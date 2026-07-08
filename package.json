@@ -1,0 +1,27 @@
+{
+  "name": "fitai-backend",
+  "version": "1.0.0",
+  "description": "Backend separado para a API de IA do FitIA.",
+  "private": true,
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "check": "node --check src/server.js && node --check src/routes/ai.routes.js && node --check src/services/workout_ai.service.js && node --check src/schemas/workout.schema.js"
+  },
+  "keywords": [
+    "fitai",
+    "express",
+    "ai",
+    "workout"
+  ],
+  "author": "",
+  "license": "UNLICENSED",
+  "dependencies": {
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
