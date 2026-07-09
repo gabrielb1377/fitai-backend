@@ -7,7 +7,7 @@
   "scripts": {
     "start": "node src/server.js",
     "dev": "node --watch src/server.js",
-    "check": "node --check src/server.js && node --check src/routes/ai.routes.js && node --check src/services/workout_ai.service.js && node --check src/schemas/workout.schema.js"
+    "check": "node --check src/server.js && node --check src/app.js && node --check src/config/env.js && node --check src/shared/errors/app-error.js && node --check src/shared/middleware/error-handler.middleware.js && node --check src/shared/middleware/not-found.middleware.js && node --check src/shared/utils/async-handler.js && node --check src/modules/ai/routes/ai.routes.js && node --check src/modules/ai/controller/ai.controller.js && node --check src/modules/ai/service/workout_ai.service.js && node --check src/modules/ai/schemas/workout.schema.js"
   },
   "keywords": [
     "fitai",
