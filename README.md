@@ -36,6 +36,7 @@ C:\fitai-backend
     |-- app.js
     |-- server.js
     |-- config
+    |   |-- database.js
     |   |-- env.js
     |   `-- prisma.js
     |-- shared
@@ -104,6 +105,23 @@ Em desenvolvimento, se `JWT_SECRET` nao for informado, o backend usa um fallback
 
 ## PostgreSQL e Prisma
 
+Instale o PostgreSQL localmente e deixe o servico rodando na porta padrao `5432`.
+
+Crie o usuario e o banco local:
+
+```sql
+CREATE USER fitai_user WITH PASSWORD 'fitai_password';
+CREATE DATABASE fitai_db OWNER fitai_user;
+GRANT ALL PRIVILEGES ON DATABASE fitai_db TO fitai_user;
+```
+
+Se necessario, garanta permissao no schema `public`:
+
+```sql
+\c fitai_db
+GRANT ALL ON SCHEMA public TO fitai_user;
+```
+
 Configure a variavel `DATABASE_URL` no arquivo `.env`:
 
 ```env
@@ -111,6 +129,20 @@ DATABASE_URL="postgresql://fitai_user:fitai_password@localhost:5432/fitai_db?sch
 ```
 
 O schema inicial esta em `prisma/schema.prisma`. Ele prepara os modelos base de usuario, perfil, treinos, exercicios, historicos, corrida, metas e recordes.
+
+Teste a conexao:
+
+```powershell
+npm run db:test
+```
+
+Ao iniciar com `npm run dev`, o backend tambem tenta conectar ao PostgreSQL. Se conectar, mostra:
+
+```text
+✓ PostgreSQL conectado
+```
+
+Se falhar, mostra uma mensagem amigavel e o servidor continua rodando.
 
 Gere o Prisma Client:
 
@@ -123,6 +155,8 @@ Rode uma migration somente depois que o PostgreSQL local, o banco e o usuario ex
 ```powershell
 npm run prisma:migrate
 ```
+
+Esse comando usa o schema ja existente em `prisma/schema.prisma`. Nenhum novo modelo foi adicionado nesta etapa.
 
 Abra o Prisma Studio:
 
@@ -138,6 +172,7 @@ Nenhuma migration foi criada nesta preparacao.
 npm start
 npm run dev
 npm run check
+npm run db:test
 npm run prisma:generate
 npm run prisma:migrate
 npm run prisma:studio

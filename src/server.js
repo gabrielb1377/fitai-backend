@@ -1,11 +1,13 @@
 const createApp = require("./app");
 const env = require("./config/env");
+const { testDatabaseConnection } = require("./config/database");
 
 const app = createApp();
 
 if (require.main === module) {
   app.listen(env.port, () => {
     console.log(`FitIA backend running on port ${env.port}`);
+    testDatabaseConnection();
   });
 }
 
