@@ -18,7 +18,7 @@ async function generateWorkoutWithOpenAI(input) {
   const prompt = buildWorkoutPrompt(input);
   const client = getOpenAIClient();
 
-  console.info(`[ai] Gerando treino via OpenAI. model=${env.openaiModel}`);
+  console.info(`[ai] modo=OPENAI model=${env.openaiModel}`);
 
   try {
     const response = await client.responses.create({
@@ -33,7 +33,7 @@ async function generateWorkoutWithOpenAI(input) {
 
     console.info(`[ai] Resposta OpenAI recebida. request_id=${response._request_id || "indisponivel"}`);
 
-    return parseWorkoutResponse(response);
+    return parseWorkoutResponse(response, input);
   } catch (err) {
     if (err instanceof AppError) {
       throw err;

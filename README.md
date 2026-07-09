@@ -2,14 +2,14 @@
 
 Backend separado em Node.js para servir a API de IA do FitIA.
 
-Esta base nao chama a OpenAI ainda. O endpoint de treino retorna um JSON mockado no formato esperado pelo app, deixando a estrutura pronta para trocar o service por uma integracao real depois.
+Esta base prepara a geracao real de treinos com OpenAI e preserva modo mock quando `OPENAI_API_KEY` nao estiver configurada.
 
 ## Regras de escopo
 
 - O projeto Flutter em `C:\fitai` nao deve ser alterado por este backend.
 - A chave da OpenAI deve ficar apenas no backend.
 - O Flutter deve chamar esta API, nao a OpenAI diretamente.
-- A implementacao atual usa mock e nao faz chamadas externas.
+- Sem `OPENAI_API_KEY`, a implementacao usa mock e nao faz chamadas externas.
 - A autenticacao JWT existe no backend, mas ainda nao foi integrada ao Flutter.
 
 ## Arquitetura
@@ -518,6 +518,8 @@ Resposta:
 
 ### POST /ai/generate-workout
 
+Gera um treino sempre compativel com o `TreinoModel` do Flutter. Se a OpenAI retornar JSON incompleto, o backend normaliza e preenche campos obrigatorios. Se a resposta vier invalida ou a chamada falhar, aplica fallback mock.
+
 Body esperado:
 
 ```json
@@ -530,36 +532,63 @@ Body esperado:
   "local": "academia",
   "equipamentos": ["barra", "halteres", "maquinas"],
   "restricoes": [],
-  "prioridades": ["peito", "costas"]
+  "prioridades": ["peito", "costas"],
+  "observacoes": ""
 }
 ```
 
-Resposta mockada:
+Resposta:
 
 ```json
 {
+  "id": "7e0f6e54-62d4-46da-93a4-6c10e3f0e2d1",
   "nome": "ABCD - Hipertrofia",
-  "descricao": "Treino mockado para hipertrofia, nivel intermediario, 4 dias por semana, 60 minutos por treino, local: academia",
+  "descricao": "Treino gerado para hipertrofia, nivel intermediario, 4 dias por semana, 60 minutos por treino, local: academia",
   "objetivo": "hipertrofia",
   "nivel": "intermediario",
+  "tempoEstimado": 60,
+  "criadoPorIA": true,
+  "dataCriacao": "2026-07-09T12:00:00.000Z",
   "dias": [
     {
+      "id": "d2fbba0c-1abf-4dc9-9efa-49210087b38e",
       "nome": "Dia A",
-      "grupo": "Peito + Triceps",
+      "titulo": "Peito + Triceps",
+      "diaSemana": "Segunda",
       "exercicios": [
         {
+          "id": "db6757fa-9297-4bc4-8fb7-058b869e0e5d",
           "nome": "Supino reto",
+          "categoria": "Peito + Triceps",
+          "musculos": ["Peito", "Triceps"],
+          "equipamentos": ["barra", "halteres", "maquinas"],
           "series": 4,
           "repeticoes": "8-12",
-          "descansoSegundos": 75,
-          "observacoes": "Mock inicial usando barra, halteres, maquinas. Ajustar pela IA real depois."
+          "descanso": 90
         }
       ]
     }
-  ]
+  ],
+  "exercicios": []
 }
 ```
 
+Arquivos de exemplo:
+
+- `docs/examples/generate-workout.request.json`
+- `docs/examples/generate-workout.response.json`
+
+### Testar no Postman ou Insomnia
+
+1. Crie uma requisicao `POST`.
+2. Use a URL `http://localhost:3001/ai/generate-workout`.
+3. Em `Headers`, defina `Content-Type: application/json`.
+4. Em `Body`, selecione `raw` e `JSON`.
+5. Cole o conteudo de `docs/examples/generate-workout.request.json`.
+6. Envie a requisicao e compare a resposta com `docs/examples/generate-workout.response.json`.
+
+O endpoint nao exige JWT hoje, para preservar o contrato atual da IA. As rotas de usuarios e perfil continuam protegidas.
+
 ## Proximo passo
 
-Quando for ativar a IA real, substitua a logica de `src/modules/ai/service/workout_ai.service.js` por uma chamada segura no backend usando `OPENAI_API_KEY` do `.env`.
+Depois que o Flutter for conectado, validar o parse do `TreinoModel` no app usando o JSON de exemplo deste backend.

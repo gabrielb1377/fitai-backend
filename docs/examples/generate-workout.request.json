@@ -1,0 +1,12 @@
+{
+  "objetivo": "hipertrofia",
+  "divisao": "ABCD",
+  "nivel": "intermediario",
+  "diasPorSemana": 4,
+  "tempoPorTreino": 60,
+  "local": "academia",
+  "equipamentos": ["barra", "halteres", "maquinas"],
+  "restricoes": [],
+  "prioridades": ["peito", "costas"],
+  "observacoes": ""
+}

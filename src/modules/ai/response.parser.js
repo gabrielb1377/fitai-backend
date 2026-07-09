@@ -1,10 +1,10 @@
 const AppError = require("../../shared/errors/app-error");
-const { validateWorkoutResponse } = require("./workout.validator");
+const { normalizeWorkoutResponse } = require("./workout.validator");
 
-function parseWorkoutResponse(response) {
+function parseWorkoutResponse(response, input) {
   const rawText = extractResponseText(response);
   const parsed = parseJson(rawText);
-  const validation = validateWorkoutResponse(parsed);
+  const validation = normalizeWorkoutResponse(parsed, input, { source: "openai" });
 
   if (!validation.valid) {
     throw new AppError(
@@ -51,6 +51,7 @@ function parseJson(rawText) {
   try {
     return JSON.parse(text);
   } catch (err) {
+    console.error("[ai] erro de parsing. reason=invalid_json");
     throw new AppError("Resposta da IA nao e um JSON valido.", 502, "invalid_ai_json");
   }
 }

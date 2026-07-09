@@ -10,6 +10,10 @@ const REQUIRED_FIELDS = {
   prioridades: "array"
 };
 
+const OPTIONAL_FIELDS = {
+  observacoes: "string"
+};
+
 function validateWorkoutRequest(body) {
   const errors = [];
   const data = body && typeof body === "object" && !Array.isArray(body) ? body : {};
@@ -21,6 +25,12 @@ function validateWorkoutRequest(body) {
     }
 
     if (!matchesType(data[field], expectedType)) {
+      errors.push(`${field} deve ser ${expectedType}.`);
+    }
+  });
+
+  Object.entries(OPTIONAL_FIELDS).forEach(([field, expectedType]) => {
+    if (field in data && !matchesType(data[field], expectedType)) {
       errors.push(`${field} deve ser ${expectedType}.`);
     }
   });
@@ -58,7 +68,8 @@ function normalizeWorkoutRequest(data) {
     local: normalizeString(data.local),
     equipamentos: normalizeStringArray(data.equipamentos),
     restricoes: normalizeStringArray(data.restricoes),
-    prioridades: normalizeStringArray(data.prioridades)
+    prioridades: normalizeStringArray(data.prioridades),
+    observacoes: normalizeString(data.observacoes)
   };
 }
 
@@ -79,5 +90,6 @@ function normalizeStringArray(value) {
 
 module.exports = {
   REQUIRED_FIELDS,
+  OPTIONAL_FIELDS,
   validateWorkoutRequest
 };

@@ -1,0 +1,31 @@
+{
+  "id": "7e0f6e54-62d4-46da-93a4-6c10e3f0e2d1",
+  "nome": "ABCD - Hipertrofia",
+  "descricao": "Treino gerado para hipertrofia, nivel intermediario, 4 dias por semana, 60 minutos por treino, local: academia",
+  "objetivo": "hipertrofia",
+  "nivel": "intermediario",
+  "tempoEstimado": 60,
+  "criadoPorIA": true,
+  "dataCriacao": "2026-07-09T12:00:00.000Z",
+  "dias": [
+    {
+      "id": "d2fbba0c-1abf-4dc9-9efa-49210087b38e",
+      "nome": "Dia A",
+      "titulo": "Peito + Triceps",
+      "diaSemana": "Segunda",
+      "exercicios": [
+        {
+          "id": "db6757fa-9297-4bc4-8fb7-058b869e0e5d",
+          "nome": "Supino reto",
+          "categoria": "Peito + Triceps",
+          "musculos": ["Peito", "Triceps"],
+          "equipamentos": ["barra", "halteres", "maquinas"],
+          "series": 4,
+          "repeticoes": "8-12",
+          "descanso": 90
+        }
+      ]
+    }
+  ],
+  "exercicios": []
+}
