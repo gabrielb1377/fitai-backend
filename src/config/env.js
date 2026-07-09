@@ -8,6 +8,10 @@ const env = {
   databaseUrl: process.env.DATABASE_URL || defaultDatabaseUrl,
   jwtSecret: process.env.JWT_SECRET || "fitai-local-development-secret",
   jwtExpiresIn: process.env.JWT_EXPIRES_IN || "7d",
+  openaiApiKey: process.env.OPENAI_API_KEY || "",
+  openaiModel: process.env.OPENAI_MODEL || "gpt-4o-mini",
+  openaiTimeoutMs: Number(process.env.OPENAI_TIMEOUT_MS) || 30000,
+  openaiMaxRetries: Number(process.env.OPENAI_MAX_RETRIES) || 2,
   serviceName: "fitai-backend"
 };
 

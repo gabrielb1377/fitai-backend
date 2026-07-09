@@ -1,7 +1,7 @@
 const { generateWorkout } = require("../service/workout_ai.service");
 const { validateWorkoutRequest } = require("../schemas/workout.schema");
 
-function generateWorkoutController(req, res) {
+async function generateWorkoutController(req, res) {
   const validation = validateWorkoutRequest(req.body);
 
   if (!validation.valid) {
@@ -12,7 +12,7 @@ function generateWorkoutController(req, res) {
     });
   }
 
-  const workout = generateWorkout(validation.data);
+  const workout = await generateWorkout(validation.data);
 
   return res.status(200).json(workout);
 }

@@ -49,6 +49,10 @@ C:\fitai-backend
     |       `-- async-handler.js
     `-- modules
         |-- ai
+        |   |-- openai.service.js
+        |   |-- prompt.builder.js
+        |   |-- response.parser.js
+        |   |-- workout.validator.js
         |   |-- controller
         |   |   `-- ai.controller.js
         |   |-- routes
@@ -112,6 +116,39 @@ JWT_EXPIRES_IN=7d
 ```
 
 Em desenvolvimento, se `JWT_SECRET` nao for informado, o backend usa um fallback local apenas para manter `npm run dev` funcionando.
+
+## OpenAI
+
+A integracao com OpenAI fica isolada no modulo `src/modules/ai` e ainda nao foi conectada ao Flutter.
+
+Configure as variaveis no `.env`:
+
+```env
+OPENAI_API_KEY="sua_chave_openai"
+OPENAI_MODEL=gpt-4o-mini
+OPENAI_TIMEOUT_MS=30000
+OPENAI_MAX_RETRIES=2
+```
+
+### Modo mock
+
+Se `OPENAI_API_KEY` estiver vazia ou ausente, `POST /ai/generate-workout` usa o gerador mock local. Esse modo mantem o contrato atual do app e permite rodar o backend sem chamadas externas.
+
+### Modo producao
+
+Com `OPENAI_API_KEY` configurada, o fluxo de geracao passa por:
+
+```text
+body validado
+-> prompt.builder.js
+-> openai.service.js
+-> Responses API
+-> response.parser.js
+-> workout.validator.js
+-> JSON final do treino
+```
+
+O SDK oficial da OpenAI esta configurado com timeout e retry automatico via `OPENAI_TIMEOUT_MS` e `OPENAI_MAX_RETRIES`. Erros da OpenAI sao padronizados pelo middleware global de erros.
 
 ## PostgreSQL e Prisma
 

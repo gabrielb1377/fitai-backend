@@ -1,3 +1,5 @@
+const { isOpenAIEnabled, generateWorkoutWithOpenAI } = require("../openai.service");
+
 const GROUPS_BY_SPLIT = {
   ABCD: [
     { nome: "Dia A", grupo: "Peito + Triceps" },
@@ -76,7 +78,17 @@ const EXERCISES_BY_GROUP = {
   ]
 };
 
-function generateWorkout(input) {
+async function generateWorkout(input) {
+  if (isOpenAIEnabled()) {
+    return generateWorkoutWithOpenAI(input);
+  }
+
+  console.info("[ai] OPENAI_API_KEY ausente. Usando modo mock para gerar treino.");
+
+  return generateMockWorkout(input);
+}
+
+function generateMockWorkout(input) {
   const divisao = normalizeSplit(input.divisao);
   const groups = GROUPS_BY_SPLIT[divisao] || GROUPS_BY_SPLIT.ABCD;
   const selectedGroups = groups.slice(0, Math.min(input.diasPorSemana, groups.length));
@@ -144,5 +156,6 @@ function capitalize(value) {
 }
 
 module.exports = {
-  generateWorkout
+  generateWorkout,
+  generateMockWorkout
 };
