@@ -1,0 +1,191 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id                String            @id @default(uuid())
+  name              String
+  email             String            @unique
+  passwordHash      String
+  profile           Profile?
+  workouts          Workout[]
+  workoutHistories  WorkoutHistory[]
+  exerciseHistories ExerciseHistory[]
+  runningHistories  RunningHistory[]
+  goals             Goal[]
+  records           Record[]
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+
+  @@map("users")
+}
+
+model Profile {
+  id        String   @id @default(uuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  weight    Float
+  height    Float
+  age       Int
+  goal      String
+  level     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("profiles")
+}
+
+model Workout {
+  id               String           @id @default(uuid())
+  userId           String
+  user             User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name             String
+  description      String
+  goal             String
+  level            String
+  split            String
+  daysPerWeek      Int
+  estimatedMinutes Int
+  days             WorkoutDay[]
+  histories        WorkoutHistory[]
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+
+  @@index([userId])
+  @@map("workouts")
+}
+
+model WorkoutDay {
+  id          String               @id @default(uuid())
+  workoutId   String
+  workout     Workout              @relation(fields: [workoutId], references: [id], onDelete: Cascade)
+  name        String
+  weekday     String
+  muscleGroup String
+  order       Int
+  exercises   WorkoutDayExercise[]
+
+  @@index([workoutId])
+  @@map("workout_days")
+}
+
+model Exercise {
+  id                  String               @id @default(uuid())
+  name                String
+  muscleGroup         String
+  equipment           String
+  difficulty          String
+  gifKey              String
+  workoutDayExercises WorkoutDayExercise[]
+  exerciseHistories   ExerciseHistory[]
+  records             Record[]
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+
+  @@index([muscleGroup])
+  @@map("exercises")
+}
+
+model WorkoutDayExercise {
+  id           String     @id @default(uuid())
+  workoutDayId String
+  workoutDay   WorkoutDay @relation(fields: [workoutDayId], references: [id], onDelete: Cascade)
+  exerciseId   String
+  exercise     Exercise   @relation(fields: [exerciseId], references: [id], onDelete: Restrict)
+  order        Int
+  sets         Int
+  reps         Int
+  restSeconds  Int
+
+  @@index([workoutDayId])
+  @@index([exerciseId])
+  @@map("workout_day_exercises")
+}
+
+model WorkoutHistory {
+  id                String            @id @default(uuid())
+  userId            String
+  user              User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workoutId         String
+  workout           Workout           @relation(fields: [workoutId], references: [id], onDelete: Restrict)
+  startedAt         DateTime
+  finishedAt        DateTime
+  totalVolume       Float
+  totalSets         Int
+  durationSeconds   Int
+  exerciseHistories ExerciseHistory[]
+
+  @@index([userId])
+  @@index([workoutId])
+  @@map("workout_histories")
+}
+
+model ExerciseHistory {
+  id               String         @id @default(uuid())
+  userId           String
+  user             User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  exerciseId       String
+  exercise         Exercise       @relation(fields: [exerciseId], references: [id], onDelete: Restrict)
+  workoutHistoryId String
+  workoutHistory   WorkoutHistory @relation(fields: [workoutHistoryId], references: [id], onDelete: Cascade)
+  weight           Float
+  reps             Int
+  sets             Int
+  volume           Float
+  performedAt      DateTime
+
+  @@index([userId])
+  @@index([exerciseId])
+  @@index([workoutHistoryId])
+  @@map("exercise_histories")
+}
+
+model RunningHistory {
+  id              String   @id @default(uuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  distanceKm      Float
+  durationSeconds Int
+  averageSpeed    Float
+  performedAt     DateTime
+
+  @@index([userId])
+  @@map("running_histories")
+}
+
+model Goal {
+  id           String   @id @default(uuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title        String
+  category     String
+  currentValue Float
+  targetValue  Float
+  status       String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([userId])
+  @@map("goals")
+}
+
+model Record {
+  id         String    @id @default(uuid())
+  userId     String
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  exerciseId String?
+  exercise   Exercise? @relation(fields: [exerciseId], references: [id], onDelete: SetNull)
+  title      String
+  category   String
+  value      Float
+  unit       String
+  achievedAt DateTime
+
+  @@index([userId])
+  @@index([exerciseId])
+  @@map("records")
+}

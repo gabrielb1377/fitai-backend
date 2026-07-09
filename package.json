@@ -7,7 +7,10 @@
   "scripts": {
     "start": "node src/server.js",
     "dev": "node --watch src/server.js",
-    "check": "node --check src/server.js && node --check src/app.js && node --check src/config/env.js && node --check src/shared/errors/app-error.js && node --check src/shared/middleware/error-handler.middleware.js && node --check src/shared/middleware/not-found.middleware.js && node --check src/shared/utils/async-handler.js && node --check src/modules/ai/routes/ai.routes.js && node --check src/modules/ai/controller/ai.controller.js && node --check src/modules/ai/service/workout_ai.service.js && node --check src/modules/ai/schemas/workout.schema.js"
+    "check": "node --check src/server.js && node --check src/app.js && node --check src/config/env.js && node --check src/config/prisma.js && node --check src/shared/errors/app-error.js && node --check src/shared/middleware/error-handler.middleware.js && node --check src/shared/middleware/not-found.middleware.js && node --check src/shared/utils/async-handler.js && node --check src/modules/ai/routes/ai.routes.js && node --check src/modules/ai/controller/ai.controller.js && node --check src/modules/ai/service/workout_ai.service.js && node --check src/modules/ai/schemas/workout.schema.js",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:studio": "prisma studio"
   },
   "keywords": [
     "fitai",
@@ -18,10 +21,16 @@
   "author": "",
   "license": "UNLICENSED",
   "dependencies": {
+    "@prisma/adapter-pg": "^7.8.0",
+    "@prisma/client": "^7.8.0",
     "dotenv": "^17.4.2",
-    "express": "^5.2.1"
+    "express": "^5.2.1",
+    "pg": "^8.22.0"
   },
   "engines": {
     "node": ">=18"
+  },
+  "devDependencies": {
+    "prisma": "^7.8.0"
   }
 }
