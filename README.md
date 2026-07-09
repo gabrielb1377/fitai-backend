@@ -10,7 +10,7 @@ Esta base nao chama a OpenAI ainda. O endpoint de treino retorna um JSON mockado
 - A chave da OpenAI deve ficar apenas no backend.
 - O Flutter deve chamar esta API, nao a OpenAI diretamente.
 - A implementacao atual usa mock e nao faz chamadas externas.
-- A autenticacao ainda nao foi criada.
+- A autenticacao JWT existe no backend, mas ainda nao foi integrada ao Flutter.
 
 ## Arquitetura
 
@@ -56,6 +56,12 @@ C:\fitai-backend
         |   |   `-- workout.schema.js
         |   `-- service
         |       `-- workout_ai.service.js
+        |-- auth
+        |   |-- auth.controller.js
+        |   |-- auth.middleware.js
+        |   |-- auth.routes.js
+        |   |-- auth.schemas.js
+        |   `-- auth.service.js
         |-- users
         |-- workouts
         |-- exercises
@@ -86,6 +92,15 @@ Por padrao, a API sobe em:
 ```text
 http://localhost:3001
 ```
+
+Configure tambem as variaveis de JWT no arquivo `.env`:
+
+```env
+JWT_SECRET="troque-por-um-segredo-forte"
+JWT_EXPIRES_IN=7d
+```
+
+Em desenvolvimento, se `JWT_SECRET` nao for informado, o backend usa um fallback local apenas para manter `npm run dev` funcionando.
 
 ## PostgreSQL e Prisma
 
@@ -140,6 +155,110 @@ Resposta esperada:
   "service": "fitai-backend",
   "timestamp": "2026-07-08T00:00:00.000Z"
 }
+```
+
+### POST /auth/register
+
+Cria um usuario, cria um perfil inicial e retorna o usuario sem `passwordHash` junto com o token JWT.
+
+Body:
+
+```json
+{
+  "name": "Gabriel",
+  "email": "teste@email.com",
+  "password": "123456"
+}
+```
+
+Resposta:
+
+```json
+{
+  "user": {
+    "id": "uuid",
+    "name": "Gabriel",
+    "email": "teste@email.com",
+    "createdAt": "2026-07-08T00:00:00.000Z",
+    "updatedAt": "2026-07-08T00:00:00.000Z",
+    "profile": {
+      "id": "uuid",
+      "userId": "uuid",
+      "weight": 0,
+      "height": 0,
+      "age": 0,
+      "goal": "",
+      "level": "",
+      "createdAt": "2026-07-08T00:00:00.000Z",
+      "updatedAt": "2026-07-08T00:00:00.000Z"
+    }
+  },
+  "token": "jwt"
+}
+```
+
+### POST /auth/login
+
+Valida email e senha com bcrypt e retorna um JWT.
+
+Body:
+
+```json
+{
+  "email": "teste@email.com",
+  "password": "123456"
+}
+```
+
+Resposta:
+
+```json
+{
+  "user": {
+    "id": "uuid",
+    "name": "Gabriel",
+    "email": "teste@email.com",
+    "createdAt": "2026-07-08T00:00:00.000Z",
+    "updatedAt": "2026-07-08T00:00:00.000Z",
+    "profile": {}
+  },
+  "token": "jwt"
+}
+```
+
+### GET /auth/me
+
+Retorna o usuario autenticado.
+
+Header:
+
+```http
+Authorization: Bearer <token>
+```
+
+Resposta:
+
+```json
+{
+  "user": {
+    "id": "uuid",
+    "name": "Gabriel",
+    "email": "teste@email.com",
+    "createdAt": "2026-07-08T00:00:00.000Z",
+    "updatedAt": "2026-07-08T00:00:00.000Z",
+    "profile": {}
+  }
+}
+```
+
+### Middleware JWT
+
+O middleware `authenticateJWT` esta em `src/modules/auth/auth.middleware.js` e pode ser usado para proteger rotas futuras:
+
+```js
+const { authenticateJWT } = require("../auth/auth.middleware");
+
+router.get("/rota-protegida", authenticateJWT, controller);
 ```
 
 ### POST /ai/generate-workout

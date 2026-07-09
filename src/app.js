@@ -1,6 +1,7 @@
 const express = require("express");
 const env = require("./config/env");
 const aiRoutes = require("./modules/ai/routes/ai.routes");
+const authRoutes = require("./modules/auth/auth.routes");
 const errorHandlerMiddleware = require("./shared/middleware/error-handler.middleware");
 const notFoundMiddleware = require("./shared/middleware/not-found.middleware");
 
@@ -17,6 +18,7 @@ function createApp() {
     });
   });
 
+  app.use("/auth", authRoutes);
   app.use("/ai", aiRoutes);
 
   app.use(notFoundMiddleware);
