@@ -64,6 +64,16 @@ C:\fitai-backend
         |   |-- auth.schemas.js
         |   `-- auth.service.js
         |-- users
+        |   |-- controller
+        |   |   `-- users.controller.js
+        |   |-- dto
+        |   |   `-- user.dto.js
+        |   |-- routes
+        |   |   `-- users.routes.js
+        |   |-- schemas
+        |   |   `-- users.schemas.js
+        |   `-- service
+        |       `-- users.service.js
         |-- workouts
         |-- exercises
         |-- running
@@ -172,6 +182,7 @@ Nenhuma migration foi criada nesta preparacao.
 npm start
 npm run dev
 npm run check
+npm test
 npm run db:test
 npm run prisma:generate
 npm run prisma:migrate
@@ -294,6 +305,178 @@ O middleware `authenticateJWT` esta em `src/modules/auth/auth.middleware.js` e p
 const { authenticateJWT } = require("../auth/auth.middleware");
 
 router.get("/rota-protegida", authenticateJWT, controller);
+```
+
+### GET /users
+
+Lista usuarios. Rota protegida por JWT.
+
+Exemplo:
+
+```powershell
+curl.exe -H "Authorization: Bearer <token>" http://localhost:3001/users
+```
+
+Resposta:
+
+```json
+{
+  "users": [
+    {
+      "id": "uuid",
+      "name": "Gabriel",
+      "email": "teste@email.com",
+      "createdAt": "2026-07-08T00:00:00.000Z",
+      "updatedAt": "2026-07-08T00:00:00.000Z",
+      "profile": {}
+    }
+  ]
+}
+```
+
+`passwordHash` nunca e retornado.
+
+### GET /users/:id
+
+Busca um usuario por ID. Rota protegida por JWT.
+
+Exemplo:
+
+```powershell
+curl.exe -H "Authorization: Bearer <token>" http://localhost:3001/users/<userId>
+```
+
+Resposta:
+
+```json
+{
+  "user": {
+    "id": "uuid",
+    "name": "Gabriel",
+    "email": "teste@email.com",
+    "createdAt": "2026-07-08T00:00:00.000Z",
+    "updatedAt": "2026-07-08T00:00:00.000Z",
+    "profile": {}
+  }
+}
+```
+
+### PATCH /users/:id
+
+Atualiza dados basicos do usuario. Rota protegida por JWT. Senha nao e atualizada por este endpoint.
+
+Body:
+
+```json
+{
+  "name": "Gabriel FitIA",
+  "email": "gabriel@email.com"
+}
+```
+
+Exemplo:
+
+```powershell
+curl.exe -X PATCH http://localhost:3001/users/<userId> -H "Authorization: Bearer <token>" -H "Content-Type: application/json" -d "{\"name\":\"Gabriel FitIA\"}"
+```
+
+Resposta:
+
+```json
+{
+  "user": {
+    "id": "uuid",
+    "name": "Gabriel FitIA",
+    "email": "teste@email.com",
+    "createdAt": "2026-07-08T00:00:00.000Z",
+    "updatedAt": "2026-07-08T00:00:00.000Z",
+    "profile": {}
+  }
+}
+```
+
+### DELETE /users/:id
+
+Remove um usuario. Rota protegida por JWT.
+
+Exemplo:
+
+```powershell
+curl.exe -X DELETE -H "Authorization: Bearer <token>" http://localhost:3001/users/<userId>
+```
+
+Resposta esperada:
+
+```text
+204 No Content
+```
+
+### GET /profile
+
+Retorna o perfil do usuario autenticado. Rota protegida por JWT.
+
+Exemplo:
+
+```powershell
+curl.exe -H "Authorization: Bearer <token>" http://localhost:3001/profile
+```
+
+Resposta:
+
+```json
+{
+  "profile": {
+    "id": "uuid",
+    "userId": "uuid",
+    "weight": 80,
+    "height": 180,
+    "age": 30,
+    "goal": "hipertrofia",
+    "level": "intermediario",
+    "createdAt": "2026-07-08T00:00:00.000Z",
+    "updatedAt": "2026-07-08T00:00:00.000Z"
+  }
+}
+```
+
+### PATCH /profile
+
+Atualiza o perfil do usuario autenticado. Rota protegida por JWT.
+
+Body:
+
+```json
+{
+  "weight": 82,
+  "height": 180,
+  "age": 30,
+  "goal": "hipertrofia",
+  "level": "intermediario"
+}
+```
+
+Exemplo:
+
+```powershell
+curl.exe -X PATCH http://localhost:3001/profile -H "Authorization: Bearer <token>" -H "Content-Type: application/json" -d "{\"weight\":82,\"goal\":\"hipertrofia\"}"
+```
+
+Resposta:
+
+```json
+{
+  "profile": {
+    "id": "uuid",
+    "userId": "uuid",
+    "weight": 82,
+    "height": 180,
+    "age": 30,
+    "goal": "hipertrofia",
+    "level": "intermediario",
+    "createdAt": "2026-07-08T00:00:00.000Z",
+    "updatedAt": "2026-07-08T00:00:00.000Z"
+  }
+}
 ```
 
 ### POST /ai/generate-workout
