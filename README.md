@@ -108,6 +108,31 @@ Por padrao, a API sobe em:
 http://localhost:3001
 ```
 
+## CORS local
+
+O backend habilita CORS antes das rotas para permitir o Flutter Web rodando localmente.
+
+Origins permitidas:
+
+```text
+http://localhost:*
+http://127.0.0.1:*
+```
+
+Metodos permitidos:
+
+```text
+GET, POST, PATCH, PUT, DELETE, OPTIONS
+```
+
+Headers permitidos:
+
+```text
+Content-Type, Authorization
+```
+
+O preflight `OPTIONS` responde antes das rotas, entao chamadas do Flutter Web para `POST /ai/generate-workout` funcionam em desenvolvimento local.
+
 Configure tambem as variaveis de JWT no arquivo `.env`:
 
 ```env
