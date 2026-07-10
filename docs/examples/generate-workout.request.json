@@ -4,6 +4,7 @@
   "nivel": "intermediario",
   "diasPorSemana": 4,
   "tempoPorTreino": 60,
+  "minExerciciosPorDia": 6,
   "local": "academia",
   "equipamentos": ["barra", "halteres", "maquinas"],
   "restricoes": [],

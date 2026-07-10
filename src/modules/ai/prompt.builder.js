@@ -1,6 +1,8 @@
 const { workoutResponseJsonSchema } = require("./workout.validator");
 
 function buildWorkoutPrompt(input) {
+  const minExercises = input.minExerciciosPorDia || 6;
+
   return {
     instructions: [
       "Voce e um especialista em treinamento fisico do FitIA.",
@@ -17,11 +19,18 @@ function buildWorkoutPrompt(input) {
       "- Preencha sempre id, nome, descricao, objetivo, nivel, tempoEstimado, criadoPorIA, dataCriacao, dias e exercicios.",
       "- criadoPorIA deve ser true.",
       "- tempoEstimado deve ser numerico e preferencialmente igual a tempoPorTreino.",
-      "- dias deve ter pelo menos um item e cada dia deve ter pelo menos um exercicio.",
+      `- Cada dia de treino deve conter no minimo ${minExercises} exercicios, onde ${minExercises} e minExerciciosPorDia.`,
+      `- Nunca gere menos que ${minExercises} exercicios em qualquer dia.`,
       "- Use nomes de dias como Dia A, Dia B, Dia C conforme a divisao.",
       "- Monte grupos musculares coerentes com objetivo, nivel, local e equipamentos.",
       "- Cada exercicio deve conter id, nome, categoria, musculos, equipamentos, series, repeticoes e descanso.",
-      "- Respeite restricoes e prioridades quando informadas.",
+      "- Nao repita o mesmo exercicio no mesmo dia.",
+      "- Evite exercicios duplicados em dias consecutivos sem necessidade.",
+      "- Respeite objetivo, nivel, equipamentos, restricoes, prioridades e tempo por treino.",
+      "- Equilibre exercicios compostos e isoladores.",
+      "- Nao gere exercicios incompativeis com o local ou equipamentos informados.",
+      `- Se ${minExercises} exercicios parecerem muito para o tempo informado, mantenha ${minExercises}, reduza descansos e prefira exercicios eficientes sem inventar movimentos invalidos.`,
+      "- Use o contextoUsuario quando existir, mas sem expor dados sensiveis na resposta.",
       "- Use portugues do Brasil."
     ].join("\n"),
     responseFormat: {

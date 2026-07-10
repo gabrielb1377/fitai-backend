@@ -108,6 +108,7 @@ const workoutResponseSchema = z.object({
 
 const WEEKDAYS = ["Segunda", "Terca", "Quarta", "Quinta", "Sexta", "Sabado", "Domingo"];
 const DEFAULT_EQUIPMENT = ["peso corporal"];
+const VALID_MIN_EXERCISES = [6, 7, 8, 9, 10];
 
 function validateWorkoutResponse(value) {
   const result = workoutResponseSchema.safeParse(value);
@@ -194,22 +195,30 @@ function normalizeDays(days, input) {
     ? days
     : buildDefaultDays(input);
 
-  return sourceDays.map((day, index) => normalizeDay(day, index, input));
+  const normalizedDays = sourceDays.map((day, index) => normalizeDay(day, index, input));
+
+  return avoidConsecutiveDuplicates(normalizedDays, input);
 }
 
 function normalizeDay(day, index, input) {
   const source = day && typeof day === "object" && !Array.isArray(day) ? day : {};
   const title = normalizeText(source.titulo, normalizeText(source.grupo, `Dia ${String.fromCharCode(65 + index)}`));
-  const exercises = Array.isArray(source.exercicios) && source.exercicios.length > 0
+  const sourceExercises = Array.isArray(source.exercicios) && source.exercicios.length > 0
     ? source.exercicios
     : buildDefaultExercises(title, input);
+  const normalizedExercises = completeMinimumExercises(
+    deduplicateExercises(sourceExercises.map((exercise) => normalizeExercise(exercise, title, input))),
+    title,
+    index,
+    input
+  );
 
   return {
     id: normalizeId(source.id),
     nome: normalizeText(source.nome, `Dia ${String.fromCharCode(65 + index)}`),
     titulo: title,
     diaSemana: normalizeText(source.diaSemana, WEEKDAYS[index % WEEKDAYS.length]),
-    exercicios: exercises.map((exercise) => normalizeExercise(exercise, title, input))
+    exercicios: normalizedExercises
   };
 }
 
@@ -258,19 +267,234 @@ function buildDefaultDays(input) {
 
 function buildDefaultExercises(category, input) {
   const exercisesByCategory = {
-    "Peito + Triceps": ["Supino reto", "Supino inclinado com halteres", "Crucifixo na maquina", "Triceps corda"],
-    "Costas + Biceps": ["Puxada frontal", "Remada baixa", "Remada curvada", "Rosca direta"],
-    Pernas: ["Agachamento livre", "Leg press", "Cadeira extensora", "Mesa flexora"],
-    "Ombros + Abdomen": ["Desenvolvimento com halteres", "Elevacao lateral", "Face pull", "Prancha"],
-    "Peito + Ombros + Triceps": ["Supino reto", "Desenvolvimento com halteres", "Crucifixo na maquina", "Triceps pulley"],
-    "Pernas + Abdomen": ["Agachamento livre", "Leg press", "Cadeira extensora", "Prancha"],
-    "Membros superiores": ["Supino reto", "Puxada frontal", "Desenvolvimento com halteres", "Rosca direta"],
-    "Membros inferiores": ["Agachamento livre", "Leg press", "Mesa flexora", "Panturrilha em pe"],
-    "Corpo inteiro": ["Agachamento livre", "Supino reto", "Puxada frontal", "Desenvolvimento com halteres"]
+    "Peito + Triceps": [
+      "Supino reto",
+      "Supino inclinado",
+      "Crucifixo",
+      "Crossover",
+      "Flexao de bracos",
+      "Triceps corda",
+      "Triceps testa",
+      "Mergulho no banco",
+      "Supino fechado",
+      "Pullover"
+    ],
+    "Costas + Biceps": [
+      "Puxada frontal",
+      "Remada baixa",
+      "Remada curvada",
+      "Remada unilateral",
+      "Barra fixa assistida",
+      "Pulldown",
+      "Rosca direta",
+      "Rosca alternada",
+      "Rosca martelo",
+      "Face pull"
+    ],
+    Pernas: [
+      "Agachamento livre",
+      "Leg press",
+      "Cadeira extensora",
+      "Mesa flexora",
+      "Afundo alternado",
+      "Levantamento terra romeno",
+      "Cadeira abdutora",
+      "Panturrilha em pe",
+      "Passada",
+      "Glute bridge"
+    ],
+    "Ombros + Abdomen": [
+      "Desenvolvimento com halteres",
+      "Elevacao lateral",
+      "Elevacao frontal",
+      "Crucifixo inverso",
+      "Face pull",
+      "Remada alta",
+      "Prancha",
+      "Abdominal infra",
+      "Dead bug",
+      "Prancha lateral"
+    ],
+    "Peito + Ombros + Triceps": [
+      "Supino reto",
+      "Desenvolvimento com halteres",
+      "Crucifixo",
+      "Elevacao lateral",
+      "Flexao de bracos",
+      "Triceps pulley",
+      "Triceps frances",
+      "Mergulho no banco",
+      "Supino inclinado",
+      "Face pull"
+    ],
+    "Pernas + Abdomen": [
+      "Agachamento livre",
+      "Leg press",
+      "Cadeira extensora",
+      "Mesa flexora",
+      "Afundo alternado",
+      "Panturrilha em pe",
+      "Prancha",
+      "Abdominal infra",
+      "Dead bug",
+      "Prancha lateral"
+    ],
+    "Membros superiores": [
+      "Supino reto",
+      "Puxada frontal",
+      "Desenvolvimento com halteres",
+      "Remada baixa",
+      "Elevacao lateral",
+      "Crucifixo",
+      "Rosca direta",
+      "Triceps corda",
+      "Face pull",
+      "Rosca martelo"
+    ],
+    "Membros inferiores": [
+      "Agachamento livre",
+      "Leg press",
+      "Mesa flexora",
+      "Cadeira extensora",
+      "Afundo alternado",
+      "Levantamento terra romeno",
+      "Panturrilha em pe",
+      "Glute bridge",
+      "Passada",
+      "Cadeira abdutora"
+    ],
+    "Corpo inteiro": [
+      "Agachamento livre",
+      "Supino reto",
+      "Puxada frontal",
+      "Desenvolvimento com halteres",
+      "Afundo alternado",
+      "Remada unilateral",
+      "Prancha",
+      "Flexao de bracos",
+      "Levantamento terra romeno",
+      "Dead bug"
+    ]
   };
-  const names = exercisesByCategory[category] || exercisesByCategory["Corpo inteiro"];
+  const bodyweightByCategory = {
+    "Peito + Triceps": [
+      "Flexao de bracos",
+      "Flexao inclinada",
+      "Flexao diamante",
+      "Mergulho no banco",
+      "Prancha com toque no ombro",
+      "Flexao declinada",
+      "Triceps no banco",
+      "Isometria de flexao",
+      "Mountain climber",
+      "Prancha alta"
+    ],
+    "Costas + Biceps": [
+      "Remada invertida",
+      "Superman",
+      "Remada isometrica com toalha",
+      "Y-T-W no solo",
+      "Prancha com remada simulada",
+      "Barra fixa assistida",
+      "Bird dog",
+      "Pulldown com elastico",
+      "Rosca com elastico",
+      "Face pull com elastico"
+    ],
+    Pernas: [
+      "Agachamento livre",
+      "Afundo alternado",
+      "Passada",
+      "Agachamento sumo",
+      "Glute bridge",
+      "Stiff unilateral",
+      "Panturrilha em pe",
+      "Step-up",
+      "Wall sit",
+      "Agachamento com salto"
+    ],
+    "Ombros + Abdomen": [
+      "Pike push-up",
+      "Prancha",
+      "Prancha lateral",
+      "Dead bug",
+      "Abdominal infra",
+      "Elevacao de quadril",
+      "Bear crawl",
+      "Hollow hold",
+      "Mountain climber",
+      "Y-T-W no solo"
+    ],
+    "Peito + Ombros + Triceps": [
+      "Flexao de bracos",
+      "Pike push-up",
+      "Mergulho no banco",
+      "Flexao diamante",
+      "Prancha com toque no ombro",
+      "Flexao inclinada",
+      "Triceps no banco",
+      "Bear crawl",
+      "Prancha alta",
+      "Flexao declinada"
+    ],
+    "Pernas + Abdomen": [
+      "Agachamento livre",
+      "Afundo alternado",
+      "Passada",
+      "Glute bridge",
+      "Panturrilha em pe",
+      "Prancha",
+      "Abdominal infra",
+      "Dead bug",
+      "Prancha lateral",
+      "Mountain climber"
+    ],
+    "Membros superiores": [
+      "Flexao de bracos",
+      "Remada invertida",
+      "Pike push-up",
+      "Mergulho no banco",
+      "Prancha com toque no ombro",
+      "Superman",
+      "Flexao diamante",
+      "Y-T-W no solo",
+      "Bear crawl",
+      "Triceps no banco"
+    ],
+    "Membros inferiores": [
+      "Agachamento livre",
+      "Afundo alternado",
+      "Passada",
+      "Agachamento sumo",
+      "Glute bridge",
+      "Stiff unilateral",
+      "Panturrilha em pe",
+      "Step-up",
+      "Wall sit",
+      "Agachamento com salto"
+    ],
+    "Corpo inteiro": [
+      "Agachamento livre",
+      "Flexao de bracos",
+      "Afundo alternado",
+      "Prancha",
+      "Remada invertida",
+      "Glute bridge",
+      "Dead bug",
+      "Mountain climber",
+      "Pike push-up",
+      "Superman"
+    ]
+  };
+  const selectedBank = shouldUseBodyweight(input) ? bodyweightByCategory : exercisesByCategory;
+  const names = selectExerciseNames(selectedBank, category);
+  const minExercises = getMinExercisesPerDay(input);
+  const filteredNames = names.filter((name) => !isRestrictedExercise(name, category, input));
+  const safeNames = filteredNames.length >= minExercises
+    ? filteredNames
+    : deduplicateNames([...filteredNames, ...selectExerciseNames(selectedBank, "Corpo inteiro")]);
 
-  return names.map((name, index) => ({
+  return safeNames.slice(0, minExercises).map((name, index) => ({
     nome: name,
     categoria: category,
     musculos: splitMuscles(category),
@@ -281,12 +505,201 @@ function buildDefaultExercises(category, input) {
   }));
 }
 
+function completeMinimumExercises(exercises, category, dayIndex, input) {
+  const minExercises = getMinExercisesPerDay(input);
+
+  if (exercises.length >= minExercises) {
+    return exercises;
+  }
+
+  const result = [...exercises];
+  const candidates = buildDefaultExercises(category, input);
+
+  candidates.forEach((candidate) => {
+    if (result.length >= minExercises) {
+      return;
+    }
+
+    const normalized = normalizeExercise(candidate, category, input);
+
+    if (!hasExerciseName(result, normalized.nome)) {
+      result.push(normalized);
+    }
+  });
+
+  if (result.length < minExercises) {
+    buildDefaultExercises("Corpo inteiro", input).forEach((candidate) => {
+      if (result.length >= minExercises) {
+        return;
+      }
+
+      const normalized = normalizeExercise(candidate, category, input);
+
+      if (!hasExerciseName(result, normalized.nome)) {
+        result.push(normalized);
+      }
+    });
+  }
+
+  if (result.length > exercises.length) {
+    logDevelopment(
+      `[ai] validacao aplicada. dia=${dayIndex + 1} minExerciciosPorDia=${minExercises} adicionados=${result.length - exercises.length}`
+    );
+  }
+
+  return result;
+}
+
+function avoidConsecutiveDuplicates(days, input) {
+  const correctedDays = days.map((day) => ({
+    ...day,
+    exercicios: [...day.exercicios]
+  }));
+  let corrections = 0;
+
+  for (let index = 1; index < correctedDays.length; index += 1) {
+    const previousNames = new Set(correctedDays[index - 1].exercicios.map((exercise) => normalizeKey(exercise.nome)));
+    const currentNames = new Set(correctedDays[index].exercicios.map((exercise) => normalizeKey(exercise.nome)));
+
+    correctedDays[index].exercicios = correctedDays[index].exercicios.map((exercise) => {
+      if (!previousNames.has(normalizeKey(exercise.nome))) {
+        return exercise;
+      }
+
+      const replacement = findReplacementExercise(correctedDays[index].titulo, input, currentNames, previousNames);
+
+      if (!replacement) {
+        return exercise;
+      }
+
+      corrections += 1;
+      currentNames.delete(normalizeKey(exercise.nome));
+      currentNames.add(normalizeKey(replacement.nome));
+
+      return replacement;
+    });
+
+    correctedDays[index].exercicios = completeMinimumExercises(
+      deduplicateExercises(correctedDays[index].exercicios),
+      correctedDays[index].titulo,
+      index,
+      input
+    );
+  }
+
+  if (corrections > 0) {
+    logDevelopment(`[ai] validacao aplicada. duplicados_consecutivos_corrigidos=${corrections}`);
+  }
+
+  return correctedDays;
+}
+
+function findReplacementExercise(category, input, currentNames, previousNames) {
+  const candidates = [
+    ...buildDefaultExercises(category, input),
+    ...buildDefaultExercises("Corpo inteiro", input)
+  ];
+
+  for (const candidate of candidates) {
+    const normalized = normalizeExercise(candidate, category, input);
+    const key = normalizeKey(normalized.nome);
+
+    if (!currentNames.has(key) && !previousNames.has(key)) {
+      return normalized;
+    }
+  }
+
+  return null;
+}
+
+function deduplicateExercises(exercises) {
+  const seen = new Set();
+  const result = [];
+
+  exercises.forEach((exercise) => {
+    const key = normalizeKey(exercise.nome);
+
+    if (!seen.has(key)) {
+      seen.add(key);
+      result.push(exercise);
+    }
+  });
+
+  return result;
+}
+
+function hasExerciseName(exercises, name) {
+  const key = normalizeKey(name);
+
+  return exercises.some((exercise) => normalizeKey(exercise.nome) === key);
+}
+
+function selectExerciseNames(bank, category) {
+  if (bank[category]) {
+    return bank[category];
+  }
+
+  const categoryKey = normalizeKey(category);
+  const matchedKeys = Object.keys(bank).filter((key) => {
+    const normalizedKey = normalizeKey(key);
+
+    return splitMuscles(category).some((muscle) => {
+      const normalizedMuscle = normalizeKey(muscle);
+      return normalizedKey.includes(normalizedMuscle) || categoryKey.includes(normalizedMuscle);
+    });
+  });
+
+  if (matchedKeys.length === 0) {
+    return bank["Corpo inteiro"];
+  }
+
+  return deduplicateNames(matchedKeys.flatMap((key) => bank[key]));
+}
+
+function deduplicateNames(names) {
+  const seen = new Set();
+
+  return names.filter((name) => {
+    const key = normalizeKey(name);
+
+    if (seen.has(key)) {
+      return false;
+    }
+
+    seen.add(key);
+    return true;
+  });
+}
+
+function shouldUseBodyweight(input) {
+  const local = normalizeKey(input.local);
+
+  return local.includes("casa") && input.equipamentos.length === 0;
+}
+
+function isRestrictedExercise(name, category, input) {
+  const text = normalizeKey(`${name} ${category}`);
+
+  return input.restricoes.some((restriction) => {
+    const normalizedRestriction = normalizeKey(restriction);
+
+    return normalizedRestriction && text.includes(normalizedRestriction);
+  });
+}
+
+function getMinExercisesPerDay(input) {
+  const minExercises = Number(input.minExerciciosPorDia);
+
+  return VALID_MIN_EXERCISES.includes(minExercises) ? minExercises : 6;
+}
+
 function buildDescription(input) {
   const parts = [
     `Treino gerado para ${normalizeText(input.objetivo, "objetivo informado")}`,
     `nivel ${normalizeText(input.nivel, "informado")}`,
     `${normalizeInteger(input.diasPorSemana, 1)} dias por semana`,
     `${normalizeInteger(input.tempoPorTreino, 60)} minutos por treino`,
+    `minimo de ${getMinExercisesPerDay(input)} exercicios por dia`,
     `local: ${normalizeText(input.local, "informado")}`
   ];
 
@@ -307,6 +720,14 @@ function normalizeText(value, fallback) {
   }
 
   return String(fallback || "").trim();
+}
+
+function normalizeKey(value) {
+  return String(value || "")
+    .trim()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
 }
 
 function normalizeStringArray(value, fallback = []) {
@@ -376,6 +797,12 @@ function formatZodErrors(error) {
     field: issue.path.join("."),
     message: issue.message
   }));
+}
+
+function logDevelopment(message) {
+  if (process.env.NODE_ENV !== "production") {
+    console.info(message);
+  }
 }
 
 module.exports = {

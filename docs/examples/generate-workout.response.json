@@ -1,7 +1,7 @@
 {
   "id": "7e0f6e54-62d4-46da-93a4-6c10e3f0e2d1",
   "nome": "ABCD - Hipertrofia",
-  "descricao": "Treino gerado para hipertrofia, nivel intermediario, 4 dias por semana, 60 minutos por treino, local: academia",
+  "descricao": "Treino gerado para hipertrofia, nivel intermediario, 4 dias por semana, 60 minutos por treino, minimo de 6 exercicios por dia, local: academia",
   "objetivo": "hipertrofia",
   "nivel": "intermediario",
   "tempoEstimado": 60,
@@ -23,6 +23,56 @@
           "series": 4,
           "repeticoes": "8-12",
           "descanso": 90
+        },
+        {
+          "id": "b8c18e39-4c9a-4515-9dcb-098f232f13d2",
+          "nome": "Supino inclinado",
+          "categoria": "Peito + Triceps",
+          "musculos": ["Peito", "Triceps"],
+          "equipamentos": ["barra", "halteres", "maquinas"],
+          "series": 3,
+          "repeticoes": "8-12",
+          "descanso": 90
+        },
+        {
+          "id": "1dfb8135-cf41-4f42-aa24-3f14353c13f4",
+          "nome": "Crucifixo",
+          "categoria": "Peito + Triceps",
+          "musculos": ["Peito", "Triceps"],
+          "equipamentos": ["barra", "halteres", "maquinas"],
+          "series": 3,
+          "repeticoes": "8-12",
+          "descanso": 90
+        },
+        {
+          "id": "c62607f6-2737-4d94-9c1b-9fa37b4c8a2d",
+          "nome": "Flexao de bracos",
+          "categoria": "Peito + Triceps",
+          "musculos": ["Peito", "Triceps"],
+          "equipamentos": ["barra", "halteres", "maquinas"],
+          "series": 3,
+          "repeticoes": "8-12",
+          "descanso": 75
+        },
+        {
+          "id": "bc6c78ef-c319-48db-ab4a-7a91166484a1",
+          "nome": "Triceps corda",
+          "categoria": "Peito + Triceps",
+          "musculos": ["Peito", "Triceps"],
+          "equipamentos": ["barra", "halteres", "maquinas"],
+          "series": 3,
+          "repeticoes": "10-12",
+          "descanso": 75
+        },
+        {
+          "id": "396bf3db-4631-4717-a6e7-15a424991489",
+          "nome": "Mergulho no banco",
+          "categoria": "Peito + Triceps",
+          "musculos": ["Peito", "Triceps"],
+          "equipamentos": ["barra", "halteres", "maquinas"],
+          "series": 3,
+          "repeticoes": "10-15",
+          "descanso": 75
         }
       ]
     }

@@ -11,7 +11,8 @@ const REQUIRED_FIELDS = {
 };
 
 const OPTIONAL_FIELDS = {
-  observacoes: "string"
+  observacoes: "string",
+  minExerciciosPorDia: "number"
 };
 
 function validateWorkoutRequest(body) {
@@ -43,6 +44,13 @@ function validateWorkoutRequest(body) {
     errors.push("tempoPorTreino deve ser maior que zero.");
   }
 
+  if (
+    data.minExerciciosPorDia !== undefined &&
+    ![6, 7, 8, 9, 10].includes(data.minExerciciosPorDia)
+  ) {
+    errors.push("minExerciciosPorDia deve ser 6, 7, 8, 9 ou 10.");
+  }
+
   return {
     valid: errors.length === 0,
     errors,
@@ -69,8 +77,15 @@ function normalizeWorkoutRequest(data) {
     equipamentos: normalizeStringArray(data.equipamentos),
     restricoes: normalizeStringArray(data.restricoes),
     prioridades: normalizeStringArray(data.prioridades),
+    minExerciciosPorDia: normalizeMinExercises(data.minExerciciosPorDia),
     observacoes: normalizeString(data.observacoes)
   };
+}
+
+function normalizeMinExercises(value) {
+  const number = Number(value);
+
+  return [6, 7, 8, 9, 10].includes(number) ? number : 6;
 }
 
 function normalizeString(value) {

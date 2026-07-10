@@ -1,19 +1,27 @@
 const { isOpenAIEnabled, generateWorkoutWithOpenAI } = require("../openai.service");
 const { buildSafeFallbackWorkout, normalizeWorkoutResponse } = require("../workout.validator");
 
-async function generateWorkout(input) {
+async function generateWorkout(input, context) {
+  const generationInput = {
+    ...input,
+    contextoUsuario: context || null
+  };
+  const authLabel = context && context.autenticado ? "autenticado" : "anonimo";
+
+  console.info(`[ai] usuario=${authLabel} minExerciciosPorDia=${input.minExerciciosPorDia}`);
+
   if (!isOpenAIEnabled()) {
     console.info("[ai] modo=MOCK reason=OPENAI_API_KEY ausente");
-    return generateMockWorkout(input);
+    return generateMockWorkout(generationInput);
   }
 
   console.info("[ai] modo=OPENAI");
 
   try {
-    return await generateWorkoutWithOpenAI(input);
+    return await generateWorkoutWithOpenAI(generationInput);
   } catch (err) {
     console.error(`[ai] fallback aplicado. reason=${err.code || "openai_error"}`);
-    return generateMockWorkout(input);
+    return generateMockWorkout(generationInput);
   }
 }
 

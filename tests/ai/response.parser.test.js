@@ -31,6 +31,20 @@ test("generateMockWorkout returns Flutter-compatible workout JSON", () => {
   assert.equal(Array.isArray(workout.exercicios), true);
 });
 
+test("generateMockWorkout respects minExerciciosPorDia", () => {
+  const workout = generateMockWorkout({
+    ...requestInput,
+    minExerciciosPorDia: 8
+  });
+
+  workout.dias.forEach((day) => {
+    const names = day.exercicios.map((exercise) => exercise.nome.toLowerCase());
+
+    assert.ok(day.exercicios.length >= 8);
+    assert.equal(new Set(names).size, names.length);
+  });
+});
+
 test("parseWorkoutResponse parses complete output_text JSON", () => {
   const validWorkout = generateMockWorkout(requestInput);
   const parsed = parseWorkoutResponse({
@@ -69,6 +83,37 @@ test("parseWorkoutResponse normalizes incomplete OpenAI JSON", () => {
   assert.ok(parsed.dias[0].id);
   assert.equal(parsed.dias[0].titulo, "Peito + Triceps");
   assert.equal(parsed.dias[0].exercicios[0].descanso, 90);
+});
+
+test("parseWorkoutResponse completes days below selected minimum", () => {
+  const parsed = parseWorkoutResponse({
+    output_text: JSON.stringify({
+      nome: "Treino gerado",
+      dias: [
+        {
+          nome: "Dia A",
+          titulo: "Peito + Triceps",
+          diaSemana: "Segunda",
+          exercicios: [
+            {
+              nome: "Supino reto",
+              categoria: "Peito + Triceps",
+              musculos: ["Peito"],
+              equipamentos: ["barra"],
+              series: 3,
+              repeticoes: "8-12",
+              descanso: 90
+            }
+          ]
+        }
+      ]
+    })
+  }, {
+    ...requestInput,
+    minExerciciosPorDia: 10
+  });
+
+  assert.equal(parsed.dias[0].exercicios.length, 10);
 });
 
 test("parseJson accepts fenced JSON", () => {

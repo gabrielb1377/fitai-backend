@@ -545,6 +545,12 @@ Resposta:
 
 Gera um treino sempre compativel com o `TreinoModel` do Flutter. Se a OpenAI retornar JSON incompleto, o backend normaliza e preenche campos obrigatorios. Se a resposta vier invalida ou a chamada falhar, aplica fallback mock.
 
+O campo `minExerciciosPorDia` e opcional para compatibilidade com clientes antigos. Quando ausente, o backend usa `6`. Valores aceitos: `6`, `7`, `8`, `9` ou `10`.
+
+Se o header `Authorization: Bearer <token>` vier com um JWT valido, o backend carrega um contexto reduzido do usuario via Prisma para melhorar a geracao: perfil, metas, recordes, historico recente, frequencia recente, exercicios favoritos e preferencias do formulario. Sem token, ou se o contexto estiver indisponivel, o endpoint continua funcionando apenas com os dados enviados no body.
+
+Depois da OpenAI responder, a validacao garante que cada dia tenha pelo menos `minExerciciosPorDia` exercicios. Se algum dia vier abaixo do minimo, o backend completa com exercicios seguros, evita duplicidade no mesmo dia e preserva o formato unico de plano com dias internos.
+
 Body esperado:
 
 ```json
@@ -554,6 +560,7 @@ Body esperado:
   "nivel": "intermediario",
   "diasPorSemana": 4,
   "tempoPorTreino": 60,
+  "minExerciciosPorDia": 6,
   "local": "academia",
   "equipamentos": ["barra", "halteres", "maquinas"],
   "restricoes": [],
