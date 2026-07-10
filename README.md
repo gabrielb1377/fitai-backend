@@ -84,6 +84,13 @@ C:\fitai-backend
         |-- goals
         |-- records
         `-- coach
+            |-- coach.routes.js
+            |-- coach.controller.js
+            |-- coach.service.js
+            |-- coach.schemas.js
+            |-- coach.context.js
+            |-- coach.prompt.js
+            `-- coach.parser.js
 ```
 
 Cada modulo deve concentrar as camadas que fizerem sentido para aquele dominio:
@@ -620,6 +627,67 @@ Arquivos de exemplo:
 6. Envie a requisicao e compare a resposta com `docs/examples/generate-workout.response.json`.
 
 O endpoint nao exige JWT hoje, para preservar o contrato atual da IA. As rotas de usuarios e perfil continuam protegidas.
+
+### POST /coach/insights
+
+Gera insights do Coach FitIA com base no historico real do usuario quando houver `Authorization: Bearer <token>` valido. Sem token, o endpoint continua funcionando com o `contextoLocal` enviado pelo Flutter.
+
+O backend calcula uma analise local antes da OpenAI: volume dos ultimos 7/14/30 dias, frequencia semanal, dias desde o ultimo treino, grupos subtreinados ou concentrados, progressao de carga, melhor carga recente, queda de volume, sequencia de treinos, distancia recente de corrida e progresso de metas.
+
+Se `OPENAI_API_KEY` estiver ausente, ou se a OpenAI falhar/parsing vier invalido, o endpoint usa fallback local seguro. A resposta nunca deve bloquear o app.
+
+Tipos aceitos:
+
+```text
+geral, exercicio, progressao, recuperacao, frequencia, metas, corrida
+```
+
+Body:
+
+```json
+{
+  "tipo": "geral",
+  "exercicioId": null,
+  "periodoDias": 30,
+  "forceRefresh": false,
+  "contextoLocal": {
+    "perfil": {},
+    "historicoTreinos": [],
+    "historicoExercicios": [],
+    "recordes": [],
+    "metas": [],
+    "corridas": []
+  }
+}
+```
+
+Resposta:
+
+```json
+{
+  "resumo": "Coach FitIA analisou 4 treino(s), 28 serie(s) e retornou 3 insight(s).",
+  "insights": [
+    {
+      "id": "uuid",
+      "categoria": "progressao",
+      "prioridade": "media",
+      "titulo": "Carga em evolucao",
+      "descricao": "Supino reto variou 5% frente ao registro anterior.",
+      "acao": "Mantenha reps limpas antes do proximo aumento.",
+      "exercicioId": "exercise-id"
+    }
+  ],
+  "geradoEm": "2026-07-09T12:00:00.000Z"
+}
+```
+
+O cache em memoria dura 10 minutos por usuario/tipo. Envie `forceRefresh: true` para ignorar o cache.
+
+Exemplo com curl:
+
+```powershell
+curl.exe -X POST http://localhost:3001/coach/insights -H "Content-Type: application/json" -d "{\"tipo\":\"geral\",\"periodoDias\":30,\"contextoLocal\":{\"historicoTreinos\":[],\"historicoExercicios\":[],\"recordes\":[],\"metas\":[],\"corridas\":[]}}"
+```
 
 ### Sincronizacao inicial
 

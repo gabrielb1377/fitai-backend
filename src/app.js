@@ -2,6 +2,7 @@ const express = require("express");
 const env = require("./config/env");
 const aiRoutes = require("./modules/ai/routes/ai.routes");
 const authRoutes = require("./modules/auth/auth.routes");
+const coachRoutes = require("./modules/coach/coach.routes");
 const syncRoutes = require("./modules/sync/sync.routes");
 const usersRoutes = require("./modules/users/routes/users.routes");
 const { corsMiddleware } = require("./shared/middleware/cors.middleware");
@@ -26,6 +27,7 @@ function createApp() {
   app.use("/auth", authRoutes);
   app.use(usersRoutes);
   app.use("/ai", aiRoutes);
+  app.use("/coach", coachRoutes);
   app.use("/sync", syncRoutes);
 
   app.use(notFoundMiddleware);
