@@ -1,0 +1,522 @@
+const { createHash } = require("crypto");
+const prisma = require("../../config/prisma");
+const { verifyToken } = require("../auth/auth.service");
+
+async function syncProfile(req, payload) {
+  const user = await resolveSyncUser(req, payload);
+  const profile = payload.profile || payload.item || payload;
+  const name = text(profile.nome || profile.name, user.name);
+
+  if (name && name !== user.name) {
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { name }
+    });
+  }
+
+  const syncedProfile = await prisma.profile.upsert({
+    where: { userId: user.id },
+    update: {
+      weight: number(profile.peso || profile.weight),
+      height: number(profile.altura || profile.height),
+      age: integer(profile.idade || profile.age),
+      goal: text(profile.objetivo || profile.goal, ""),
+      level: text(profile.nivel || profile.level, "")
+    },
+    create: {
+      userId: user.id,
+      weight: number(profile.peso || profile.weight),
+      height: number(profile.altura || profile.height),
+      age: integer(profile.idade || profile.age),
+      goal: text(profile.objetivo || profile.goal, ""),
+      level: text(profile.nivel || profile.level, "")
+    }
+  });
+
+  logSync("profile", user, 1);
+
+  return {
+    user: safeUser(user),
+    profile: syncedProfile
+  };
+}
+
+async function getProfile(req, payload = {}) {
+  const user = await resolveSyncUser(req, payload);
+  const profile = await prisma.profile.findUnique({
+    where: { userId: user.id }
+  });
+
+  return {
+    user: safeUser(user),
+    profile
+  };
+}
+
+async function syncGoals(req, payload, items) {
+  const user = await resolveSyncUser(req, payload);
+  const goals = [];
+
+  for (const item of items) {
+    const id = syncId(item, "goal");
+    const data = {
+      userId: user.id,
+      title: text(item.titulo || item.title, "Meta FitIA"),
+      category: text(item.categoria || item.category, "geral"),
+      currentValue: number(item.valorAtual || item.currentValue),
+      targetValue: number(item.valorObjetivo || item.targetValue),
+      status: text(item.status || item.statusLabel, "em_andamento")
+    };
+
+    goals.push(await prisma.goal.upsert({
+      where: { id },
+      update: data,
+      create: {
+        id,
+        ...data
+      }
+    }));
+  }
+
+  logSync("goals", user, goals.length);
+
+  return { goals };
+}
+
+async function getGoals(req, payload = {}) {
+  const user = await resolveSyncUser(req, payload);
+  const goals = await prisma.goal.findMany({
+    where: { userId: user.id },
+    orderBy: { updatedAt: "desc" }
+  });
+
+  return { goals };
+}
+
+async function syncRecords(req, payload, items) {
+  const user = await resolveSyncUser(req, payload);
+  const records = [];
+
+  for (const item of items) {
+    const id = syncId(item, "record");
+    const data = {
+      userId: user.id,
+      title: text(item.titulo || item.title, "Recorde FitIA"),
+      category: text(item.categoria || item.category, "geral"),
+      value: number(item.valor || item.value),
+      unit: text(item.unidade || item.unit, ""),
+      achievedAt: date(item.data || item.achievedAt)
+    };
+
+    records.push(await prisma.record.upsert({
+      where: { id },
+      update: data,
+      create: {
+        id,
+        ...data
+      }
+    }));
+  }
+
+  logSync("records", user, records.length);
+
+  return { records };
+}
+
+async function getRecords(req, payload = {}) {
+  const user = await resolveSyncUser(req, payload);
+  const records = await prisma.record.findMany({
+    where: { userId: user.id },
+    orderBy: { achievedAt: "desc" }
+  });
+
+  return { records };
+}
+
+async function syncWorkouts(req, payload, items) {
+  const user = await resolveSyncUser(req, payload);
+  const workouts = [];
+
+  for (const item of items) {
+    workouts.push(await upsertWorkoutWithDays(user.id, item));
+  }
+
+  logSync("workouts", user, workouts.length);
+
+  return { workouts };
+}
+
+async function getWorkouts(req, payload = {}) {
+  const user = await resolveSyncUser(req, payload);
+  const workouts = await prisma.workout.findMany({
+    where: { userId: user.id },
+    include: {
+      days: {
+        orderBy: { order: "asc" },
+        include: {
+          exercises: {
+            orderBy: { order: "asc" },
+            include: { exercise: true }
+          }
+        }
+      }
+    },
+    orderBy: { updatedAt: "desc" }
+  });
+
+  return { workouts };
+}
+
+async function syncWorkoutHistory(req, payload, items) {
+  const user = await resolveSyncUser(req, payload);
+  const histories = [];
+
+  for (const item of items) {
+    histories.push(await upsertWorkoutHistory(user.id, item));
+  }
+
+  logSync("workout-history", user, histories.length);
+
+  return { histories };
+}
+
+async function syncRunning(req, payload, items) {
+  const user = await resolveSyncUser(req, payload);
+  const runs = [];
+
+  for (const item of items) {
+    const performedAt = date(item.data || item.performedAt);
+    const distanceKm = number(item.distancia || item.distanceKm);
+    const durationSeconds = integer(item.segundos || item.durationSeconds);
+    const averageSpeed = number(
+      item.velocidadeMedia || item.averageSpeed,
+      durationSeconds > 0 ? distanceKm / (durationSeconds / 3600) : 0
+    );
+    const id = syncId(
+      {
+        id: item.id,
+        data: performedAt.toISOString(),
+        distancia: distanceKm,
+        segundos: durationSeconds
+      },
+      "running"
+    );
+    const data = {
+      userId: user.id,
+      distanceKm,
+      durationSeconds,
+      averageSpeed,
+      performedAt
+    };
+
+    runs.push(await prisma.runningHistory.upsert({
+      where: { id },
+      update: data,
+      create: {
+        id,
+        ...data
+      }
+    }));
+  }
+
+  logSync("running", user, runs.length);
+
+  return { runs };
+}
+
+async function upsertWorkoutWithDays(userId, item) {
+  const workoutId = syncId(item, "workout");
+  const exercises = Array.isArray(item.exercicios) ? item.exercicios : [];
+  const days = Array.isArray(item.planoDias) ? item.planoDias : [];
+
+  return prisma.$transaction(async (tx) => {
+    const workout = await tx.workout.upsert({
+      where: { id: workoutId },
+      update: {
+        userId,
+        name: text(item.nome || item.name, "Treino FitIA"),
+        description: text(item.descricao || item.description, ""),
+        goal: text(item.objetivo || item.goal, "geral"),
+        level: text(item.nivel || item.level, "iniciante"),
+        split: text(item.divisao || item.split, "Full Body"),
+        daysPerWeek: integer(item.diasPorSemana || item.daysPerWeek, days.length || 1),
+        estimatedMinutes: integer(item.tempoEstimado || item.estimatedMinutes, 45)
+      },
+      create: {
+        id: workoutId,
+        userId,
+        name: text(item.nome || item.name, "Treino FitIA"),
+        description: text(item.descricao || item.description, ""),
+        goal: text(item.objetivo || item.goal, "geral"),
+        level: text(item.nivel || item.level, "iniciante"),
+        split: text(item.divisao || item.split, "Full Body"),
+        daysPerWeek: integer(item.diasPorSemana || item.daysPerWeek, days.length || 1),
+        estimatedMinutes: integer(item.tempoEstimado || item.estimatedMinutes, 45)
+      }
+    });
+
+    await tx.workoutDay.deleteMany({
+      where: { workoutId }
+    });
+
+    const exerciseMap = new Map();
+    for (const exercise of exercises) {
+      const id = syncId(exercise, "exercise");
+      const saved = await tx.exercise.upsert({
+        where: { id },
+        update: {
+          name: text(exercise.nome || exercise.name, "Exercicio"),
+          muscleGroup: text(exercise.categoria || exercise.muscleGroup, "Geral"),
+          equipment: joinList(exercise.equipamentos || exercise.equipment),
+          difficulty: text(exercise.dificuldade || exercise.difficulty || item.nivel, "iniciante"),
+          gifKey: text(exercise.gifKey || exercise.gifPath || exercise.imagem, "")
+        },
+        create: {
+          id,
+          name: text(exercise.nome || exercise.name, "Exercicio"),
+          muscleGroup: text(exercise.categoria || exercise.muscleGroup, "Geral"),
+          equipment: joinList(exercise.equipamentos || exercise.equipment),
+          difficulty: text(exercise.dificuldade || exercise.difficulty || item.nivel, "iniciante"),
+          gifKey: text(exercise.gifKey || exercise.gifPath || exercise.imagem, "")
+        }
+      });
+
+      exerciseMap.set(String(exercise.id || exercise.nome || saved.id), saved);
+      exerciseMap.set(saved.id, saved);
+      exerciseMap.set(saved.name, saved);
+    }
+
+    const sourceDays = days.length > 0
+      ? days
+      : [{
+          codigo: "Dia 1",
+          nome: text(item.nome, "Treino"),
+          exercicioIds: exercises.map((exercise) => exercise.id || exercise.nome)
+        }];
+
+    for (let index = 0; index < sourceDays.length; index += 1) {
+      const day = sourceDays[index];
+      const workoutDay = await tx.workoutDay.create({
+        data: {
+          workoutId,
+          name: text(day.codigo || day.name, `Dia ${index + 1}`),
+          weekday: text(day.diaSemana || day.codigo || day.weekday, ""),
+          muscleGroup: text(day.nome || day.muscleGroup, "Geral"),
+          order: integer(day.ordem || day.order, index + 1)
+        }
+      });
+
+      const ids = Array.isArray(day.exercicioIds) ? day.exercicioIds : [];
+      const fallbackIds = ids.length > 0 ? ids : exercises.map((exercise) => exercise.id || exercise.nome);
+
+      for (let exerciseIndex = 0; exerciseIndex < fallbackIds.length; exerciseIndex += 1) {
+        const exercise = exerciseMap.get(String(fallbackIds[exerciseIndex]));
+        if (!exercise) continue;
+
+        await tx.workoutDayExercise.create({
+          data: {
+            workoutDayId: workoutDay.id,
+            exerciseId: exercise.id,
+            order: exerciseIndex + 1,
+            sets: 3,
+            reps: 12,
+            restSeconds: 90
+          }
+        });
+      }
+    }
+
+    return workout;
+  });
+}
+
+async function upsertWorkoutHistory(userId, item) {
+  const workout = await ensureHistoryWorkout(userId, item);
+  const startedAt = date(item.dataHora || item.startedAt);
+  const durationSeconds = integer(item.tempoSegundos || item.durationSeconds);
+  const finishedAt = date(
+    item.finishedAt,
+    new Date(startedAt.getTime() + Math.max(durationSeconds, 0) * 1000)
+  );
+  const id = syncId(item, "workout_history");
+  const data = {
+    userId,
+    workoutId: workout.id,
+    startedAt,
+    finishedAt,
+    totalVolume: number(item.volumeTotal || item.totalVolume),
+    totalSets: integer(item.seriesConcluidas || item.totalSets),
+    durationSeconds
+  };
+
+  return prisma.workoutHistory.upsert({
+    where: { id },
+    update: data,
+    create: {
+      id,
+      ...data
+    }
+  });
+}
+
+async function ensureHistoryWorkout(userId, item) {
+  const workoutId = text(item.treinoId || item.workoutId, "");
+
+  if (workoutId) {
+    const existing = await prisma.workout.findUnique({ where: { id: workoutId } });
+    if (existing) return existing;
+  }
+
+  const placeholderId = workoutId || `history_workout_${hash(text(item.nomeTreino || item.workoutName, "Treino"))}`;
+
+  return prisma.workout.upsert({
+    where: { id: placeholderId },
+    update: {
+      userId,
+      name: text(item.nomeTreino || item.workoutName, "Treino"),
+      description: "Treino criado automaticamente pela sincronizacao de historico.",
+      goal: text(item.objetivo || item.goal, "geral"),
+      level: text(item.nivel || item.level, "iniciante"),
+      split: "Historico",
+      daysPerWeek: 1,
+      estimatedMinutes: Math.max(1, Math.round(integer(item.tempoSegundos || item.durationSeconds) / 60))
+    },
+    create: {
+      id: placeholderId,
+      userId,
+      name: text(item.nomeTreino || item.workoutName, "Treino"),
+      description: "Treino criado automaticamente pela sincronizacao de historico.",
+      goal: text(item.objetivo || item.goal, "geral"),
+      level: text(item.nivel || item.level, "iniciante"),
+      split: "Historico",
+      daysPerWeek: 1,
+      estimatedMinutes: Math.max(1, Math.round(integer(item.tempoSegundos || item.durationSeconds) / 60))
+    }
+  });
+}
+
+async function resolveSyncUser(req, payload = {}) {
+  const auth = readOptionalAuth(req);
+
+  if (auth) {
+    const user = await prisma.user.findUnique({
+      where: { id: auth.userId }
+    });
+
+    if (user) {
+      return user;
+    }
+  }
+
+  const clientId = text(
+    payload.clientId || req.headers["x-fitai-client-id"],
+    "anonymous-local"
+  );
+  const safeClientId = clientId.replace(/[^a-zA-Z0-9_.-]/g, "_").slice(0, 80);
+  const email = `sync.${safeClientId}@local.fitai`;
+
+  return prisma.user.upsert({
+    where: { email },
+    update: {
+      name: "FitIA Local"
+    },
+    create: {
+      name: "FitIA Local",
+      email,
+      passwordHash: "sync-user-no-login"
+    }
+  });
+}
+
+function readOptionalAuth(req) {
+  const authHeader = req.headers.authorization || "";
+  const [scheme, token] = authHeader.split(" ");
+
+  if (scheme !== "Bearer" || !token) {
+    return null;
+  }
+
+  try {
+    const payload = verifyToken(token);
+    return {
+      userId: payload.sub,
+      email: payload.email
+    };
+  } catch (err) {
+    logRaw("auth opcional invalido; usando usuario local de sync");
+    return null;
+  }
+}
+
+function safeUser(user) {
+  return {
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    createdAt: user.createdAt,
+    updatedAt: user.updatedAt
+  };
+}
+
+function syncId(item, prefix) {
+  const explicit = text(item.id || item.syncId, "");
+  if (explicit) return explicit;
+
+  return `${prefix}_${hash(JSON.stringify(item || {}))}`;
+}
+
+function hash(value) {
+  return createHash("sha1").update(String(value || "")).digest("hex").slice(0, 24);
+}
+
+function text(value, fallback = "") {
+  const result = value === undefined || value === null ? "" : String(value).trim();
+  return result || fallback;
+}
+
+function number(value, fallback = 0) {
+  if (typeof value === "number" && Number.isFinite(value)) return value;
+
+  const parsed = Number(String(value || "").replace(",", ".").replace(/[^\d.-]/g, ""));
+  return Number.isFinite(parsed) ? parsed : fallback;
+}
+
+function integer(value, fallback = 0) {
+  return Math.round(number(value, fallback));
+}
+
+function date(value, fallback = new Date()) {
+  const parsed = Date.parse(String(value || ""));
+  return Number.isNaN(parsed) ? fallback : new Date(parsed);
+}
+
+function joinList(value) {
+  if (Array.isArray(value)) {
+    return value.map((item) => text(item)).filter(Boolean).join(", ");
+  }
+
+  return text(value);
+}
+
+function logSync(scope, user, count) {
+  logRaw(`${scope} sincronizado count=${count} user=${user.id}`);
+}
+
+function logRaw(message) {
+  if (process.env.NODE_ENV !== "production") {
+    console.info(`[sync] ${message}`);
+  }
+}
+
+module.exports = {
+  syncProfile,
+  getProfile,
+  syncGoals,
+  getGoals,
+  syncRecords,
+  getRecords,
+  syncWorkouts,
+  getWorkouts,
+  syncWorkoutHistory,
+  syncRunning
+};

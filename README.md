@@ -128,7 +128,7 @@ GET, POST, PATCH, PUT, DELETE, OPTIONS
 Headers permitidos:
 
 ```text
-Content-Type, Authorization
+Content-Type, Authorization, X-FitIA-Client-Id
 ```
 
 O preflight `OPTIONS` responde antes das rotas, entao chamadas do Flutter Web para `POST /ai/generate-workout` funcionam em desenvolvimento local.
@@ -620,6 +620,54 @@ Arquivos de exemplo:
 6. Envie a requisicao e compare a resposta com `docs/examples/generate-workout.response.json`.
 
 O endpoint nao exige JWT hoje, para preservar o contrato atual da IA. As rotas de usuarios e perfil continuam protegidas.
+
+### Sincronizacao inicial
+
+O modulo `src/modules/sync` prepara a sincronizacao offline-first do Flutter com PostgreSQL. O app pode continuar usando SharedPreferences localmente e enviar dados ao backend quando estiver disponivel.
+
+Nesta sprint, login ainda nao e obrigatorio. Se a requisicao tiver `Authorization: Bearer <token>`, o backend usa o usuario autenticado. Sem token, usa `X-FitIA-Client-Id` ou `clientId` do body para criar/reusar um usuario local de sincronizacao.
+
+Endpoints:
+
+```text
+POST /sync/profile
+POST /sync/goals
+POST /sync/records
+POST /sync/workouts
+POST /sync/workout-history
+POST /sync/running
+GET /sync/profile
+GET /sync/workouts
+GET /sync/goals
+GET /sync/records
+```
+
+Formato recomendado para envios em lote:
+
+```json
+{
+  "clientId": "fitai_local_device_id",
+  "items": []
+}
+```
+
+Para perfil:
+
+```json
+{
+  "clientId": "fitai_local_device_id",
+  "profile": {
+    "nome": "Gabriel",
+    "peso": "80 kg",
+    "altura": "180 cm",
+    "idade": "30",
+    "objetivo": "hipertrofia",
+    "nivel": "intermediario"
+  }
+}
+```
+
+Os modelos com `updatedAt` no Prisma sao atualizados via `upsert`. Historicos e recordes usam IDs estaveis enviados pelo app ou gerados a partir do conteudo recebido.
 
 ## Proximo passo
 

@@ -11,7 +11,7 @@ const corsOptions = {
     return callback(null, false);
   },
   methods: ["GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"],
+  allowedHeaders: ["Content-Type", "Authorization", "X-FitIA-Client-Id"],
   optionsSuccessStatus: 204
 };
 

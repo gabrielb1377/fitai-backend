@@ -37,7 +37,7 @@ test("preflight allows local Flutter Web origins", async (t) => {
     headers: {
       Origin: origin,
       "Access-Control-Request-Method": "POST",
-      "Access-Control-Request-Headers": "Content-Type, Authorization"
+      "Access-Control-Request-Headers": "Content-Type, Authorization, X-FitIA-Client-Id"
     }
   });
 
@@ -47,6 +47,7 @@ test("preflight allows local Flutter Web origins", async (t) => {
   assert.match(response.headers.get("access-control-allow-methods"), /OPTIONS/);
   assert.match(response.headers.get("access-control-allow-headers"), /Content-Type/);
   assert.match(response.headers.get("access-control-allow-headers"), /Authorization/);
+  assert.match(response.headers.get("access-control-allow-headers"), /X-FitIA-Client-Id/);
 });
 
 test("health response includes CORS header for 127 local origins", async (t) => {
