@@ -3,7 +3,9 @@ const assert = require("node:assert/strict");
 const {
   listReadyPlans,
   getReadyPlanById,
-  listReadyPlanCategories
+  listReadyPlanCategories,
+  toCopiedPlanDto,
+  repsAsNumber
 } = require("../../src/modules/ready_plans/ready_plans.service");
 
 test("listReadyPlans retorna apenas o resumo dos planos ativos", async () => {
@@ -88,4 +90,45 @@ test("listReadyPlanCategories preserva todas as categorias da biblioteca", async
   assert.equal(result.categories.length, 13);
   assert.equal(abc.planCount, 2);
   assert.equal(powerlifting.planCount, 0);
+});
+
+test("copy DTO preserva origem, ordem e prescricao do plano pessoal", () => {
+  const dto = toCopiedPlanDto({
+    id: "workout-1",
+    name: "ABC Classico",
+    description: "Plano copiado.",
+    goal: "Hipertrofia",
+    level: "Iniciante",
+    split: "ABC",
+    daysPerWeek: 3,
+    estimatedMinutes: 55,
+    source: "ready_plan",
+    readyPlanId: "ready-1",
+    days: [{
+      id: "day-1",
+      name: "Dia A",
+      weekday: "Segunda",
+      muscleGroup: "Peito",
+      order: 1,
+      exercises: [{
+        id: "item-1",
+        exerciseId: "exercise-1",
+        sets: 4,
+        reps: 8,
+        repsText: "8-12",
+        restSeconds: 90,
+        rir: "2",
+        cadence: "2-0-2",
+        notes: "Controle a descida.",
+        order: 1,
+        exercise: { name: "Supino reto" }
+      }]
+    }]
+  });
+
+  assert.equal(dto.source, "ready_plan");
+  assert.equal(dto.readyPlanId, "ready-1");
+  assert.equal(dto.dias[0].exercicios[0].repeticoes, "8-12");
+  assert.equal(dto.dias[0].exercicios[0].rir, "2");
+  assert.equal(repsAsNumber("8-12"), 8);
 });

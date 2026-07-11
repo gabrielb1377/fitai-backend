@@ -188,7 +188,7 @@ async function resolveStepsUser(req, payload = {}, db = prisma) {
   }
 
   const clientId = text(
-    payload.clientId || req.headers["x-fitai-client-id"],
+    payload.clientId || req.headers["x-fitia-client-id"],
     "anonymous-local"
   );
   const safeClientId = clientId.replace(/[^a-zA-Z0-9_.-]/g, "_").slice(0, 80);

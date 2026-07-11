@@ -51,12 +51,17 @@ model Workout {
   split            String
   daysPerWeek      Int
   estimatedMinutes Int
+  source           String           @default("manual")
+  readyPlanId      String?
+  readyPlan        ReadyPlan?       @relation("ReadyPlanCopies", fields: [readyPlanId], references: [id], onDelete: SetNull)
   days             WorkoutDay[]
   histories        WorkoutHistory[]
   createdAt        DateTime         @default(now())
   updatedAt        DateTime         @updatedAt
 
+  @@unique([userId, readyPlanId])
   @@index([userId])
+  @@index([readyPlanId])
   @@map("workouts")
 }
 
@@ -100,7 +105,11 @@ model WorkoutDayExercise {
   order        Int
   sets         Int
   reps         Int
+  repsText     String?
   restSeconds  Int
+  rir          String?
+  cadence      String?
+  notes        String?
 
   @@index([workoutDayId])
   @@index([exerciseId])
@@ -221,6 +230,7 @@ model ReadyPlan {
   estimatedMinutes Int
   isActive         Boolean        @default(true)
   days             ReadyPlanDay[]
+  copiedWorkouts   Workout[]      @relation("ReadyPlanCopies")
   createdAt        DateTime       @default(now())
   updatedAt        DateTime       @updatedAt
 
@@ -256,6 +266,9 @@ model ReadyPlanExercise {
   sets           Int
   reps           String
   restSeconds    Int
+  rir            String?
+  cadence        String?
+  notes          String?
   order          Int
 
   @@unique([readyPlanDayId, order])

@@ -228,6 +228,8 @@ async function upsertWorkoutWithDays(userId, item) {
   const workoutId = syncId(item, "workout");
   const exercises = Array.isArray(item.exercicios) ? item.exercicios : [];
   const days = Array.isArray(item.planoDias) ? item.planoDias : [];
+  const source = text(item.origem || item.source, "manual");
+  const readyPlanId = text(item.readyPlanId, "") || null;
 
   return prisma.$transaction(async (tx) => {
     const workout = await tx.workout.upsert({
@@ -240,7 +242,9 @@ async function upsertWorkoutWithDays(userId, item) {
         level: text(item.nivel || item.level, "iniciante"),
         split: text(item.divisao || item.split, "Full Body"),
         daysPerWeek: integer(item.diasPorSemana || item.daysPerWeek, days.length || 1),
-        estimatedMinutes: integer(item.tempoEstimado || item.estimatedMinutes, 45)
+        estimatedMinutes: integer(item.tempoEstimado || item.estimatedMinutes, 45),
+        source,
+        readyPlanId
       },
       create: {
         id: workoutId,
@@ -251,7 +255,9 @@ async function upsertWorkoutWithDays(userId, item) {
         level: text(item.nivel || item.level, "iniciante"),
         split: text(item.divisao || item.split, "Full Body"),
         daysPerWeek: integer(item.diasPorSemana || item.daysPerWeek, days.length || 1),
-        estimatedMinutes: integer(item.tempoEstimado || item.estimatedMinutes, 45)
+        estimatedMinutes: integer(item.tempoEstimado || item.estimatedMinutes, 45),
+        source,
+        readyPlanId
       }
     });
 
@@ -313,14 +319,24 @@ async function upsertWorkoutWithDays(userId, item) {
         const exercise = exerciseMap.get(String(fallbackIds[exerciseIndex]));
         if (!exercise) continue;
 
+        const sourceExercise = exercises.find((item) => {
+          const key = String(item.id || item.nome || item.name);
+          return key === String(fallbackIds[exerciseIndex]) || item.nome === exercise.name || item.name === exercise.name;
+        }) || {};
+        const repsText = text(sourceExercise.repeticoes || sourceExercise.reps, "") || null;
+
         await tx.workoutDayExercise.create({
           data: {
             workoutDayId: workoutDay.id,
             exerciseId: exercise.id,
             order: exerciseIndex + 1,
-            sets: 3,
-            reps: 12,
-            restSeconds: 90
+            sets: integer(sourceExercise.series || sourceExercise.sets, 3),
+            reps: integer(repsText, 12),
+            repsText,
+            restSeconds: integer(sourceExercise.descansoSegundos || sourceExercise.descanso || sourceExercise.restSeconds, 90),
+            rir: text(sourceExercise.rir, "") || null,
+            cadence: text(sourceExercise.cadencia || sourceExercise.cadence, "") || null,
+            notes: text(sourceExercise.observacoesTreino || sourceExercise.observacoes || sourceExercise.notes, "") || null
           }
         });
       }
@@ -409,7 +425,7 @@ async function resolveSyncUser(req, payload = {}) {
   }
 
   const clientId = text(
-    payload.clientId || req.headers["x-fitai-client-id"],
+    payload.clientId || req.headers["x-fitia-client-id"],
     "anonymous-local"
   );
   const safeClientId = clientId.replace(/[^a-zA-Z0-9_.-]/g, "_").slice(0, 80);

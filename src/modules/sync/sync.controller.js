@@ -80,7 +80,7 @@ function parsePayload(body) {
 
 function queryPayload(req) {
   return {
-    clientId: req.query.clientId || req.headers["x-fitai-client-id"]
+    clientId: req.query.clientId || req.headers["x-fitia-client-id"]
   };
 }
 
