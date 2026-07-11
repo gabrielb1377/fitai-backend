@@ -3,6 +3,7 @@ const env = require("./config/env");
 const aiRoutes = require("./modules/ai/routes/ai.routes");
 const authRoutes = require("./modules/auth/auth.routes");
 const coachRoutes = require("./modules/coach/coach.routes");
+const readyPlansRoutes = require("./modules/ready_plans/ready_plans.routes");
 const stepsRoutes = require("./modules/steps/steps.routes");
 const syncRoutes = require("./modules/sync/sync.routes");
 const usersRoutes = require("./modules/users/routes/users.routes");
@@ -29,6 +30,7 @@ function createApp() {
   app.use(usersRoutes);
   app.use("/ai", aiRoutes);
   app.use("/coach", coachRoutes);
+  app.use("/ready-plans", readyPlansRoutes);
   app.use("/steps", stepsRoutes);
   app.use("/sync", syncRoutes);
 

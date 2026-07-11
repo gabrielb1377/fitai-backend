@@ -206,3 +206,59 @@ model Record {
   @@index([exerciseId])
   @@map("records")
 }
+
+model ReadyPlan {
+  id               String         @id @default(uuid())
+  slug             String         @unique
+  name             String
+  description      String
+  coverImage       String
+  category         String
+  level            String
+  goal             String
+  split            String
+  daysPerWeek      Int
+  estimatedMinutes Int
+  isActive         Boolean        @default(true)
+  days             ReadyPlanDay[]
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+
+  @@index([category])
+  @@index([isActive])
+  @@map("ready_plans")
+}
+
+model ReadyPlanDay {
+  id          String              @id @default(uuid())
+  readyPlanId String
+  readyPlan   ReadyPlan           @relation(fields: [readyPlanId], references: [id], onDelete: Cascade)
+  name        String
+  title       String
+  weekday     String?
+  muscleGroup String
+  order       Int
+  exercises   ReadyPlanExercise[]
+
+  @@unique([readyPlanId, order])
+  @@index([readyPlanId])
+  @@map("ready_plan_days")
+}
+
+model ReadyPlanExercise {
+  id             String       @id @default(uuid())
+  readyPlanDayId String
+  readyPlanDay   ReadyPlanDay @relation(fields: [readyPlanDayId], references: [id], onDelete: Cascade)
+  name           String
+  category       String
+  muscles        String[]
+  equipment      String[]
+  sets           Int
+  reps           String
+  restSeconds    Int
+  order          Int
+
+  @@unique([readyPlanDayId, order])
+  @@index([readyPlanDayId])
+  @@map("ready_plan_exercises")
+}
