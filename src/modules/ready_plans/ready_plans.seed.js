@@ -1,5 +1,12 @@
 const prisma = require("../../config/prisma");
 
+const FEATURED_SLUGS = new Set([
+  "hipertrofia-essencial-abc",
+  "upper-lower-4-dias",
+  "casa-sem-equipamentos",
+  "calistenia-fundamentos"
+]);
+
 const WEEKDAYS = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"];
 
 const EXERCISE_LIBRARY = {
@@ -101,6 +108,7 @@ function toPrismaPlan(planDefinition) {
 
   return {
     ...plan,
+    featured: FEATURED_SLUGS.has(plan.slug),
     days: {
       create: days.map((dayDefinition, dayIndex) => ({
         name: dayDefinition.name,

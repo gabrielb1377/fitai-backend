@@ -7,20 +7,21 @@ datasource db {
 }
 
 model User {
-  id                String            @id @default(uuid())
-  name              String
-  email             String            @unique
-  passwordHash      String
-  profile           Profile?
-  workouts          Workout[]
-  workoutHistories  WorkoutHistory[]
-  exerciseHistories ExerciseHistory[]
-  runningHistories  RunningHistory[]
-  goals             Goal[]
-  records           Record[]
-  dailySteps        DailySteps[]
-  createdAt         DateTime          @default(now())
-  updatedAt         DateTime          @updatedAt
+  id                 String              @id @default(uuid())
+  name               String
+  email              String              @unique
+  passwordHash       String
+  profile            Profile?
+  workouts           Workout[]
+  workoutHistories   WorkoutHistory[]
+  exerciseHistories  ExerciseHistory[]
+  runningHistories   RunningHistory[]
+  goals              Goal[]
+  records            Record[]
+  dailySteps         DailySteps[]
+  readyPlanFavorites ReadyPlanFavorite[]
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
 
   @@map("users")
 }
@@ -217,8 +218,8 @@ model Record {
 }
 
 model ReadyPlan {
-  id               String         @id @default(uuid())
-  slug             String         @unique
+  id               String              @id @default(uuid())
+  slug             String              @unique
   name             String
   description      String
   coverImage       String
@@ -228,11 +229,14 @@ model ReadyPlan {
   split            String
   daysPerWeek      Int
   estimatedMinutes Int
-  isActive         Boolean        @default(true)
+  isActive         Boolean             @default(true)
+  featured         Boolean             @default(false)
+  popularityCount  Int                 @default(0)
   days             ReadyPlanDay[]
-  copiedWorkouts   Workout[]      @relation("ReadyPlanCopies")
-  createdAt        DateTime       @default(now())
-  updatedAt        DateTime       @updatedAt
+  copiedWorkouts   Workout[]           @relation("ReadyPlanCopies")
+  favorites        ReadyPlanFavorite[]
+  createdAt        DateTime            @default(now())
+  updatedAt        DateTime            @updatedAt
 
   @@index([category])
   @@index([isActive])
@@ -274,4 +278,18 @@ model ReadyPlanExercise {
   @@unique([readyPlanDayId, order])
   @@index([readyPlanDayId])
   @@map("ready_plan_exercises")
+}
+
+model ReadyPlanFavorite {
+  id          String    @id @default(uuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  readyPlanId String
+  readyPlan   ReadyPlan @relation(fields: [readyPlanId], references: [id], onDelete: Cascade)
+  createdAt   DateTime  @default(now())
+
+  @@unique([userId, readyPlanId])
+  @@index([userId])
+  @@index([readyPlanId])
+  @@map("ready_plan_favorites")
 }

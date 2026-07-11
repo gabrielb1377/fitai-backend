@@ -48,6 +48,49 @@ async function listReadyPlanCategories(db = prisma) {
   };
 }
 
+async function listReadyPlanFavorites(userId, db = prisma) {
+  const favorites = await db.readyPlanFavorite.findMany({
+    where: { userId },
+    orderBy: { createdAt: "desc" },
+    include: {
+      readyPlan: {
+        include: { _count: { select: { days: true } } }
+      }
+    }
+  });
+
+  return {
+    favoriteIds: favorites.map((favorite) => favorite.readyPlanId),
+    favorites: favorites
+      .filter((favorite) => favorite.readyPlan.isActive)
+      .map((favorite) => toSummaryDto(favorite.readyPlan))
+  };
+}
+
+async function addReadyPlanFavorite(userId, readyPlanId, db = prisma) {
+  const readyPlan = await db.readyPlan.findFirst({
+    where: { id: readyPlanId, isActive: true },
+    select: { id: true }
+  });
+
+  if (!readyPlan) {
+    throw new AppError("Plano pronto nao encontrado.", 404, "ready_plan_not_found");
+  }
+
+  const favorite = await db.readyPlanFavorite.upsert({
+    where: { userId_readyPlanId: { userId, readyPlanId } },
+    update: {},
+    create: { userId, readyPlanId }
+  });
+
+  return { message: "Plano adicionado aos favoritos.", favorite };
+}
+
+async function removeReadyPlanFavorite(userId, readyPlanId, db = prisma) {
+  await db.readyPlanFavorite.deleteMany({ where: { userId, readyPlanId } });
+  return { message: "Plano removido dos favoritos.", readyPlanId };
+}
+
 async function copyReadyPlan(req, id, db = prisma) {
   const user = await resolveCopyUser(req, db);
   const idempotencyKey = text(req.headers["idempotency-key"]);
@@ -123,6 +166,11 @@ async function copyReadyPlan(req, id, db = prisma) {
           });
         }
       }
+
+      await tx.readyPlan.update({
+        where: { id: readyPlan.id },
+        data: { popularityCount: { increment: 1 } }
+      });
 
       return tx.workout.findUnique({
         where: { id: workout.id },
@@ -224,6 +272,10 @@ function toSummaryDto(plan) {
     divisao: plan.split,
     diasPorSemana: plan.daysPerWeek,
     tempoEstimado: plan.estimatedMinutes,
+    featured: plan.featured,
+    popularityCount: plan.popularityCount,
+    createdAt: plan.createdAt,
+    updatedAt: plan.updatedAt,
     totalDias: plan._count ? plan._count.days : undefined
   };
 }
@@ -319,6 +371,9 @@ module.exports = {
   listReadyPlans,
   getReadyPlanById,
   listReadyPlanCategories,
+  listReadyPlanFavorites,
+  addReadyPlanFavorite,
+  removeReadyPlanFavorite,
   copyReadyPlan,
   toSummaryDto,
   toDetailDto,

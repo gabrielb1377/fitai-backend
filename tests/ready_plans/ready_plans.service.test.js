@@ -4,9 +4,35 @@ const {
   listReadyPlans,
   getReadyPlanById,
   listReadyPlanCategories,
+  listReadyPlanFavorites,
+  addReadyPlanFavorite,
+  removeReadyPlanFavorite,
   toCopiedPlanDto,
   repsAsNumber
 } = require("../../src/modules/ready_plans/ready_plans.service");
+
+function readyPlanSummary(overrides = {}) {
+  return {
+    id: "plan-1",
+    slug: "abc-classico",
+    name: "ABC Classico",
+    description: "Plano fixo.",
+    coverImage: "/images/ready-plans/abc-classico.jpg",
+    category: "ABC",
+    level: "Iniciante",
+    goal: "Hipertrofia",
+    split: "ABC",
+    daysPerWeek: 3,
+    estimatedMinutes: 55,
+    isActive: true,
+    featured: true,
+    popularityCount: 7,
+    createdAt: new Date("2026-07-11T12:00:00.000Z"),
+    updatedAt: new Date("2026-07-11T12:00:00.000Z"),
+    _count: { days: 3 },
+    ...overrides
+  };
+}
 
 test("listReadyPlans retorna apenas o resumo dos planos ativos", async () => {
   const result = await listReadyPlans({
@@ -90,6 +116,49 @@ test("listReadyPlanCategories preserva todas as categorias da biblioteca", async
   assert.equal(result.categories.length, 13);
   assert.equal(abc.planCount, 2);
   assert.equal(powerlifting.planCount, 0);
+});
+
+test("favoritos retornam apenas planos ativos e seus identificadores", async () => {
+  const result = await listReadyPlanFavorites("user-1", {
+    readyPlanFavorite: {
+      findMany: async () => [
+        { readyPlanId: "plan-1", readyPlan: readyPlanSummary() },
+        { readyPlanId: "plan-2", readyPlan: readyPlanSummary({ id: "plan-2", isActive: false }) }
+      ]
+    }
+  });
+
+  assert.deepEqual(result.favoriteIds, ["plan-1", "plan-2"]);
+  assert.equal(result.favorites.length, 1);
+  assert.equal(result.favorites[0].featured, true);
+  assert.equal(result.favorites[0].popularityCount, 7);
+});
+
+test("adicionar e remover favorito usam o usuario autenticado", async () => {
+  const calls = [];
+  const db = {
+    readyPlan: {
+      findFirst: async () => ({ id: "plan-1" })
+    },
+    readyPlanFavorite: {
+      upsert: async (args) => {
+        calls.push(args);
+        return { id: "favorite-1", userId: "user-1", readyPlanId: "plan-1" };
+      },
+      deleteMany: async (args) => {
+        calls.push(args);
+        return { count: 1 };
+      }
+    }
+  };
+
+  const added = await addReadyPlanFavorite("user-1", "plan-1", db);
+  const removed = await removeReadyPlanFavorite("user-1", "plan-1", db);
+
+  assert.equal(added.favorite.readyPlanId, "plan-1");
+  assert.equal(removed.readyPlanId, "plan-1");
+  assert.deepEqual(calls[0].where.userId_readyPlanId, { userId: "user-1", readyPlanId: "plan-1" });
+  assert.deepEqual(calls[1].where, { userId: "user-1", readyPlanId: "plan-1" });
 });
 
 test("copy DTO preserva origem, ordem e prescricao do plano pessoal", () => {
