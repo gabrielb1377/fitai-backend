@@ -149,6 +149,19 @@ async function buildDatabaseContext(userId, input) {
         },
         orderBy: { performedAt: "desc" },
         take: 80
+      },
+      dailySteps: {
+        where: { date: { gte: since } },
+        select: {
+          id: true,
+          date: true,
+          steps: true,
+          goal: true,
+          source: true,
+          updatedAt: true
+        },
+        orderBy: { date: "desc" },
+        take: 80
       }
     }
   });
@@ -214,6 +227,14 @@ async function buildDatabaseContext(userId, input) {
       segundos: run.durationSeconds,
       velocidadeMedia: run.averageSpeed,
       data: run.performedAt
+    })),
+    passos: user.dailySteps.map((item) => ({
+      id: item.id,
+      data: item.date,
+      passos: item.steps,
+      metaDiaria: item.goal,
+      origem: item.source,
+      updatedAt: item.updatedAt
     }))
   };
 
@@ -234,7 +255,8 @@ function buildLocalContext(input) {
     historicoExercicios: contextoLocal.historicoExercicios || [],
     recordes: contextoLocal.recordes || [],
     metas: contextoLocal.metas || [],
-    corridas: contextoLocal.corridas || []
+    corridas: contextoLocal.corridas || [],
+    passos: contextoLocal.passos || contextoLocal.historicoPassos || []
   };
   const clientKey = input.clientId || hash(JSON.stringify(raw).slice(0, 1000));
 
@@ -262,6 +284,7 @@ function buildStructuredContext({ source, userKey, raw, input }) {
       recordes: raw.recordes.length,
       metas: raw.metas.length,
       corridas: raw.corridas.length,
+      passos: raw.passos.length,
       periodoDias: input.periodoDias,
       tipo: input.tipo,
       exercicioId: input.exercicioId
@@ -274,6 +297,7 @@ function analyzeContext(raw, periodoDias) {
   const workouts = normalizeWorkouts(raw.historicoTreinos);
   const exerciseHistory = normalizeExerciseHistory(raw.historicoExercicios);
   const runs = normalizeRuns(raw.corridas);
+  const steps = normalizeSteps(raw.passos);
   const goals = normalizeGoals(raw.metas);
   const muscleCounts = countMuscleGroups(workouts, exerciseHistory, raw.planos);
   const volume7 = volumeSince(workouts, exerciseHistory, 7, now);
@@ -285,6 +309,9 @@ function analyzeContext(raw, periodoDias) {
   const progression = progressionByExercise(exerciseHistory);
   const runningRecentDistance = distanceSince(runs, periodoDias, now);
   const runningPreviousDistance = distanceBetween(runs, periodoDias * 2, periodoDias, now);
+  const steps7 = stepsSince(steps, 7, now);
+  const previousSteps7 = stepsBetween(steps, 14, 7, now);
+  const steps30 = stepsSince(steps, 30, now);
 
   return {
     volume: {
@@ -307,6 +334,17 @@ function analyzeContext(raw, periodoDias) {
     corrida: {
       distanciaRecente: runningRecentDistance,
       variacaoPercentual: percentChange(runningRecentDistance, runningPreviousDistance)
+    },
+    passos: {
+      hoje: stepsToday(steps, now),
+      mediaSemanal: averageSteps(steps, 7, now),
+      mediaMensal: averageSteps(steps, 30, now),
+      variacaoMediaSemanalPercentual: percentChange(steps7, previousSteps7),
+      diasMetaConcluida7: goalCompletedDays(steps, 7, now),
+      diasMetaConcluida30: goalCompletedDays(steps, 30, now),
+      sequenciaDiasAtivos: stepGoalStreak(steps, now),
+      total7Dias: steps7,
+      total30Dias: steps30
     },
     metas: goals.map((goal) => ({
       id: goal.id,
@@ -379,6 +417,16 @@ function normalizeRuns(items) {
     distance: number(item.distancia || item.distanceKm),
     seconds: integer(item.segundos || item.durationSeconds),
     date: date(item.data || item.performedAt)
+  })).filter((item) => item.date);
+}
+
+function normalizeSteps(items) {
+  return array(items).map((item) => ({
+    id: text(item.id),
+    steps: integer(item.passos || item.steps),
+    goal: integer(item.metaDiaria || item.goal, 10000),
+    source: text(item.origem || item.source, "local"),
+    date: date(item.data || item.date)
   })).filter((item) => item.date);
 }
 
@@ -502,6 +550,69 @@ function distanceBetween(runs, fromDays, toDays, now) {
   const from = new Date(now.getTime() - fromDays * 86400000);
   const to = new Date(now.getTime() - toDays * 86400000);
   return round(runs.filter((run) => run.date >= from && run.date < to).reduce((sum, run) => sum + run.distance, 0));
+}
+
+function stepsToday(steps, now) {
+  const key = dateKey(now);
+  const today = steps.find((item) => dateKey(item.date) === key);
+
+  if (!today) {
+    return {
+      passos: 0,
+      metaDiaria: 10000,
+      faltam: 10000,
+      origem: "local"
+    };
+  }
+
+  return {
+    passos: today.steps,
+    metaDiaria: today.goal,
+    faltam: Math.max(0, today.goal - today.steps),
+    origem: today.source
+  };
+}
+
+function stepsSince(steps, days, now) {
+  const from = new Date(now.getTime() - days * 86400000);
+  return steps.filter((item) => item.date >= from).reduce((sum, item) => sum + item.steps, 0);
+}
+
+function stepsBetween(steps, fromDays, toDays, now) {
+  const from = new Date(now.getTime() - fromDays * 86400000);
+  const to = new Date(now.getTime() - toDays * 86400000);
+  return steps
+    .filter((item) => item.date >= from && item.date < to)
+    .reduce((sum, item) => sum + item.steps, 0);
+}
+
+function averageSteps(steps, days, now) {
+  const from = new Date(now.getTime() - days * 86400000);
+  const recent = steps.filter((item) => item.date >= from);
+
+  if (recent.length === 0) return 0;
+
+  return Math.round(recent.reduce((sum, item) => sum + item.steps, 0) / recent.length);
+}
+
+function goalCompletedDays(steps, days, now) {
+  const from = new Date(now.getTime() - days * 86400000);
+  return steps.filter((item) => item.date >= from && item.steps >= item.goal).length;
+}
+
+function stepGoalStreak(steps, now) {
+  const days = new Map(steps.map((item) => [dateKey(item.date), item]));
+  let current = dateOnly(now);
+  let streak = 0;
+
+  while (true) {
+    const record = days.get(dateKey(current));
+    if (!record || record.steps < record.goal) break;
+    streak += 1;
+    current = new Date(current.getTime() - 86400000);
+  }
+
+  return streak;
 }
 
 function workoutStreak(workouts, now) {

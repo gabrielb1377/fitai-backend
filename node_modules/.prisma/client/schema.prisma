@@ -18,6 +18,7 @@ model User {
   runningHistories  RunningHistory[]
   goals             Goal[]
   records           Record[]
+  dailySteps        DailySteps[]
   createdAt         DateTime          @default(now())
   updatedAt         DateTime          @updatedAt
 
@@ -155,6 +156,22 @@ model RunningHistory {
 
   @@index([userId])
   @@map("running_histories")
+}
+
+model DailySteps {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  date      DateTime
+  steps     Int
+  goal      Int
+  source    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, date])
+  @@index([userId])
+  @@map("daily_steps")
 }
 
 model Goal {

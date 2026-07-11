@@ -70,6 +70,8 @@ function buildLocalCoachResponse(context, input, mode = "local") {
   const overtrained = analysis.gruposMusculares ? analysis.gruposMusculares.excessivos || [] : [];
   const frequency = Number(analysis.frequenciaSemanal || 0);
   const daysSinceLastWorkout = analysis.diasDesdeUltimoTreino;
+  const steps = analysis.passos || {};
+  const todaySteps = steps.hoje || {};
 
   if (frequency === 0) {
     insights.push(makeInsight({
@@ -104,6 +106,46 @@ function buildLocalCoachResponse(context, input, mode = "local") {
       titulo: "Pausa longa detectada",
       descricao: `Seu ultimo treino registrado foi ha ${daysSinceLastWorkout} dias.`,
       acao: "Volte com carga moderada e foco em tecnica."
+    }));
+  }
+
+  if (todaySteps.metaDiaria && todaySteps.faltam > 0) {
+    insights.push(makeInsight({
+      categoria: "meta",
+      prioridade: "media",
+      titulo: "Passos de hoje",
+      descricao: `Faltam ${todaySteps.faltam} passos para sua meta de hoje.`,
+      acao: "Inclua uma caminhada curta ou pequenos blocos ao longo do dia."
+    }));
+  }
+
+  if (todaySteps.metaDiaria && todaySteps.passos >= todaySteps.metaDiaria) {
+    insights.push(makeInsight({
+      categoria: "meta",
+      prioridade: "baixa",
+      titulo: "Meta de passos concluida",
+      descricao: `Voce completou a meta diaria com ${todaySteps.passos} passos.`,
+      acao: "Mantenha o ritmo sem transformar todo dia em intensidade alta."
+    }));
+  }
+
+  if (steps.variacaoMediaSemanalPercentual !== null && steps.variacaoMediaSemanalPercentual !== undefined) {
+    insights.push(makeInsight({
+      categoria: "frequencia",
+      prioridade: steps.variacaoMediaSemanalPercentual >= 0 ? "baixa" : "media",
+      titulo: "Media semanal de passos",
+      descricao: `Sua media semanal variou ${steps.variacaoMediaSemanalPercentual}% frente aos 7 dias anteriores.`,
+      acao: "Use essa tendencia para ajustar a meta sem pressa."
+    }));
+  }
+
+  if (steps.diasMetaConcluida7 > 0) {
+    insights.push(makeInsight({
+      categoria: "meta",
+      prioridade: steps.diasMetaConcluida7 >= 5 ? "baixa" : "media",
+      titulo: "Consistencia nos passos",
+      descricao: `Voce completou a meta em ${steps.diasMetaConcluida7} dos ultimos 7 dias.`,
+      acao: "Busque mais um dia completo antes de aumentar a meta."
     }));
   }
 

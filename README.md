@@ -83,6 +83,11 @@ C:\fitai-backend
         |-- running
         |-- goals
         |-- records
+        |-- steps
+        |   |-- steps.routes.js
+        |   |-- steps.controller.js
+        |   |-- steps.service.js
+        |   `-- steps.schemas.js
         `-- coach
             |-- coach.routes.js
             |-- coach.controller.js
@@ -207,7 +212,7 @@ Configure a variavel `DATABASE_URL` no arquivo `.env`:
 DATABASE_URL="postgresql://fitai_user:fitai_password@localhost:5432/fitai_db?schema=public"
 ```
 
-O schema inicial esta em `prisma/schema.prisma`. Ele prepara os modelos base de usuario, perfil, treinos, exercicios, historicos, corrida, metas e recordes.
+O schema esta em `prisma/schema.prisma`. Ele prepara os modelos base de usuario, perfil, treinos, exercicios, historicos, corrida, metas, recordes e passos diarios.
 
 Teste a conexao:
 
@@ -229,13 +234,13 @@ Gere o Prisma Client:
 npm run prisma:generate
 ```
 
-Rode uma migration somente depois que o PostgreSQL local, o banco e o usuario existirem:
+Rode as migrations somente depois que o PostgreSQL local, o banco e o usuario existirem:
 
 ```powershell
 npm run prisma:migrate
 ```
 
-Esse comando usa o schema ja existente em `prisma/schema.prisma`. Nenhum novo modelo foi adicionado nesta etapa.
+Esta sprint adicionou `DailySteps` e a migration preparada em `prisma/migrations/20260710000000_add_daily_steps/migration.sql`.
 
 Abra o Prisma Studio:
 
@@ -687,6 +692,49 @@ Exemplo com curl:
 
 ```powershell
 curl.exe -X POST http://localhost:3001/coach/insights -H "Content-Type: application/json" -d "{\"tipo\":\"geral\",\"periodoDias\":30,\"contextoLocal\":{\"historicoTreinos\":[],\"historicoExercicios\":[],\"recordes\":[],\"metas\":[],\"corridas\":[]}}"
+```
+
+O contexto do Coach tambem considera passos diarios quando disponiveis: passos de hoje, media semanal, media mensal, dias com meta concluida e sequencia de dias ativos. Esses dados sao lidos apenas quando `/coach/insights` e chamado; atualizar passos nao chama OpenAI automaticamente.
+
+### Passos diarios
+
+O modulo `src/modules/steps` sincroniza passos reais do Flutter com PostgreSQL. Se houver `Authorization: Bearer <token>`, usa o usuario autenticado. Sem token, em desenvolvimento usa `X-FitIA-Client-Id` ou `clientId` para manter um usuario local de sincronizacao.
+
+Modelo Prisma:
+
+```text
+DailySteps
+- id
+- userId
+- date
+- steps
+- goal
+- source
+- createdAt
+- updatedAt
+```
+
+Existe indice unico por `userId + date`. O upsert nunca soma o mesmo total duas vezes: para o mesmo dia, o backend preserva o maior total confiavel e registra a origem (`health_connect`, `local` ou `manual`).
+
+Endpoints:
+
+```text
+POST /steps/sync
+GET /steps/today
+GET /steps/range?from=YYYY-MM-DD&to=YYYY-MM-DD
+GET /steps/stats?period=7d|30d
+```
+
+Exemplo de sync:
+
+```powershell
+curl.exe -X POST http://localhost:3001/steps/sync -H "Content-Type: application/json" -H "X-FitIA-Client-Id: fitai_local" -d "{\"items\":[{\"date\":\"2026-07-10\",\"steps\":8420,\"goal\":10000,\"source\":\"health_connect\"}]}"
+```
+
+Exemplo de stats:
+
+```powershell
+curl.exe "http://localhost:3001/steps/stats?period=7d" -H "X-FitIA-Client-Id: fitai_local"
 ```
 
 ### Sincronizacao inicial

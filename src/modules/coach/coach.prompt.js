@@ -102,7 +102,8 @@ function buildContextSample(context) {
     exerciciosRecentes: context.raw.historicoExercicios.slice(0, 12),
     recordesRecentes: context.raw.recordes.slice(0, 8),
     metasRecentes: context.raw.metas.slice(0, 8),
-    corridasRecentes: context.raw.corridas.slice(0, 8)
+    corridasRecentes: context.raw.corridas.slice(0, 8),
+    passosRecentes: (context.raw.passos || []).slice(0, 10)
   };
 }
 
