@@ -141,16 +141,26 @@ model ExerciseHistory {
   user             User           @relation(fields: [userId], references: [id], onDelete: Cascade)
   exerciseId       String
   exercise         Exercise       @relation(fields: [exerciseId], references: [id], onDelete: Restrict)
+  exerciseKey      String         @default("")
+  exerciseName     String         @default("")
   workoutHistoryId String
   workoutHistory   WorkoutHistory @relation(fields: [workoutHistoryId], references: [id], onDelete: Cascade)
+  workoutSessionId String         @default("")
+  setNumber        Int            @default(1)
+  completed        Boolean        @default(true)
   weight           Float
   reps             Int
   sets             Int
+  restSeconds      Int?
+  rir              String?
+  notes            String?
   volume           Float
   performedAt      DateTime
 
   @@index([userId])
   @@index([exerciseId])
+  @@index([userId, exerciseKey])
+  @@index([userId, workoutSessionId])
   @@index([workoutHistoryId])
   @@map("exercise_histories")
 }

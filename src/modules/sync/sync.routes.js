@@ -10,6 +10,7 @@ const {
   postWorkoutsController,
   getWorkoutsController,
   postWorkoutHistoryController,
+  postExerciseHistoryController,
   postRunningController
 } = require("./sync.controller");
 
@@ -28,6 +29,7 @@ router.post("/workouts", asyncHandler(postWorkoutsController));
 router.get("/workouts", asyncHandler(getWorkoutsController));
 
 router.post("/workout-history", asyncHandler(postWorkoutHistoryController));
+router.post("/exercise-history", asyncHandler(postExerciseHistoryController));
 router.post("/running", asyncHandler(postRunningController));
 
 module.exports = router;

@@ -180,6 +180,19 @@ async function syncWorkoutHistory(req, payload, items) {
   return { histories };
 }
 
+async function syncExerciseHistory(req, payload, items) {
+  const user = await resolveSyncUser(req, payload);
+  const histories = [];
+
+  for (const item of items) {
+    histories.push(await upsertExerciseHistory(user.id, item));
+  }
+
+  logSync("exercise-history", user, histories.length);
+
+  return { histories };
+}
+
 async function syncRunning(req, payload, items) {
   const user = await resolveSyncUser(req, payload);
   const runs = [];
@@ -375,17 +388,108 @@ async function upsertWorkoutHistory(userId, item) {
   });
 }
 
-async function ensureHistoryWorkout(userId, item) {
+async function upsertExerciseHistory(userId, item) {
+  return prisma.$transaction(async (tx) => {
+    const workoutHistory = await ensureExerciseWorkoutHistory(tx, userId, item);
+    const exerciseKey = text(item.exerciseKey, "");
+    const exerciseName = text(item.nomeExercicio || item.exerciseName, "Exercicio");
+    const exerciseId = syncId(
+      { id: item.exercicioId || item.exerciseId, exerciseKey, exerciseName },
+      "exercise"
+    );
+    const exercise = await tx.exercise.upsert({
+      where: { id: exerciseId },
+      update: {
+        name: exerciseName,
+        muscleGroup: text(item.categoria || item.muscleGroup, "Geral"),
+        equipment: text(item.equipamento || item.equipment, ""),
+        difficulty: text(item.dificuldade || item.difficulty, ""),
+        gifKey: text(item.gifKey, "")
+      },
+      create: {
+        id: exerciseId,
+        name: exerciseName,
+        muscleGroup: text(item.categoria || item.muscleGroup, "Geral"),
+        equipment: text(item.equipamento || item.equipment, ""),
+        difficulty: text(item.dificuldade || item.difficulty, ""),
+        gifKey: text(item.gifKey, "")
+      }
+    });
+    const id = syncId(item, "exercise_history");
+    const data = {
+      userId,
+      exerciseId: exercise.id,
+      exerciseKey,
+      exerciseName,
+      workoutHistoryId: workoutHistory.id,
+      workoutSessionId: text(item.workoutSessionId || item.sessaoTreinoId, workoutHistory.id),
+      setNumber: integer(item.serieNumero || item.setNumber, 1),
+      completed: item.concluida !== false && item.completed !== false,
+      weight: number(item.peso || item.weight),
+      reps: integer(item.repeticoes || item.reps),
+      sets: integer(item.series || item.sets, 1),
+      restSeconds: integer(item.descansoSegundos || item.restSeconds) || null,
+      rir: text(item.rir, "") || null,
+      notes: text(item.comentario || item.notes, "") || null,
+      volume: number(item.volume, number(item.peso || item.weight) * integer(item.repeticoes || item.reps)),
+      performedAt: date(item.dataHora || item.performedAt)
+    };
+
+    return tx.exerciseHistory.upsert({
+      where: { id },
+      update: data,
+      create: { id, ...data }
+    });
+  });
+}
+
+async function ensureExerciseWorkoutHistory(tx, userId, item) {
+  const workout = await ensureHistoryWorkout(userId, item, tx);
+  const id = syncId(
+    {
+      id: item.workoutHistoryId || item.workoutSessionId || item.sessaoTreinoId,
+      workoutId: item.treinoId || item.workoutId,
+      performedAt: item.dataHora || item.performedAt,
+      exerciseKey: item.exerciseKey
+    },
+    "workout_history"
+  );
+  const performedAt = date(item.dataHora || item.performedAt);
+  return tx.workoutHistory.upsert({
+    where: { id },
+    update: {
+      userId,
+      workoutId: workout.id,
+      startedAt: performedAt,
+      finishedAt: performedAt,
+      totalVolume: number(item.volume),
+      totalSets: integer(item.series || item.sets, 1),
+      durationSeconds: 0
+    },
+    create: {
+      id,
+      userId,
+      workoutId: workout.id,
+      startedAt: performedAt,
+      finishedAt: performedAt,
+      totalVolume: number(item.volume),
+      totalSets: integer(item.series || item.sets, 1),
+      durationSeconds: 0
+    }
+  });
+}
+
+async function ensureHistoryWorkout(userId, item, client = prisma) {
   const workoutId = text(item.treinoId || item.workoutId, "");
 
   if (workoutId) {
-    const existing = await prisma.workout.findUnique({ where: { id: workoutId } });
+    const existing = await client.workout.findUnique({ where: { id: workoutId } });
     if (existing) return existing;
   }
 
   const placeholderId = workoutId || `history_workout_${hash(text(item.nomeTreino || item.workoutName, "Treino"))}`;
 
-  return prisma.workout.upsert({
+  return client.workout.upsert({
     where: { id: placeholderId },
     update: {
       userId,
@@ -534,5 +638,6 @@ module.exports = {
   syncWorkouts,
   getWorkouts,
   syncWorkoutHistory,
+  syncExerciseHistory,
   syncRunning
 };

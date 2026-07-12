@@ -61,6 +61,13 @@ async function postWorkoutHistoryController(req, res) {
   return res.status(200).json(result);
 }
 
+async function postExerciseHistoryController(req, res) {
+  const payload = parsePayload(req.body);
+  const result = await syncService.syncExerciseHistory(req, payload, getPayloadItems(payload));
+
+  return res.status(200).json(result);
+}
+
 async function postRunningController(req, res) {
   const payload = parsePayload(req.body);
   const result = await syncService.syncRunning(req, payload, getPayloadItems(payload));
@@ -94,5 +101,6 @@ module.exports = {
   postWorkoutsController,
   getWorkoutsController,
   postWorkoutHistoryController,
+  postExerciseHistoryController,
   postRunningController
 };
