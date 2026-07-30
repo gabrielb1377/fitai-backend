@@ -7,6 +7,7 @@ const progressionRoutes = require("./modules/progression/progression.routes");
 const readyPlansRoutes = require("./modules/ready_plans/ready_plans.routes");
 const stepsRoutes = require("./modules/steps/steps.routes");
 const syncRoutes = require("./modules/sync/sync.routes");
+const workoutSyncRoutes = require("./modules/workout_sync/workout_sync.routes");
 const usersRoutes = require("./modules/users/routes/users.routes");
 const { corsMiddleware } = require("./shared/middleware/cors.middleware");
 const errorHandlerMiddleware = require("./shared/middleware/error-handler.middleware");
@@ -35,6 +36,7 @@ function createApp() {
   app.use("/ready-plans", readyPlansRoutes);
   app.use("/steps", stepsRoutes);
   app.use("/sync", syncRoutes);
+  app.use("/workout-sync", workoutSyncRoutes);
 
   app.use(notFoundMiddleware);
   app.use(errorHandlerMiddleware);

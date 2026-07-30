@@ -7,21 +7,24 @@ datasource db {
 }
 
 model User {
-  id                 String              @id @default(uuid())
-  name               String
-  email              String              @unique
-  passwordHash       String
-  profile            Profile?
-  workouts           Workout[]
-  workoutHistories   WorkoutHistory[]
-  exerciseHistories  ExerciseHistory[]
-  runningHistories   RunningHistory[]
-  goals              Goal[]
-  records            Record[]
-  dailySteps         DailySteps[]
-  readyPlanFavorites ReadyPlanFavorite[]
-  createdAt          DateTime            @default(now())
-  updatedAt          DateTime            @updatedAt
+  id                  String               @id @default(uuid())
+  name                String
+  email               String               @unique
+  passwordHash        String
+  profile             Profile?
+  workouts            Workout[]
+  workoutHistories    WorkoutHistory[]
+  exerciseHistories   ExerciseHistory[]
+  runningHistories    RunningHistory[]
+  goals               Goal[]
+  records             Record[]
+  dailySteps          DailySteps[]
+  readyPlanFavorites  ReadyPlanFavorite[]
+  workoutSyncEvents   WorkoutSyncEvent[]
+  workoutSyncSessions WorkoutSyncSession[]
+  workoutSyncSets     WorkoutSyncSet[]
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
 
   @@map("users")
 }
@@ -302,4 +305,73 @@ model ReadyPlanFavorite {
   @@index([userId])
   @@index([readyPlanId])
   @@map("ready_plan_favorites")
+}
+
+model WorkoutSyncEvent {
+  id             String   @id @default(uuid())
+  userId         String
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  deviceId       String
+  eventId        String
+  idempotencyKey String
+  aggregateId    String
+  eventType      String
+  payload        Json
+  payloadHash    String
+  occurredAt     DateTime
+  processedAt    DateTime @default(now())
+  status         String
+  error          String?
+  version        Int
+
+  @@unique([userId, idempotencyKey])
+  @@unique([userId, eventId])
+  @@index([userId, aggregateId])
+  @@index([userId, processedAt])
+  @@map("workout_sync_events")
+}
+
+model WorkoutSyncSession {
+  id                   String           @id @default(uuid())
+  userId               String
+  user                 User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  externalSessionId    String
+  planId               String
+  workoutId            String
+  status               String
+  startedAt            DateTime
+  finishedAt           DateTime?
+  currentExerciseIndex Int              @default(0)
+  currentSetIndex      Int              @default(0)
+  restEndsAt           DateTime?
+  version              Int              @default(1)
+  createdAt            DateTime         @default(now())
+  updatedAt            DateTime         @updatedAt
+  sets                 WorkoutSyncSet[]
+
+  @@unique([userId, externalSessionId])
+  @@index([userId, status])
+  @@map("workout_sync_sessions")
+}
+
+model WorkoutSyncSet {
+  id            String             @id @default(uuid())
+  userId        String
+  user          User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sessionId     String
+  session       WorkoutSyncSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  externalSetId String
+  exerciseId    String
+  setIndex      Int
+  weight        Float
+  reps          Int
+  completedAt   DateTime
+  version       Int                @default(1)
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+
+  @@unique([userId, externalSetId])
+  @@unique([sessionId, exerciseId, setIndex])
+  @@index([userId, sessionId])
+  @@map("workout_sync_sets")
 }
