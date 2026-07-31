@@ -6,11 +6,12 @@ const {
   meController
 } = require("./auth.controller");
 const { authenticateJWT } = require("./auth.middleware");
+const { authRateLimit } = require("../../shared/middleware/auth-rate-limit.middleware");
 
 const router = Router();
 
-router.post("/register", asyncHandler(registerController));
-router.post("/login", asyncHandler(loginController));
+router.post("/register", authRateLimit, asyncHandler(registerController));
+router.post("/login", authRateLimit, asyncHandler(loginController));
 router.get("/me", authenticateJWT, asyncHandler(meController));
 
 module.exports = router;
