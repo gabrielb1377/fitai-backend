@@ -61,14 +61,14 @@ jobs:
       - name: Static checks
         run: npm run check
 
-      - name: Unit tests
-        run: npm test
-
       - name: Build and generate Prisma client
         run: npm run build
 
       - name: Validate Prisma schema
         run: npx prisma validate
+
+      - name: Unit tests
+        run: npm test
 
       - name: Run PostgreSQL workout sync integration tests
         run: npm run test:workout-sync:integration
