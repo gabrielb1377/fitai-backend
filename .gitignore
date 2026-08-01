@@ -2,5 +2,13 @@
 .env.*
 !.env.example
 
+# Credenciais e chaves locais nunca entram no repositorio.
+*.pem
+*.p12
+*.pfx
+*.key
+id_rsa
+id_ed25519
+
 node_modules/
 coverage/

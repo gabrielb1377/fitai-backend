@@ -1,0 +1,77 @@
+name: Backend CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - feature/**
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    name: Backend quality gates
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:16.9-alpine
+        env:
+          POSTGRES_USER: fitai
+          POSTGRES_PASSWORD: fitai_ci_password
+          POSTGRES_DB: fitai_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U fitai -d fitai_test"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      NODE_ENV: test
+      PORT: 3001
+      DATABASE_URL: postgresql://fitai:fitai_ci_password@localhost:5432/fitai_test?schema=public
+      TEST_DATABASE_URL: postgresql://fitai:fitai_ci_password@localhost:5432/fitai_test?schema=public
+      OPENAI_API_KEY: ''
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4.2.2
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4.0.4
+        with:
+          node-version: 22.17.0
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate ephemeral JWT test secret
+        shell: bash
+        run: |
+          printf '%s\n' 'JWT_SECRET<<EOF' >> "$GITHUB_ENV"
+          openssl rand -hex 32 >> "$GITHUB_ENV"
+          printf '%s\n' 'EOF' >> "$GITHUB_ENV"
+
+      - name: Scan working tree for secrets
+        run: npm run secrets:check
+
+      - name: Static checks
+        run: npm run check
+
+      - name: Unit tests
+        run: npm test
+
+      - name: Build and generate Prisma client
+        run: npm run build
+
+      - name: Validate Prisma schema
+        run: npx prisma validate
+
+      - name: Run PostgreSQL workout sync integration tests
+        run: npm run test:workout-sync:integration
+
+      - name: Audit production dependencies
+        run: npm audit --omit=dev --audit-level=high
