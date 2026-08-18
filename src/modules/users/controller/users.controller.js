@@ -1,6 +1,5 @@
 const AppError = require("../../../shared/errors/app-error");
 const {
-  listUsers,
   getUserById,
   updateUser,
   deleteUser,
@@ -15,15 +14,16 @@ const {
 } = require("../schemas/users.schemas");
 
 async function listUsersController(req, res) {
-  const users = await listUsers();
+  const user = await getUserById(req.auth.userId);
 
   return res.status(200).json({
-    users
+    users: [user]
   });
 }
 
 async function getUserController(req, res) {
   const { id } = parseParams(req.params);
+  requireCurrentUser(req, id);
   const user = await getUserById(id);
 
   return res.status(200).json({
@@ -33,6 +33,7 @@ async function getUserController(req, res) {
 
 async function updateUserController(req, res) {
   const { id } = parseParams(req.params);
+  requireCurrentUser(req, id);
   const input = parseBody(updateUserSchema, req.body);
   const user = await updateUser(id, input);
 
@@ -43,10 +44,19 @@ async function updateUserController(req, res) {
 
 async function deleteUserController(req, res) {
   const { id } = parseParams(req.params);
+  requireCurrentUser(req, id);
 
   await deleteUser(id);
 
   return res.status(204).send();
+}
+
+function requireCurrentUser(req, userId) {
+  if (req.auth?.userId === userId) {
+    return;
+  }
+
+  throw new AppError("Acesso negado para este usuario.", 403, "forbidden");
 }
 
 async function getProfileController(req, res) {

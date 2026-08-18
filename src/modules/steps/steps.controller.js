@@ -16,8 +16,7 @@ async function syncStepsController(req, res) {
 }
 
 async function todayStepsController(req, res) {
-  const payload = queryPayload(req);
-  const result = await stepsService.getToday(req, payload);
+  const result = await stepsService.getToday(req);
 
   return res.status(200).json(result);
 }
@@ -54,12 +53,6 @@ function parseQuery(query, parser) {
   }
 
   return validation.data;
-}
-
-function queryPayload(req) {
-  return {
-    clientId: req.query.clientId || req.headers["x-fitia-client-id"]
-  };
 }
 
 module.exports = {

@@ -10,7 +10,7 @@ async function postProfileController(req, res) {
 }
 
 async function getProfileController(req, res) {
-  const result = await syncService.getProfile(req, queryPayload(req));
+  const result = await syncService.getProfile(req);
 
   return res.status(200).json(result);
 }
@@ -23,7 +23,7 @@ async function postGoalsController(req, res) {
 }
 
 async function getGoalsController(req, res) {
-  const result = await syncService.getGoals(req, queryPayload(req));
+  const result = await syncService.getGoals(req);
 
   return res.status(200).json(result);
 }
@@ -36,7 +36,7 @@ async function postRecordsController(req, res) {
 }
 
 async function getRecordsController(req, res) {
-  const result = await syncService.getRecords(req, queryPayload(req));
+  const result = await syncService.getRecords(req);
 
   return res.status(200).json(result);
 }
@@ -49,7 +49,7 @@ async function postWorkoutsController(req, res) {
 }
 
 async function getWorkoutsController(req, res) {
-  const result = await syncService.getWorkouts(req, queryPayload(req));
+  const result = await syncService.getWorkouts(req);
 
   return res.status(200).json(result);
 }
@@ -83,12 +83,6 @@ function parsePayload(body) {
   }
 
   return validation.data;
-}
-
-function queryPayload(req) {
-  return {
-    clientId: req.query.clientId || req.headers["x-fitia-client-id"]
-  };
 }
 
 module.exports = {

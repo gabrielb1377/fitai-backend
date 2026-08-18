@@ -1,5 +1,6 @@
 const { Router } = require("express");
 const asyncHandler = require("../../shared/utils/async-handler");
+const { authenticateJWT } = require("../auth/auth.middleware");
 const {
   postProfileController,
   getProfileController,
@@ -15,6 +16,10 @@ const {
 } = require("./sync.controller");
 
 const router = Router();
+
+// Sync data is always owned by the authenticated user. Device/client IDs are
+// transport metadata only and must never define data ownership.
+router.use(authenticateJWT);
 
 router.post("/profile", asyncHandler(postProfileController));
 router.get("/profile", asyncHandler(getProfileController));

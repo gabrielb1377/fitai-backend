@@ -1,8 +1,8 @@
 const prisma = require("../../config/prisma");
-const { verifyToken } = require("../auth/auth.service");
+const AppError = require("../../shared/errors/app-error");
 
 async function syncSteps(req, payload, items, db = prisma) {
-  const user = await resolveStepsUser(req, payload, db);
+  const user = await resolveAuthenticatedUser(req, db);
   const synced = [];
 
   for (const item of items) {
@@ -42,7 +42,7 @@ async function syncSteps(req, payload, items, db = prisma) {
 }
 
 async function getToday(req, payload = {}, db = prisma) {
-  const user = await resolveStepsUser(req, payload, db);
+  const user = await resolveAuthenticatedUser(req, db);
   const date = dateFromKey(normalizeDateKey(new Date()));
   const record = await db.dailySteps.findUnique({
     where: { userId_date: { userId: user.id, date } }
@@ -55,7 +55,7 @@ async function getToday(req, payload = {}, db = prisma) {
 }
 
 async function getRange(req, query, db = prisma) {
-  const user = await resolveStepsUser(req, query, db);
+  const user = await resolveAuthenticatedUser(req, db);
   const today = new Date();
   const from = dateFromKey(normalizeDateKey(query.from || daysAgo(29, today)));
   const to = dateFromKey(normalizeDateKey(query.to || today));
@@ -79,7 +79,7 @@ async function getRange(req, query, db = prisma) {
 }
 
 async function getStats(req, query, db = prisma) {
-  const user = await resolveStepsUser(req, query, db);
+  const user = await resolveAuthenticatedUser(req, db);
   const days = query.period === "30d" ? 30 : 7;
   const today = new Date();
   const from = dateFromKey(normalizeDateKey(daysAgo(days - 1, today)));
@@ -179,45 +179,18 @@ function activeStepStreak(records, today) {
   return streak;
 }
 
-async function resolveStepsUser(req, payload = {}, db = prisma) {
-  const auth = readOptionalAuth(req);
-
-  if (auth) {
-    const user = await db.user.findUnique({ where: { id: auth.userId } });
-    if (user) return user;
+async function resolveAuthenticatedUser(req, db = prisma) {
+  const userId = text(req?.auth?.userId);
+  if (!userId) {
+    throw new AppError("Autenticacao obrigatoria.", 401, "authentication_required");
   }
 
-  const clientId = text(
-    payload.clientId || req.headers["x-fitia-client-id"],
-    "anonymous-local"
-  );
-  const safeClientId = clientId.replace(/[^a-zA-Z0-9_.-]/g, "_").slice(0, 80);
-  const email = `steps.${safeClientId}@local.fitai`;
-
-  return db.user.upsert({
-    where: { email },
-    update: { name: "FitIA Local" },
-    create: {
-      name: "FitIA Local",
-      email,
-      passwordHash: "steps-user-no-login"
-    }
-  });
-}
-
-function readOptionalAuth(req) {
-  const authHeader = req.headers.authorization || "";
-  const [scheme, token] = authHeader.split(" ");
-
-  if (scheme !== "Bearer" || !token) return null;
-
-  try {
-    const payload = verifyToken(token);
-    return { userId: payload.sub, email: payload.email };
-  } catch (err) {
-    logSteps("auth opcional invalido; usando contexto local");
-    return null;
+  const user = await db.user.findUnique({ where: { id: userId } });
+  if (!user) {
+    throw new AppError("Usuario autenticado nao encontrado.", 401, "authenticated_user_not_found");
   }
+
+  return user;
 }
 
 function toDto(record) {

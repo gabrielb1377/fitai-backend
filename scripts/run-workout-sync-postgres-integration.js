@@ -30,10 +30,12 @@ async function main() {
     ...process.env,
     DATABASE_URL: testDatabaseUrl,
     TEST_DATABASE_URL: testDatabaseUrl,
-    RUN_WORKOUT_SYNC_POSTGRES_TESTS: "1"
+    RUN_WORKOUT_SYNC_POSTGRES_TESTS: "1",
+    RUN_AUTHORIZATION_OWNERSHIP_POSTGRES_TESTS: "1"
   };
   run(process.execPath, [require.resolve("prisma/build/index.js"), "migrate", "deploy"], environment);
   run(process.execPath, ["--test", "tests/workout_sync/workout_sync.postgres.integration.test.js"], environment);
+  run(process.execPath, ["--test", "tests/security/authorization_ownership.postgres.integration.test.js"], environment);
 }
 
 function deriveTestDatabaseUrl(databaseUrl) {

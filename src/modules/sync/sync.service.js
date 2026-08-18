@@ -1,9 +1,9 @@
 const { createHash } = require("crypto");
 const prisma = require("../../config/prisma");
-const { verifyToken } = require("../auth/auth.service");
+const AppError = require("../../shared/errors/app-error");
 
 async function syncProfile(req, payload) {
-  const user = await resolveSyncUser(req, payload);
+  const user = await resolveAuthenticatedUser(req);
   const profile = payload.profile || payload.item || payload;
   const name = text(profile.nome || profile.name, user.name);
 
@@ -42,7 +42,7 @@ async function syncProfile(req, payload) {
 }
 
 async function getProfile(req, payload = {}) {
-  const user = await resolveSyncUser(req, payload);
+  const user = await resolveAuthenticatedUser(req);
   const profile = await prisma.profile.findUnique({
     where: { userId: user.id }
   });
@@ -54,13 +54,12 @@ async function getProfile(req, payload = {}) {
 }
 
 async function syncGoals(req, payload, items) {
-  const user = await resolveSyncUser(req, payload);
+  const user = await resolveAuthenticatedUser(req);
   const goals = [];
 
   for (const item of items) {
-    const id = syncId(item, "goal");
+    const id = syncId(item, "goal", user.id);
     const data = {
-      userId: user.id,
       title: text(item.titulo || item.title, "Meta FitIA"),
       category: text(item.categoria || item.category, "geral"),
       currentValue: number(item.valorAtual || item.currentValue),
@@ -68,11 +67,13 @@ async function syncGoals(req, payload, items) {
       status: text(item.status || item.statusLabel, "em_andamento")
     };
 
+    await ensureOwnedOrAvailable(prisma, "goal", id, user.id);
     goals.push(await prisma.goal.upsert({
       where: { id },
       update: data,
       create: {
         id,
+        userId: user.id,
         ...data
       }
     }));
@@ -84,7 +85,7 @@ async function syncGoals(req, payload, items) {
 }
 
 async function getGoals(req, payload = {}) {
-  const user = await resolveSyncUser(req, payload);
+  const user = await resolveAuthenticatedUser(req);
   const goals = await prisma.goal.findMany({
     where: { userId: user.id },
     orderBy: { updatedAt: "desc" }
@@ -94,13 +95,12 @@ async function getGoals(req, payload = {}) {
 }
 
 async function syncRecords(req, payload, items) {
-  const user = await resolveSyncUser(req, payload);
+  const user = await resolveAuthenticatedUser(req);
   const records = [];
 
   for (const item of items) {
-    const id = syncId(item, "record");
+    const id = syncId(item, "record", user.id);
     const data = {
-      userId: user.id,
       title: text(item.titulo || item.title, "Recorde FitIA"),
       category: text(item.categoria || item.category, "geral"),
       value: number(item.valor || item.value),
@@ -108,11 +108,13 @@ async function syncRecords(req, payload, items) {
       achievedAt: date(item.data || item.achievedAt)
     };
 
+    await ensureOwnedOrAvailable(prisma, "record", id, user.id);
     records.push(await prisma.record.upsert({
       where: { id },
       update: data,
       create: {
         id,
+        userId: user.id,
         ...data
       }
     }));
@@ -124,7 +126,7 @@ async function syncRecords(req, payload, items) {
 }
 
 async function getRecords(req, payload = {}) {
-  const user = await resolveSyncUser(req, payload);
+  const user = await resolveAuthenticatedUser(req);
   const records = await prisma.record.findMany({
     where: { userId: user.id },
     orderBy: { achievedAt: "desc" }
@@ -134,7 +136,7 @@ async function getRecords(req, payload = {}) {
 }
 
 async function syncWorkouts(req, payload, items) {
-  const user = await resolveSyncUser(req, payload);
+  const user = await resolveAuthenticatedUser(req);
   const workouts = [];
 
   for (const item of items) {
@@ -147,7 +149,7 @@ async function syncWorkouts(req, payload, items) {
 }
 
 async function getWorkouts(req, payload = {}) {
-  const user = await resolveSyncUser(req, payload);
+  const user = await resolveAuthenticatedUser(req);
   const workouts = await prisma.workout.findMany({
     where: { userId: user.id },
     include: {
@@ -168,7 +170,7 @@ async function getWorkouts(req, payload = {}) {
 }
 
 async function syncWorkoutHistory(req, payload, items) {
-  const user = await resolveSyncUser(req, payload);
+  const user = await resolveAuthenticatedUser(req);
   const histories = [];
 
   for (const item of items) {
@@ -181,7 +183,7 @@ async function syncWorkoutHistory(req, payload, items) {
 }
 
 async function syncExerciseHistory(req, payload, items) {
-  const user = await resolveSyncUser(req, payload);
+  const user = await resolveAuthenticatedUser(req);
   const histories = [];
 
   for (const item of items) {
@@ -194,7 +196,7 @@ async function syncExerciseHistory(req, payload, items) {
 }
 
 async function syncRunning(req, payload, items) {
-  const user = await resolveSyncUser(req, payload);
+  const user = await resolveAuthenticatedUser(req);
   const runs = [];
 
   for (const item of items) {
@@ -212,21 +214,23 @@ async function syncRunning(req, payload, items) {
         distancia: distanceKm,
         segundos: durationSeconds
       },
-      "running"
+      "running",
+      user.id
     );
     const data = {
-      userId: user.id,
       distanceKm,
       durationSeconds,
       averageSpeed,
       performedAt
     };
 
+    await ensureOwnedOrAvailable(prisma, "runningHistory", id, user.id);
     runs.push(await prisma.runningHistory.upsert({
       where: { id },
       update: data,
       create: {
         id,
+        userId: user.id,
         ...data
       }
     }));
@@ -238,17 +242,17 @@ async function syncRunning(req, payload, items) {
 }
 
 async function upsertWorkoutWithDays(userId, item) {
-  const workoutId = syncId(item, "workout");
+  const workoutId = syncId(item, "workout", userId);
   const exercises = Array.isArray(item.exercicios) ? item.exercicios : [];
   const days = Array.isArray(item.planoDias) ? item.planoDias : [];
   const source = text(item.origem || item.source, "manual");
   const readyPlanId = text(item.readyPlanId, "") || null;
 
   return prisma.$transaction(async (tx) => {
+    await ensureOwnedOrAvailable(tx, "workout", workoutId, userId);
     const workout = await tx.workout.upsert({
       where: { id: workoutId },
       update: {
-        userId,
         name: text(item.nome || item.name, "Treino FitIA"),
         description: text(item.descricao || item.description, ""),
         goal: text(item.objetivo || item.goal, "geral"),
@@ -367,9 +371,8 @@ async function upsertWorkoutHistory(userId, item) {
     item.finishedAt,
     new Date(startedAt.getTime() + Math.max(durationSeconds, 0) * 1000)
   );
-  const id = syncId(item, "workout_history");
+  const id = syncId(item, "workout_history", userId);
   const data = {
-    userId,
     workoutId: workout.id,
     startedAt,
     finishedAt,
@@ -378,11 +381,13 @@ async function upsertWorkoutHistory(userId, item) {
     durationSeconds
   };
 
+  await ensureOwnedOrAvailable(prisma, "workoutHistory", id, userId);
   return prisma.workoutHistory.upsert({
     where: { id },
     update: data,
     create: {
       id,
+      userId,
       ...data
     }
   });
@@ -415,9 +420,8 @@ async function upsertExerciseHistory(userId, item) {
         gifKey: text(item.gifKey, "")
       }
     });
-    const id = syncId(item, "exercise_history");
+    const id = syncId(item, "exercise_history", userId);
     const data = {
-      userId,
       exerciseId: exercise.id,
       exerciseKey,
       exerciseName,
@@ -435,10 +439,11 @@ async function upsertExerciseHistory(userId, item) {
       performedAt: date(item.dataHora || item.performedAt)
     };
 
+    await ensureOwnedOrAvailable(tx, "exerciseHistory", id, userId);
     return tx.exerciseHistory.upsert({
       where: { id },
       update: data,
-      create: { id, ...data }
+      create: { id, userId, ...data }
     });
   });
 }
@@ -452,13 +457,14 @@ async function ensureExerciseWorkoutHistory(tx, userId, item) {
       performedAt: item.dataHora || item.performedAt,
       exerciseKey: item.exerciseKey
     },
-    "workout_history"
+    "workout_history",
+    userId
   );
   const performedAt = date(item.dataHora || item.performedAt);
+  await ensureOwnedOrAvailable(tx, "workoutHistory", id, userId);
   return tx.workoutHistory.upsert({
     where: { id },
     update: {
-      userId,
       workoutId: workout.id,
       startedAt: performedAt,
       finishedAt: performedAt,
@@ -484,15 +490,21 @@ async function ensureHistoryWorkout(userId, item, client = prisma) {
 
   if (workoutId) {
     const existing = await client.workout.findUnique({ where: { id: workoutId } });
-    if (existing) return existing;
+    if (existing) {
+      if (existing.userId !== userId) {
+        throw ownershipNotFound();
+      }
+      return existing;
+    }
   }
 
-  const placeholderId = workoutId || `history_workout_${hash(text(item.nomeTreino || item.workoutName, "Treino"))}`;
+  const placeholderId = workoutId || `history_workout_${hash(`${userId}:${text(item.nomeTreino || item.workoutName, "Treino")}`)}`;
+
+  await ensureOwnedOrAvailable(client, "workout", placeholderId, userId);
 
   return client.workout.upsert({
     where: { id: placeholderId },
     update: {
-      userId,
       name: text(item.nomeTreino || item.workoutName, "Treino"),
       description: "Treino criado automaticamente pela sincronizacao de historico.",
       goal: text(item.objetivo || item.goal, "geral"),
@@ -515,57 +527,34 @@ async function ensureHistoryWorkout(userId, item, client = prisma) {
   });
 }
 
-async function resolveSyncUser(req, payload = {}) {
-  const auth = readOptionalAuth(req);
+async function resolveAuthenticatedUser(req) {
+  const userId = text(req?.auth?.userId);
 
-  if (auth) {
-    const user = await prisma.user.findUnique({
-      where: { id: auth.userId }
-    });
-
-    if (user) {
-      return user;
-    }
+  if (!userId) {
+    throw new AppError("Autenticacao obrigatoria.", 401, "authentication_required");
   }
 
-  const clientId = text(
-    payload.clientId || req.headers["x-fitia-client-id"],
-    "anonymous-local"
-  );
-  const safeClientId = clientId.replace(/[^a-zA-Z0-9_.-]/g, "_").slice(0, 80);
-  const email = `sync.${safeClientId}@local.fitai`;
+  const user = await prisma.user.findUnique({ where: { id: userId } });
+  if (!user) {
+    throw new AppError("Usuario autenticado nao encontrado.", 401, "authenticated_user_not_found");
+  }
 
-  return prisma.user.upsert({
-    where: { email },
-    update: {
-      name: "FitIA Local"
-    },
-    create: {
-      name: "FitIA Local",
-      email,
-      passwordHash: "sync-user-no-login"
-    }
-  });
+  return user;
 }
 
-function readOptionalAuth(req) {
-  const authHeader = req.headers.authorization || "";
-  const [scheme, token] = authHeader.split(" ");
+async function ensureOwnedOrAvailable(client, model, id, userId) {
+  const existing = await client[model].findUnique({
+    where: { id },
+    select: { userId: true }
+  });
 
-  if (scheme !== "Bearer" || !token) {
-    return null;
+  if (existing && existing.userId !== userId) {
+    throw ownershipNotFound();
   }
+}
 
-  try {
-    const payload = verifyToken(token);
-    return {
-      userId: payload.sub,
-      email: payload.email
-    };
-  } catch (err) {
-    logRaw("auth opcional invalido; usando usuario local de sync");
-    return null;
-  }
+function ownershipNotFound() {
+  return new AppError("Recurso nao encontrado.", 404, "resource_not_found");
 }
 
 function safeUser(user) {
@@ -578,11 +567,11 @@ function safeUser(user) {
   };
 }
 
-function syncId(item, prefix) {
+function syncId(item, prefix, ownerScope = "") {
   const explicit = text(item.id || item.syncId, "");
   if (explicit) return explicit;
 
-  return `${prefix}_${hash(JSON.stringify(item || {}))}`;
+  return `${prefix}_${hash(`${ownerScope}:${JSON.stringify(item || {})}`)}`;
 }
 
 function hash(value) {
