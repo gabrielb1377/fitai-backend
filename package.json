@@ -14,6 +14,7 @@
     "secrets:check": "node scripts/check-staged-secrets.js",
     "secrets:check:staged": "node scripts/check-staged-secrets.js --staged",
     "test:workout-sync:integration": "node scripts/run-workout-sync-postgres-integration.js",
+    "test:r1-4:auth-sync-e2e": "node scripts/run-r1-4-auth-sync-e2e.js",
     "db:test": "node src/config/database.js",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
