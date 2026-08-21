@@ -117,6 +117,9 @@ function createWorkoutSyncService({ prismaClient = prisma, now = () => new Date(
       case "workout_session_finished":
       case "workout_session_discarded":
         return applySessionTransition(tx, context);
+      case "workout_session_progressed":
+      case "workout_exercise_changed":
+        return applySessionProgress(tx, context);
       default:
         throw new AppError("Evento de treino nao suportado.", 400, "unsupported_workout_event");
     }
@@ -246,6 +249,31 @@ function createWorkoutSyncService({ prismaClient = prisma, now = () => new Date(
         currentExerciseIndex: sessionData.currentExerciseIndex,
         currentSetIndex: sessionData.currentSetIndex,
         restEndsAt: targetStatus === "active" ? sessionData.restEndsAt : null,
+        version: event.version
+      }
+    });
+    return accepted(event, updated.version);
+  }
+
+  async function applySessionProgress(tx, { userId, event }) {
+    const sessionData = readSession(event);
+    const session = await tx.workoutSyncSession.findUnique({
+      where: { userId_externalSessionId: { userId, externalSessionId: sessionData.externalSessionId } }
+    });
+    if (!session) throw new AppError("Sessao de treino nao encontrada.", 409, "workout_session_not_found");
+    if (["completed", "discarded"].includes(session.status)) {
+      return conflict(event, "session_closed", "Sessao ja foi encerrada.", session.version);
+    }
+    if (event.version < session.version) {
+      return conflict(event, "stale_version", "Versao da sessao esta desatualizada.", session.version);
+    }
+
+    const updated = await tx.workoutSyncSession.update({
+      where: { id: session.id },
+      data: {
+        currentExerciseIndex: sessionData.currentExerciseIndex,
+        currentSetIndex: sessionData.currentSetIndex,
+        restEndsAt: sessionData.restEndsAt,
         version: event.version
       }
     });

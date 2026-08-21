@@ -36,3 +36,14 @@ test("rejeita tipo fora da allowlist, payload grande e lote invalido", () => {
     false
   );
 });
+
+test("aceita eventos canônicos de progresso e troca de exercício", () => {
+  assert.equal(
+    parseWorkoutSyncEvent(event({ eventType: "workout_session_progressed" })).success,
+    true
+  );
+  assert.equal(
+    parseWorkoutSyncEvent(event({ eventType: "workout_exercise_changed" })).success,
+    true
+  );
+});

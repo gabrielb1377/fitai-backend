@@ -5,6 +5,8 @@ const supportedEventTypes = new Set([
   "workout_set_completed",
   "workout_session_paused",
   "workout_session_resumed",
+  "workout_session_progressed",
+  "workout_exercise_changed",
   "workout_session_finished",
   "workout_session_discarded"
 ]);

@@ -117,6 +117,51 @@ test("usuario nao acessa sessao de outro usuario", async () => {
   assert.equal(database.state.sets.length, 0);
 });
 
+test("progresso e troca de exercício atualizam a mesma sessão", async () => {
+  const database = createMemoryPrisma();
+  const service = createWorkoutSyncService({ prismaClient: database });
+  const progress = sessionEvent({
+    eventId: "event-progress",
+    idempotencyKey: "workout_session_progressed:session-1:2",
+    eventType: "workout_session_progressed",
+    version: 2,
+    payload: {
+      session: {
+        ...sessionEvent().payload.session,
+        currentExerciseIndex: 1,
+        currentSetIndex: 0,
+        restEndsAt: "2026-07-30T10:02:00.000Z",
+        version: 2
+      }
+    }
+  });
+  const changed = sessionEvent({
+    eventId: "event-exercise-change",
+    idempotencyKey: "workout_exercise_changed:session-1:3",
+    eventType: "workout_exercise_changed",
+    version: 3,
+    payload: {
+      session: {
+        ...progress.payload.session,
+        restEndsAt: null,
+        version: 3
+      },
+      change: "replace"
+    }
+  });
+
+  const result = await service.processBatch({
+    userId,
+    deviceId,
+    events: [sessionEvent(), progress, changed]
+  });
+
+  assert.equal(result.accepted.length, 3);
+  assert.equal(database.state.sessions.length, 1);
+  assert.equal(database.state.sessions[0].currentExerciseIndex, 1);
+  assert.equal(database.state.sessions[0].version, 3);
+});
+
 function sessionEvent(overrides = {}) {
   return {
     eventId: "event-start",
