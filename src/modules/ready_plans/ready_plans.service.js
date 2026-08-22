@@ -1,6 +1,5 @@
 const prisma = require("../../config/prisma");
 const AppError = require("../../shared/errors/app-error");
-const { verifyToken } = require("../auth/auth.service");
 const { READY_PLAN_CATEGORIES } = require("./ready_plans.schemas");
 
 async function listReadyPlans(db = prisma) {
@@ -228,35 +227,16 @@ async function findOrCreateExercise(tx, readyExercise, level, cache) {
 }
 
 async function resolveCopyUser(req, db) {
-  const authorization = text(req.headers.authorization);
-
-  if (authorization) {
-    const [scheme, token] = authorization.split(" ");
-    if (scheme !== "Bearer" || !token) {
-      throw new AppError("Token JWT nao informado.", 401, "missing_token");
-    }
-
-    const payload = verifyToken(token);
-    const user = await db.user.findUnique({ where: { id: payload.sub } });
-    if (!user) {
-      throw new AppError("Usuario autenticado nao encontrado.", 401, "authenticated_user_not_found");
-    }
-    return user;
+  const userId = text(req.auth?.userId);
+  if (!userId) {
+    throw new AppError("Token JWT nao informado.", 401, "missing_token");
   }
 
-  const clientId = text(req.headers["x-fitia-client-id"], "anonymous-local");
-  const safeClientId = clientId.replace(/[^a-zA-Z0-9_.-]/g, "_").slice(0, 80);
-  const email = `sync.${safeClientId}@local.fitai`;
-
-  return db.user.upsert({
-    where: { email },
-    update: { name: "FitIA Local" },
-    create: {
-      name: "FitIA Local",
-      email,
-      passwordHash: "sync-user-no-login"
-    }
-  });
+  const user = await db.user.findUnique({ where: { id: userId } });
+  if (!user) {
+    throw new AppError("Usuario autenticado nao encontrado.", 401, "authenticated_user_not_found");
+  }
+  return user;
 }
 
 function toSummaryDto(plan) {

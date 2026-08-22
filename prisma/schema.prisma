@@ -20,6 +20,7 @@ model User {
   records             Record[]
   dailySteps          DailySteps[]
   readyPlanFavorites  ReadyPlanFavorite[]
+  authRefreshSessions AuthRefreshSession[]
   workoutSyncEvents   WorkoutSyncEvent[]
   workoutSyncSessions WorkoutSyncSession[]
   workoutSyncSets     WorkoutSyncSet[]
@@ -27,6 +28,20 @@ model User {
   updatedAt           DateTime             @updatedAt
 
   @@map("users")
+}
+
+model AuthRefreshSession {
+  id        String   @id
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String
+  expiresAt DateTime
+  revokedAt DateTime?
+  createdAt DateTime @default(now())
+
+  @@index([userId, revokedAt])
+  @@index([expiresAt])
+  @@map("auth_refresh_sessions")
 }
 
 model Profile {

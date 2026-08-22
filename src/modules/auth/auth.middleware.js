@@ -14,7 +14,8 @@ function authenticateJWT(req, res, next) {
 
     req.auth = {
       userId: payload.sub,
-      email: payload.email
+      email: payload.email,
+      tokenType: payload.typ || "legacy_access"
     };
 
     return next();

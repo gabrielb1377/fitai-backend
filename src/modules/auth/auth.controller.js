@@ -2,11 +2,14 @@ const AppError = require("../../shared/errors/app-error");
 const {
   registerUser,
   loginUser,
+  refreshUserSession,
+  revokeUserSessions,
   getAuthenticatedUser
 } = require("./auth.service");
 const {
   registerSchema,
   loginSchema,
+  refreshSchema,
   formatZodErrors
 } = require("./auth.schemas");
 
@@ -22,6 +25,17 @@ async function loginController(req, res) {
   const result = await loginUser(input);
 
   return res.status(200).json(result);
+}
+
+async function refreshController(req, res) {
+  const input = parseBody(refreshSchema, req.body);
+  const result = await refreshUserSession(input.refreshToken);
+  return res.status(200).json(result);
+}
+
+async function logoutController(req, res) {
+  await revokeUserSessions(req.auth.userId);
+  return res.status(204).send();
 }
 
 async function meController(req, res) {
@@ -45,5 +59,7 @@ function parseBody(schema, body) {
 module.exports = {
   registerController,
   loginController,
+  refreshController,
+  logoutController,
   meController
 };

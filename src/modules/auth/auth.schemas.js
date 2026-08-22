@@ -11,6 +11,10 @@ const loginSchema = z.object({
   password: z.string().min(1, "Senha e obrigatoria.")
 }).strict();
 
+const refreshSchema = z.object({
+  refreshToken: z.string().trim().min(1, "Refresh token e obrigatorio.")
+}).strict();
+
 function formatZodErrors(error) {
   return error.issues.map((issue) => ({
     field: issue.path.join("."),
@@ -21,5 +25,6 @@ function formatZodErrors(error) {
 module.exports = {
   registerSchema,
   loginSchema,
+  refreshSchema,
   formatZodErrors
 };

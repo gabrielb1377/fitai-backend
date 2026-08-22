@@ -13,6 +13,7 @@ function createEnv(values = process.env) {
     databaseUrl,
     jwtSecret,
     jwtExpiresIn: optionalText(values.JWT_EXPIRES_IN, "7d"),
+    jwtRefreshExpiresIn: optionalText(values.JWT_REFRESH_EXPIRES_IN, "30d"),
     openaiApiKey: optionalText(values.OPENAI_API_KEY),
     openaiModel: optionalText(values.OPENAI_MODEL, "gpt-4o-mini"),
     openaiTimeoutMs: optionalPositiveInteger(values.OPENAI_TIMEOUT_MS, 30000),
