@@ -14,18 +14,8 @@ const coachRequestSchema = z.object({
   tipo: z.enum(ALLOWED_TYPES).default("geral"),
   exercicioId: z.string().trim().nullable().optional(),
   periodoDias: z.number().int().positive().max(365).default(30),
-  contextoLocal: z.object({
-    perfil: z.record(z.string(), z.any()).optional().default({}),
-    planos: z.array(z.record(z.string(), z.any())).optional().default([]),
-    historicoTreinos: z.array(z.record(z.string(), z.any())).optional().default([]),
-    historicoExercicios: z.array(z.record(z.string(), z.any())).optional().default([]),
-    recordes: z.array(z.record(z.string(), z.any())).optional().default([]),
-    metas: z.array(z.record(z.string(), z.any())).optional().default([]),
-    corridas: z.array(z.record(z.string(), z.any())).optional().default([])
-  }).passthrough().optional().default({}),
-  forceRefresh: z.boolean().optional().default(false),
-  clientId: z.string().trim().optional()
-}).passthrough();
+  forceRefresh: z.boolean().optional().default(false)
+}).strict();
 
 function validateCoachRequest(body) {
   const result = coachRequestSchema.safeParse(

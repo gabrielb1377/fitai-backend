@@ -21,6 +21,7 @@ model User {
   dailySteps          DailySteps[]
   readyPlanFavorites  ReadyPlanFavorite[]
   authRefreshSessions AuthRefreshSession[]
+  aiUsages            AiUsage[]
   workoutSyncEvents   WorkoutSyncEvent[]
   workoutSyncSessions WorkoutSyncSession[]
   workoutSyncSets     WorkoutSyncSet[]
@@ -28,6 +29,26 @@ model User {
   updatedAt           DateTime             @updatedAt
 
   @@map("users")
+}
+
+model AiUsage {
+  id             String   @id @default(uuid())
+  userId         String
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  operation      String
+  idempotencyKey String
+  requestHash    String
+  status         String   @default("pending")
+  response       Json?
+  errorCode      String?
+  periodStart    DateTime
+  createdAt      DateTime @default(now())
+  completedAt    DateTime?
+  updatedAt      DateTime @updatedAt
+
+  @@unique([userId, operation, idempotencyKey])
+  @@index([userId, operation, periodStart, status])
+  @@map("ai_usages")
 }
 
 model AuthRefreshSession {

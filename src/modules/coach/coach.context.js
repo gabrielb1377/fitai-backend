@@ -1,36 +1,15 @@
-const { createHash } = require("crypto");
 const prisma = require("../../config/prisma");
-const { verifyToken } = require("../auth/auth.service");
+const AppError = require("../../shared/errors/app-error");
 
-async function buildCoachContext(req, input) {
-  const auth = readOptionalAuth(req);
-
-  if (auth) {
-    const dbContext = await tryBuildDatabaseContext(auth.userId, input);
-
-    if (dbContext) {
-      logContext(
-        `usuario=autenticado treinos=${dbContext.raw.historicoTreinos.length} series=${dbContext.raw.historicoExercicios.length}`
-      );
-      return dbContext;
-    }
+async function buildCoachContext(userId, input) {
+  const context = await buildDatabaseContext(userId, input);
+  if (!context) {
+    throw new AppError("Usuario autenticado nao encontrado.", 404, "authenticated_user_not_found");
   }
-
-  const localContext = buildLocalContext(input);
   logContext(
-    `usuario=anonimo treinos=${localContext.raw.historicoTreinos.length} series=${localContext.raw.historicoExercicios.length}`
+    `usuario=autenticado treinos=${context.raw.historicoTreinos.length} series=${context.raw.historicoExercicios.length}`
   );
-
-  return localContext;
-}
-
-async function tryBuildDatabaseContext(userId, input) {
-  try {
-    return await buildDatabaseContext(userId, input);
-  } catch (err) {
-    logContext(`contexto_db_indisponivel reason=${err && err.code ? err.code : "erro"}`);
-    return null;
-  }
+  return context;
 }
 
 async function buildDatabaseContext(userId, input) {
@@ -246,28 +225,6 @@ async function buildDatabaseContext(userId, input) {
   });
 }
 
-function buildLocalContext(input) {
-  const contextoLocal = input.contextoLocal || {};
-  const raw = {
-    perfil: contextoLocal.perfil || {},
-    planos: contextoLocal.planos || [],
-    historicoTreinos: contextoLocal.historicoTreinos || [],
-    historicoExercicios: contextoLocal.historicoExercicios || [],
-    recordes: contextoLocal.recordes || [],
-    metas: contextoLocal.metas || [],
-    corridas: contextoLocal.corridas || [],
-    passos: contextoLocal.passos || contextoLocal.historicoPassos || []
-  };
-  const clientKey = input.clientId || hash(JSON.stringify(raw).slice(0, 1000));
-
-  return buildStructuredContext({
-    source: "local",
-    userKey: `local:${clientKey}`,
-    raw,
-    input
-  });
-}
-
 function buildStructuredContext({ source, userKey, raw, input }) {
   const analysis = analyzeContext(raw, input.periodoDias);
 
@@ -357,20 +314,6 @@ function analyzeContext(raw, periodoDias) {
   };
 }
 
-function readOptionalAuth(req) {
-  const authHeader = req.headers.authorization || "";
-  const [scheme, token] = authHeader.split(" ");
-
-  if (scheme !== "Bearer" || !token) return null;
-
-  try {
-    const payload = verifyToken(token);
-    return { userId: payload.sub, email: payload.email };
-  } catch (err) {
-    logContext("token opcional invalido; usando contexto local");
-    return null;
-  }
-}
 
 function profileFromDb(profile) {
   if (!profile) return {};
@@ -710,10 +653,6 @@ function normalizeKey(value) {
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
     .trim();
-}
-
-function hash(value) {
-  return createHash("sha1").update(String(value || "")).digest("hex").slice(0, 16);
 }
 
 function logContext(message) {

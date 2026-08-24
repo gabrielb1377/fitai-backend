@@ -1,6 +1,7 @@
 const OpenAI = require("openai");
 const { randomUUID } = require("crypto");
 const env = require("../../config/env");
+const AppError = require("../../shared/errors/app-error");
 const { buildCoachContext } = require("./coach.context");
 const { buildCoachPrompt } = require("./coach.prompt");
 const { parseCoachResponse, normalizeCoachResponse } = require("./coach.parser");
@@ -9,8 +10,8 @@ const CACHE_TTL_MS = 10 * 60 * 1000;
 const cache = new Map();
 let openaiClient;
 
-async function generateCoachInsights(req, input) {
-  const context = await buildCoachContext(req, input);
+async function generateCoachInsights(userId, input, dependencies = {}) {
+  const context = await buildCoachContext(userId, input);
   const cacheKey = buildCacheKey(context, input);
   const cached = !input.forceRefresh ? getCached(cacheKey) : null;
 
@@ -38,7 +39,8 @@ async function generateCoachInsights(req, input) {
   try {
     logCoach(`modo=OPENAI model=${env.openaiModel}`);
     const prompt = buildCoachPrompt(input, context);
-    const response = await getOpenAIClient().responses.create({
+    const client = dependencies.client || getOpenAIClient();
+    const response = await client.responses.create({
       model: env.openaiModel,
       instructions: prompt.instructions,
       input: prompt.input,
@@ -53,11 +55,24 @@ async function generateCoachInsights(req, input) {
     setCached(cacheKey, parsed);
     return parsed;
   } catch (err) {
-    logCoach(`fallback_aplicado reason=${err && err.code ? err.code : "openai_error"}`);
-    const fallback = buildLocalCoachResponse(context, input, "openai_fallback");
-    setCached(cacheKey, fallback);
-    return fallback;
+    logCoach(`provider_failure code=${err && err.code ? err.code : "openai_error"}`);
+    throw normalizeProviderError(err);
   }
+}
+
+function normalizeProviderError(err) {
+  if (err instanceof AppError) return err;
+  const status = Number(err && err.status);
+  if (status === 429) {
+    return new AppError("O provedor de IA esta temporariamente limitado.", 503, "ai_provider_rate_limited");
+  }
+  if (Number.isFinite(status) && status >= 500) {
+    return new AppError("O provedor de IA esta indisponivel.", 502, "ai_provider_unavailable");
+  }
+  if (err && (err.name === "APIConnectionTimeoutError" || err.code === "ETIMEDOUT")) {
+    return new AppError("O provedor de IA excedeu o tempo de resposta.", 504, "ai_provider_timeout");
+  }
+  return new AppError("Falha controlada ao consultar o provedor de IA.", 502, "ai_provider_failed");
 }
 
 function buildLocalCoachResponse(context, input, mode = "local") {
@@ -379,5 +394,6 @@ function logCoach(message) {
 
 module.exports = {
   generateCoachInsights,
-  buildLocalCoachResponse
+  buildLocalCoachResponse,
+  normalizeProviderError
 };

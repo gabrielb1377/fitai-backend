@@ -1,17 +1,10 @@
 const prisma = require("../../config/prisma");
-const { verifyToken } = require("../auth/auth.service");
+const AppError = require("../../shared/errors/app-error");
 
-async function loadWorkoutContext(req, input) {
-  const auth = readOptionalAuth(req);
-
-  if (!auth) {
-    logContext("usuario=anonimo contexto=formulario");
-    return buildAnonymousContext(input);
-  }
-
+async function loadWorkoutContext(userId, input) {
   try {
     const user = await prisma.user.findUnique({
-      where: { id: auth.userId },
+      where: { id: userId },
       select: {
         id: true,
         name: true,
@@ -115,8 +108,7 @@ async function loadWorkoutContext(req, input) {
     });
 
     if (!user) {
-      logContext("usuario=anonimo reason=usuario_nao_encontrado");
-      return buildAnonymousContext(input);
+      throw new AppError("Usuario autenticado nao encontrado.", 404, "authenticated_user_not_found");
     }
 
     const context = buildAuthenticatedContext(user, input);
@@ -126,53 +118,10 @@ async function loadWorkoutContext(req, input) {
 
     return context;
   } catch (err) {
-    logContext(`usuario=anonimo reason=contexto_indisponivel code=${err.code || "db_error"}`);
-    return buildAnonymousContext(input);
+    if (err instanceof AppError) throw err;
+    logContext(`contexto_indisponivel code=${err.code || "db_error"}`);
+    throw new AppError("Contexto de IA indisponivel.", 503, "ai_context_unavailable");
   }
-}
-
-function readOptionalAuth(req) {
-  const authHeader = req.headers.authorization || "";
-  const [scheme, token] = authHeader.split(" ");
-
-  if (scheme !== "Bearer" || !token) {
-    return null;
-  }
-
-  try {
-    const payload = verifyToken(token);
-
-    return {
-      userId: payload.sub,
-      email: payload.email
-    };
-  } catch (err) {
-    logContext("usuario=anonimo reason=token_opcional_invalido");
-    return null;
-  }
-}
-
-function buildAnonymousContext(input) {
-  return {
-    autenticado: false,
-    origem: "formulario",
-    perfil: {
-      objetivo: input.objetivo,
-      nivel: input.nivel
-    },
-    metas: [],
-    recordes: [],
-    historicoTreinos: {
-      frequenciaRecente: 0,
-      recentes: []
-    },
-    historicoExercicios: {
-      favoritos: [],
-      recentes: []
-    },
-    corrida: [],
-    preferencias: buildFormPreferences(input)
-  };
 }
 
 function buildAuthenticatedContext(user, input) {

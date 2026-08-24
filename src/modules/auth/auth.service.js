@@ -170,7 +170,9 @@ function signAccessToken(user) {
     {
       sub: user.id,
       email: user.email,
-      typ: "access"
+      typ: "access",
+      // Keeps each access-token rotation distinguishable even within one second.
+      jti: randomUUID()
     },
     env.jwtSecret,
     {

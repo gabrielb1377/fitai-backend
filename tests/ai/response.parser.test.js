@@ -56,64 +56,18 @@ test("parseWorkoutResponse parses complete output_text JSON", () => {
   assert.equal(parsed.dias.length, 4);
 });
 
-test("parseWorkoutResponse normalizes incomplete OpenAI JSON", () => {
-  const parsed = parseWorkoutResponse({
-    output_text: JSON.stringify({
-      nome: "Treino gerado",
-      dias: [
-        {
-          nome: "Dia A",
-          grupo: "Peito + Triceps",
-          exercicios: [
-            {
-              nome: "Supino reto",
-              series: 3,
-              repeticoes: "8-12",
-              descansoSegundos: 90
-            }
-          ]
-        }
-      ]
-    })
-  }, requestInput);
-
-  assert.equal(parsed.criadoPorIA, true);
-  assert.equal(parsed.tempoEstimado, 60);
-  assert.ok(parsed.id);
-  assert.ok(parsed.dias[0].id);
-  assert.equal(parsed.dias[0].titulo, "Peito + Triceps");
-  assert.equal(parsed.dias[0].exercicios[0].descanso, 90);
+test("parseWorkoutResponse rejects incomplete OpenAI JSON", () => {
+  assert.throws(() => parseWorkoutResponse({
+    output_text: JSON.stringify({ nome: "Treino gerado", dias: [] })
+  }, requestInput), (error) => error instanceof AppError && error.code === "invalid_ai_response");
 });
 
-test("parseWorkoutResponse completes days below selected minimum", () => {
-  const parsed = parseWorkoutResponse({
-    output_text: JSON.stringify({
-      nome: "Treino gerado",
-      dias: [
-        {
-          nome: "Dia A",
-          titulo: "Peito + Triceps",
-          diaSemana: "Segunda",
-          exercicios: [
-            {
-              nome: "Supino reto",
-              categoria: "Peito + Triceps",
-              musculos: ["Peito"],
-              equipamentos: ["barra"],
-              series: 3,
-              repeticoes: "8-12",
-              descanso: 90
-            }
-          ]
-        }
-      ]
-    })
-  }, {
-    ...requestInput,
-    minExerciciosPorDia: 10
-  });
-
-  assert.equal(parsed.dias[0].exercicios.length, 10);
+test("parseWorkoutResponse rejects output below the requested exercise minimum", () => {
+  const workout = generateMockWorkout({ ...requestInput, minExerciciosPorDia: 6 });
+  workout.dias[0].exercicios = workout.dias[0].exercicios.slice(0, 1);
+  assert.throws(() => parseWorkoutResponse({
+    output_text: JSON.stringify(workout)
+  }, { ...requestInput, minExerciciosPorDia: 10 }), (error) => error instanceof AppError && error.code === "invalid_ai_response");
 });
 
 test("parseJson accepts fenced JSON", () => {

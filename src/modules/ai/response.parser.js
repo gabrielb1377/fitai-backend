@@ -1,21 +1,30 @@
 const AppError = require("../../shared/errors/app-error");
-const { normalizeWorkoutResponse } = require("./workout.validator");
+const { validateWorkoutResponse } = require("./workout.validator");
 
 function parseWorkoutResponse(response, input) {
   const rawText = extractResponseText(response);
   const parsed = parseJson(rawText);
-  const validation = normalizeWorkoutResponse(parsed, input, { source: "openai" });
+  const validation = validateWorkoutResponse(parsed);
 
-  if (!validation.valid) {
+  const minimumError = minimumExercisesError(validation.data, input);
+  if (!validation.valid || minimumError) {
     throw new AppError(
       "Resposta da IA fora do formato esperado.",
       502,
       "invalid_ai_response",
-      validation.errors
+      minimumError ? [...validation.errors, minimumError] : validation.errors
     );
   }
 
   return validation.data;
+}
+
+function minimumExercisesError(workout, input) {
+  const minimum = Number(input && input.minExerciciosPorDia) || 6;
+  const belowMinimum = workout && workout.dias && workout.dias.find((day) => day.exercicios.length < minimum);
+  return belowMinimum
+    ? { field: "dias.exercicios", message: `Cada dia deve conter pelo menos ${minimum} exercicios.` }
+    : null;
 }
 
 function extractResponseText(response) {

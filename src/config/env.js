@@ -18,6 +18,10 @@ function createEnv(values = process.env) {
     openaiModel: optionalText(values.OPENAI_MODEL, "gpt-4o-mini"),
     openaiTimeoutMs: optionalPositiveInteger(values.OPENAI_TIMEOUT_MS, 30000),
     openaiMaxRetries: optionalPositiveInteger(values.OPENAI_MAX_RETRIES, 2),
+    aiWorkoutDailyQuota: optionalPositiveInteger(values.AI_WORKOUT_DAILY_QUOTA, 10),
+    aiCoachDailyQuota: optionalPositiveInteger(values.AI_COACH_DAILY_QUOTA, 30),
+    aiRateLimitWindowMs: optionalPositiveInteger(values.AI_RATE_LIMIT_WINDOW_MS, 60000),
+    aiRateLimitMax: optionalPositiveInteger(values.AI_RATE_LIMIT_MAX, 12),
     serviceName: "fitai-backend"
   });
 }
