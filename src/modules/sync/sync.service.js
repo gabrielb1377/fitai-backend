@@ -151,7 +151,7 @@ async function syncWorkouts(req, payload, items) {
 async function getWorkouts(req, payload = {}) {
   const user = await resolveAuthenticatedUser(req);
   const workouts = await prisma.workout.findMany({
-    where: { userId: user.id },
+    where: { userId: user.id, deletedAt: null },
     include: {
       days: {
         orderBy: { order: "asc" },
@@ -167,6 +167,31 @@ async function getWorkouts(req, payload = {}) {
   });
 
   return { workouts };
+}
+
+/// Soft deletion is deliberate: completed history keeps its Workout relation,
+/// while active plan reads and future sync pulls exclude the definition.
+async function deleteWorkout(req, workoutId) {
+  const user = await resolveAuthenticatedUser(req);
+  return deleteWorkoutById(user.id, workoutId);
+}
+
+async function deleteWorkoutById(userId, workoutId, db = prisma) {
+  const id = text(workoutId);
+  if (!id) {
+    throw new AppError("Identificador do plano obrigatorio.", 400, "workout_id_required");
+  }
+
+  const result = await db.workout.updateMany({
+    where: { id, userId, deletedAt: null },
+    data: { deletedAt: new Date() }
+  });
+
+  return {
+    id,
+    deleted: result.count > 0,
+    alreadyDeleted: result.count === 0
+  };
 }
 
 async function syncWorkoutHistory(req, payload, items) {
@@ -250,6 +275,16 @@ async function upsertWorkoutWithDays(userId, item) {
 
   return prisma.$transaction(async (tx) => {
     await ensureOwnedOrAvailable(tx, "workout", workoutId, userId);
+    const existing = await tx.workout.findUnique({
+      where: { id: workoutId },
+      select: { deletedAt: true }
+    });
+
+    // A delayed upsert cannot revive a plan deleted by the same owner. There
+    // is no restore endpoint in the current lifecycle contract.
+    if (existing?.deletedAt) {
+      return tx.workout.findUnique({ where: { id: workoutId } });
+    }
     const workout = await tx.workout.upsert({
       where: { id: workoutId },
       update: {
@@ -626,6 +661,8 @@ module.exports = {
   getRecords,
   syncWorkouts,
   getWorkouts,
+  deleteWorkout,
+  deleteWorkoutById,
   syncWorkoutHistory,
   syncExerciseHistory,
   syncRunning

@@ -54,6 +54,17 @@ async function getWorkoutsController(req, res) {
   return res.status(200).json(result);
 }
 
+async function postWorkoutDeleteController(req, res) {
+  const payload = parsePayload(req.body);
+  const workoutId = String(payload.id || payload.workoutId || "").trim();
+  if (!workoutId) {
+    throw new AppError("Identificador do plano obrigatorio.", 400, "workout_id_required");
+  }
+  const result = await syncService.deleteWorkout(req, workoutId);
+
+  return res.status(200).json(result);
+}
+
 async function postWorkoutHistoryController(req, res) {
   const payload = parsePayload(req.body);
   const result = await syncService.syncWorkoutHistory(req, payload, getPayloadItems(payload));
@@ -94,6 +105,7 @@ module.exports = {
   getRecordsController,
   postWorkoutsController,
   getWorkoutsController,
+  postWorkoutDeleteController,
   postWorkoutHistoryController,
   postExerciseHistoryController,
   postRunningController

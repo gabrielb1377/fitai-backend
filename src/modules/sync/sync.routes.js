@@ -10,6 +10,7 @@ const {
   getRecordsController,
   postWorkoutsController,
   getWorkoutsController,
+  postWorkoutDeleteController,
   postWorkoutHistoryController,
   postExerciseHistoryController,
   postRunningController
@@ -32,6 +33,7 @@ router.get("/records", asyncHandler(getRecordsController));
 
 router.post("/workouts", asyncHandler(postWorkoutsController));
 router.get("/workouts", asyncHandler(getWorkoutsController));
+router.post("/workouts/delete", asyncHandler(postWorkoutDeleteController));
 
 router.post("/workout-history", asyncHandler(postWorkoutHistoryController));
 router.post("/exercise-history", asyncHandler(postExerciseHistoryController));

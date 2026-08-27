@@ -112,15 +112,18 @@ async function copyReadyPlan(req, id, db = prisma) {
 
       const existing = await tx.workout.findFirst({
         where: { userId: user.id, readyPlanId: readyPlan.id },
-        select: { id: true }
+        select: { id: true, deletedAt: true }
       });
 
-      if (existing) {
+      if (existing && !existing.deletedAt) {
         throw new AppError("Este plano ja foi adicionado aos seus planos.", 409, "ready_plan_already_copied");
       }
 
-      const workout = await tx.workout.create({
-        data: {
+      if (existing?.deletedAt) {
+        await tx.workoutDay.deleteMany({ where: { workoutId: existing.id } });
+      }
+
+      const workoutData = {
           userId: user.id,
           name: readyPlan.name,
           description: readyPlan.description,
@@ -131,8 +134,13 @@ async function copyReadyPlan(req, id, db = prisma) {
           estimatedMinutes: readyPlan.estimatedMinutes,
           source: "ready_plan",
           readyPlanId: readyPlan.id
-        }
-      });
+      };
+      const workout = existing
+        ? await tx.workout.update({
+            where: { id: existing.id },
+            data: { ...workoutData, deletedAt: null }
+          })
+        : await tx.workout.create({ data: workoutData });
       const exercisesByName = new Map();
 
       for (const day of readyPlan.days) {
