@@ -220,8 +220,8 @@ async function syncExerciseHistory(req, payload, items) {
   return { histories };
 }
 
-async function syncRunning(req, payload, items) {
-  const user = await resolveAuthenticatedUser(req);
+async function syncRunning(req, payload, items, db = prisma) {
+  const user = await resolveAuthenticatedUser(req, db);
   const runs = [];
 
   for (const item of items) {
@@ -243,14 +243,41 @@ async function syncRunning(req, payload, items) {
       user.id
     );
     const data = {
+      externalRunId: id,
       distanceKm,
       durationSeconds,
       averageSpeed,
+      paceMinutesPerKm: distanceKm > 0 ? (durationSeconds / 60) / distanceKm : 0,
+      route: Array.isArray(item.route) ? item.route : [],
+      calories: optionalNumber(item.calories),
+      steps: optionalInteger(item.steps || item.passos),
+      startedAt: date(
+        item.startTime || item.startedAt,
+        new Date(performedAt.getTime() - durationSeconds * 1000)
+      ),
+      finishedAt: date(item.endTime || item.finishedAt, performedAt),
       performedAt
     };
 
-    await ensureOwnedOrAvailable(prisma, "runningHistory", id, user.id);
-    runs.push(await prisma.runningHistory.upsert({
+    const activityMutation = await db.activitySyncMutation.findFirst({
+      where: {
+        userId: user.id,
+        entityType: "run",
+        entityKey: id
+      }
+    });
+    if (activityMutation) {
+      const canonical = await db.runningHistory.findUnique({
+        where: {
+          userId_externalRunId: { userId: user.id, externalRunId: id }
+        }
+      });
+      if (canonical) runs.push(canonical);
+      continue;
+    }
+
+    await ensureOwnedOrAvailable(db, "runningHistory", id, user.id);
+    runs.push(await db.runningHistory.upsert({
       where: { id },
       update: data,
       create: {
@@ -263,7 +290,14 @@ async function syncRunning(req, payload, items) {
 
   logSync("running", user, runs.length);
 
-  return { runs };
+  return { runs: runs.map(toLegacyRunningDto) };
+}
+
+function toLegacyRunningDto(run) {
+  if (!run) return run;
+  const legacyRun = { ...run };
+  delete legacyRun.revision;
+  return legacyRun;
 }
 
 async function upsertWorkoutWithDays(userId, item) {
@@ -562,14 +596,14 @@ async function ensureHistoryWorkout(userId, item, client = prisma) {
   });
 }
 
-async function resolveAuthenticatedUser(req) {
+async function resolveAuthenticatedUser(req, db = prisma) {
   const userId = text(req?.auth?.userId);
 
   if (!userId) {
     throw new AppError("Autenticacao obrigatoria.", 401, "authentication_required");
   }
 
-  const user = await prisma.user.findUnique({ where: { id: userId } });
+  const user = await db.user.findUnique({ where: { id: userId } });
   if (!user) {
     throw new AppError("Usuario autenticado nao encontrado.", 401, "authenticated_user_not_found");
   }
@@ -627,6 +661,16 @@ function number(value, fallback = 0) {
 
 function integer(value, fallback = 0) {
   return Math.round(number(value, fallback));
+}
+
+function optionalNumber(value) {
+  if (value === undefined || value === null || value === "") return null;
+  return number(value);
+}
+
+function optionalInteger(value) {
+  if (value === undefined || value === null || value === "") return null;
+  return integer(value);
 }
 
 function date(value, fallback = new Date()) {

@@ -13,6 +13,19 @@ async function syncSteps(req, payload, items, db = prisma) {
     const existing = await db.dailySteps.findUnique({
       where: { userId_date: { userId: user.id, date } }
     });
+    const activityMutation = await db.activitySyncMutation.findFirst({
+      where: {
+        userId: user.id,
+        entityType: "steps",
+        entityKey: dateKey
+      }
+    });
+    if (activityMutation) {
+      // Older clients may retry a queued absolute snapshot after v2 has
+      // accepted a later correction. Preserve the v2-authoritative row.
+      if (existing) synced.push(existing);
+      continue;
+    }
     const incoming = normalizeStepItem(item, date);
     const merged = reconcileStepRecord(existing, incoming);
 
@@ -21,14 +34,20 @@ async function syncSteps(req, payload, items, db = prisma) {
       update: {
         steps: merged.steps,
         goal: merged.goal,
-        source: merged.source
+        source: merged.source,
+        dayKey: dateKey,
+        deviceId: text(payload.clientId, "legacy"),
+        observedAt: incoming.updatedAt
       },
       create: {
         userId: user.id,
         date,
+        dayKey: dateKey,
         steps: merged.steps,
         goal: merged.goal,
-        source: merged.source
+        source: merged.source,
+        deviceId: text(payload.clientId, "legacy"),
+        observedAt: incoming.updatedAt
       }
     }));
   }

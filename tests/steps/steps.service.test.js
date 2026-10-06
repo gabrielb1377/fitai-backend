@@ -1,10 +1,78 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
 const {
+  syncSteps,
   reconcileStepRecord,
   buildStepStats,
   normalizeDateKey
 } = require("../../src/modules/steps/steps.service");
+
+test("legacy steps sync cannot overwrite a day already owned by ActivitySync/v2", async () => {
+  const user = { id: "user-a", name: "A", email: "a@test.dev" };
+  const canonical = {
+    id: "steps-a",
+    userId: user.id,
+    date: new Date("2026-10-05T00:00:00.000Z"),
+    steps: 5900,
+    goal: 10000,
+    source: "health_connect",
+    createdAt: new Date("2026-10-05T12:00:00.000Z"),
+    updatedAt: new Date("2026-10-05T12:00:00.000Z")
+  };
+  let writes = 0;
+  const db = {
+    user: { findUnique: async () => user },
+    dailySteps: {
+      findUnique: async () => canonical,
+      upsert: async () => {
+        writes++;
+        return canonical;
+      }
+    },
+    activitySyncMutation: { findFirst: async () => ({ revision: 9n }) }
+  };
+
+  const result = await syncSteps(
+    { auth: { userId: user.id } },
+    { clientId: "old-device" },
+    [{ date: "2026-10-05", steps: 6200, source: "health_connect" }],
+    db
+  );
+
+  assert.equal(result.steps[0].steps, 5900);
+  assert.equal(writes, 0);
+});
+
+test("legacy steps sync remains writable before a v2 identity exists", async () => {
+  const user = { id: "user-a", name: "A", email: "a@test.dev" };
+  let writes = 0;
+  const db = {
+    user: { findUnique: async () => user },
+    dailySteps: {
+      findUnique: async () => null,
+      upsert: async ({ create }) => {
+        writes++;
+        return {
+          id: "legacy-steps",
+          ...create,
+          createdAt: new Date("2026-10-05T12:00:00.000Z"),
+          updatedAt: new Date("2026-10-05T12:00:00.000Z")
+        };
+      }
+    },
+    activitySyncMutation: { findFirst: async () => null }
+  };
+
+  const result = await syncSteps(
+    { auth: { userId: user.id } },
+    { clientId: "old-device" },
+    [{ date: "2026-10-05", steps: 6200, source: "local" }],
+    db
+  );
+
+  assert.equal(result.steps[0].steps, 6200);
+  assert.equal(writes, 1);
+});
 
 test("reconcileStepRecord keeps the largest value for the same day", () => {
   const existing = {
