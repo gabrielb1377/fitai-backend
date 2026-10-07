@@ -139,6 +139,39 @@ test("ActivitySync/v2: runs, steps, ownership, cursor, tombstone e multi-device"
 
 test.after(async () => { if (prisma) await prisma.$disconnect(); });
 
+test("FITAI-12: canonical progress survives PostgreSQL, ACK, retry and device B pull", { skip: !enabled }, async () => {
+  const nonce = randomUUID();
+  const user = await createUser(`metrics-${nonce}@fitia.test`);
+  const token = accessToken(user);
+  const server = createApp().listen(0, "127.0.0.1");
+  await new Promise((resolve) => server.once("listening", resolve));
+  const base = `http://127.0.0.1:${server.address().port}`;
+  const value = run(`metrics-${nonce}`);
+  value.route = [0, 1, 2, 3, 4, 5].map((distance) => ({
+    ...value.route[0],
+    timestamp: new Date(new Date(value.startedAt).getTime() + distance * 360000).toISOString(),
+    cumulativeDistanceKm: distance,
+    activeElapsedSeconds: distance * 360,
+    startsSegment: distance === 0
+  }));
+  try {
+    const accepted = await post(base, token, body({ runs: [value] }));
+    assert.equal(accepted.body.ack.accepted.length, 1);
+    const retry = await post(base, token, body({ runs: [value] }));
+    assert.equal(retry.body.ack.alreadyApplied.length, 1);
+    const sameEntity = await post(base, token, body({ runs: [{ ...value, mutationId: `${value.mutationId}-same` }] }, "device-b"));
+    assert.equal(sameEntity.body.ack.alreadyApplied.length, 1);
+    assert.equal(sameEntity.body.ack.rejected.length, 0);
+    const pulled = await get(base, token, "0");
+    assert.deepEqual(pulled.body.state.runs[0].route, value.route);
+    assert.equal(await prisma.runningHistory.count({ where: { userId: user.id } }), 1);
+    assert.equal(await prisma.progressionXpEvent.count({ where: { userId: user.id } }), 0);
+  } finally {
+    await new Promise((resolve) => server.close(resolve));
+    await prisma.user.deleteMany({ where: { id: user.id } });
+  }
+});
+
 async function createUser(email) {
   return prisma.user.create({ data: { name: "Activity Integration", email, passwordHash: "unused" } });
 }
