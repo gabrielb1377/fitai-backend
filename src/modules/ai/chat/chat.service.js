@@ -11,20 +11,26 @@ const { createActionService } = require("../actions/action.service");
 const HISTORY_MESSAGES = 8;
 const HISTORY_CHARS = 6000;
 const LEASE_MS = 120000;
+const TRANSACTION_ATTEMPTS = 5;
 const busy = () => new AppError("Esta conversa esta sendo processada. Tente novamente.", 409, "ai_request_in_progress");
 
 function createChatService({ client = prisma, contextEngine = createFitnessContextEngine({ client }),
   gateway = createAiGateway({ config: createAiConfig() }), claim = usage.claimAiUsage,
-  fail = usage.failAiUsage, now = () => new Date(), actionService = createActionService({ client, now }) } = {}) {
+  fail = usage.failAiUsage, now = () => new Date(), actionService = createActionService({ client, now }),
+  wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms)) } = {}) {
   async function owned(userId, conversationId) {
     const conversation = await client.aiConversation.findFirst({ where: { id: conversationId, userId } });
     if (!conversation) throw new AppError("Conversa nao encontrada.", 404, "conversation_not_found");
     return conversation;
   }
   async function transaction(action) {
-    for (let attempt = 0; attempt < 3; attempt++) {
+    for (let attempt = 0; attempt < TRANSACTION_ATTEMPTS; attempt++) {
       try { return await client.$transaction(action, { isolationLevel: "Serializable" }); }
-      catch (error) { if (error.code === "P2034" && attempt < 2) continue; throw error; }
+      catch (error) {
+        if (error.code !== "P2034" || attempt === TRANSACTION_ATTEMPTS - 1) throw error;
+        // Retry only the rolled-back database work, never the provider or quota claim.
+        await wait(50 * 2 ** attempt);
+      }
     }
   }
   async function prepare(userId, input, usageId) {
@@ -57,7 +63,7 @@ function createChatService({ client = prisma, contextEngine = createFitnessConte
     let lease;
     try {
       lease = await prepare(userId, input, usageId);
-      const context = await contextEngine.build({ userId, task: lease.task });
+      const context = await contextEngine.build({ userId, task: lease.task, message: input.message });
       const actionContext = await actionService.context({ userId, task: lease.task });
       const answer = await gateway.generate({ task: lease.task, requestId: usageId,
         input: { message: input.message, context, history: lease.history, actionContext } });
@@ -106,4 +112,4 @@ function createChatService({ client = prisma, contextEngine = createFitnessConte
   }
   return { send, history };
 }
-module.exports = { createChatService, HISTORY_MESSAGES, HISTORY_CHARS, LEASE_MS };
+module.exports = { createChatService, HISTORY_MESSAGES, HISTORY_CHARS, LEASE_MS, TRANSACTION_ATTEMPTS };

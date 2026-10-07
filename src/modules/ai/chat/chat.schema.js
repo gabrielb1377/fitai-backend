@@ -13,6 +13,11 @@ const chatRequestSchema = z.object({
 function selectTask(input, previousTask = "chat") {
   if (input.intent) return input.intent;
   const message = input.message.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+  const strength = /supino|carga|repetico|musculacao|pernas|serie/.test(message);
+  const steps = /passos|steps/.test(message);
+  if ((strength || steps) && /corrida|correr|ritmo|pace|parciais/.test(message)) return "analyze_progress";
+  if (/semana|o que.*hoje|evoluindo|evolucao geral/.test(message)) return "analyze_progress";
+  if (strength || steps) return /progresso|performance|volume|xp/.test(message) ? "analyze_progress" : "chat";
   if (/corrida|correr|ritmo|pace|parciais/.test(message)) return "running_advice";
   if (/progresso|evolucao|performance|volume|recorde|xp/.test(message)) return "analyze_progress";
   return CHAT_TASKS.includes(previousTask) ? previousTask : "chat";

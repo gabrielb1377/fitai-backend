@@ -6,6 +6,7 @@ const { validateWorkoutCatalog, projection } = require("./catalog");
 const { gatewayError, classifyProviderError, policies } = require("./errors");
 const { createOpenAIAdapter, createOpenRouterAdapter } = require("./providers");
 const { buildChatPrompt, parseChatResponse } = require("../chat/chat.prompt");
+const { evaluateAiResponse } = require("../reliability/semantic-evaluator");
 
 const TASKS = Object.freeze({
   generate_workout: "implemented",
@@ -81,10 +82,13 @@ function createAiGateway({ config, adapters, logger = (event) => console.info(JS
               throw gatewayError("ai_invalid_response", correlation);
             }
             if (isWorkout) validateWorkoutCatalog(workout, correlation);
+            else if (!evaluateAiResponse({ question: input.message, task, context: input.context, response: workout, evaluateActions: false }).passed) {
+              throw gatewayError("ai_semantic_validation_error", correlation);
+            }
             return { data: workout, metadata: emit("succeeded") };
           } catch (error) {
             if (error.code === "ai_domain_validation_error") throw error;
-            lastError = gatewayError("ai_invalid_response", correlation);
+            lastError = gatewayError(error.code === "ai_semantic_validation_error" ? error.code : "ai_invalid_response", correlation);
             if (semanticFallbacks++ >= config.semanticFallbacks) throw lastError;
           }
         }

@@ -35,4 +35,17 @@ function validateWorkoutCatalog(workout, requestId) {
   return workout;
 }
 
-module.exports = { projection, normalizeName, validateWorkoutCatalog };
+function replacementCompatibility(previousId, replacementId) {
+  const from = projection.exerciseMetadata?.[previousId];
+  const to = projection.exerciseMetadata?.[replacementId];
+  if (!from || !to || !from.primaryMuscles.length || !to.primaryMuscles.length) return "UNKNOWN";
+  const muscles = new Set(from.primaryMuscles.map(normalizeName));
+  const sharedMuscle = to.primaryMuscles.some((m) => muscles.has(normalizeName(m)));
+  const sameCategory = normalizeName(from.category) === normalizeName(to.category);
+  const distinctMovement = !["unknown", "isolation"].includes(from.movementPattern) &&
+    !["unknown", "isolation"].includes(to.movementPattern) && from.movementPattern !== to.movementPattern;
+  if ((!sharedMuscle && !sameCategory) || distinctMovement) return "INCOMPATIBLE";
+  return sharedMuscle && !distinctMovement ? "COMPATIBLE" : "UNKNOWN";
+}
+
+module.exports = { projection, normalizeName, validateWorkoutCatalog, replacementCompatibility };

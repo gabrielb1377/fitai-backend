@@ -70,5 +70,9 @@ test("AI Actions PostgreSQL: persisted proposals, R2 sync verification, A/B, con
   assert.equal((await make().complete({ userId: a, actionId: generated.actionId })).status, "EXECUTED");
   assert.equal(await prisma.workout.count({ where: { id: confirmed.expectedAfter.id, userId: a } }), 1);
   const invalid = await propose({ type: "USE_GENERATED_WORKOUT", generationRequestId: randomUUID(), reason: "Sem artefato." }); assert.equal(invalid.status, "REJECTED");
+  const incompatible = await propose({ ...candidate, previousExerciseId: "ombros_004", canonicalExerciseId: "costas_002" });
+  assert.equal(incompatible.status, "REJECTED");
+  assert.equal(incompatible.validation.code, "ai_action_incompatible_replacement");
+  assert.equal((await prisma.workout.findFirst({ where: { id: planId }, include })).days[0].exercises[0].exerciseId, "ombros_004");
   assert.equal(await prisma.workoutSyncSet.count({ where: { userId: a } }), 1);
 });

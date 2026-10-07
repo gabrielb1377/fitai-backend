@@ -18,7 +18,9 @@ void main(List<String> args) {
   final sorted = names.toList()..sort();
   for (final name in sorted) {
     final binding = binder.bindAi(
-      templateItemId: 'export', remoteExerciseId: '', exerciseName: name,
+      templateItemId: 'export',
+      remoteExerciseId: '',
+      exerciseName: name,
     );
     if (binding.isResolved) bindings[name] = binding.canonicalExerciseId;
   }
@@ -26,17 +28,34 @@ void main(List<String> args) {
     'contract': ExerciseCatalogBindingContract.identifier,
     'source': 'app/lib/data/exercicios + ExerciseCatalogBinder.bindAi',
     'sourceRevision': args.isEmpty ? 'UNRECORDED' : args.first,
-    'canonicalIds': identity.entries.map((entry) => entry.canonicalId).toList()..sort(),
+    'canonicalIds': identity.entries.map((entry) => entry.canonicalId).toList()
+      ..sort(),
     'nameBindings': bindings,
+    'exerciseMetadata': {
+      for (final entry in identity.entries)
+        entry.canonicalId: {
+          'category': entry.exercise.categoria,
+          'primaryMuscles': entry.exercise.musculos,
+          'movementPattern': entry.movementPattern.name,
+        },
+    },
   });
-  final target = File.fromUri(Platform.script.resolve('../src/modules/ai/gateway/catalog-projection.json'));
+  final target = File.fromUri(
+    Platform.script.resolve(
+      '../src/modules/ai/gateway/catalog-projection.json',
+    ),
+  );
   if (args.contains('--check')) {
     if (!target.existsSync() || target.readAsStringSync() != '$payload\n') {
-      stderr.writeln('Catalog projection drift. Regenerate from the approved app revision.');
+      stderr.writeln(
+        'Catalog projection drift. Regenerate from the approved app revision.',
+      );
       exitCode = 1;
     }
   } else {
     target.writeAsStringSync('$payload\n');
   }
-  stdout.writeln('Catalog projection: ${identity.entries.length} IDs, ${bindings.length} resolved names.');
+  stdout.writeln(
+    'Catalog projection: ${identity.entries.length} IDs, ${bindings.length} resolved names.',
+  );
 }

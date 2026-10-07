@@ -13,19 +13,33 @@ const names = new Map();
 for (const [name, id] of Object.entries(projection.nameBindings)) if (!names.has(id)) names.set(id, name);
 const unavailable = (source, reason = "remote_data_unavailable") => ({ status: "UNAVAILABLE", source, reason });
 const domain = (source, data, isEmpty = false) => ({ status: isEmpty ? "EMPTY" : "AVAILABLE", source, data });
-const text = (value) => String(value || "").replace(/[\w.+-]+@[\w.-]+\.[A-Za-z]{2,}/g, "[redacted]").slice(0, 100);
+const text = (value) => {
+  const signal = String(value || "");
+  if (/Bearer\s+|eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.|sk-[A-Za-z0-9_-]{12,}|(?:api[_ ]?key|refresh[_ ]?token)\s*[:=]/i.test(signal)) return null;
+  return signal.replace(/[\w.+-]+@[\w.-]+\.[A-Za-z]{2,}/g, "[redacted]").slice(0, 100);
+};
 const iso = (value) => new Date(value).toISOString();
+
+function selectContextDomains(task, message = "") {
+  if (task === "running_advice") return ["profile", "goals", "progression", "running"];
+  const question = String(message).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+  const strength = /supino|carga|repetico|serie|exercicio|musculacao/.test(question);
+  const steps = /passos|steps/.test(question);
+  const crossDomain = /semana|hoje|evoluindo|evolucao geral|pernas|corrida|correr/.test(question);
+  if (!crossDomain && strength && !steps) return ["profile", "goals", "progression", "strength", "currentPlan"];
+  if (!crossDomain && steps && !strength) return ["profile", "goals", "progression", "steps"];
+  return ["profile", "goals", "progression", "strength", "running", "steps", "currentPlan"];
+}
 
 function createFitnessContextEngine({ client = prisma, now = () => new Date() } = {}) {
   async function query(source, action, project) {
     try { return await withDeadline(async () => project(await action()), BUDGET.deadlineMs); }
     catch { return unavailable(source); }
   }
-  async function build({ userId, task }) {
+  async function build({ userId, task, message = "" }) {
     if (!userId) throw new AppError("Autenticacao necessaria.", 401, "unauthorized");
     const generatedAt = now();
-    const selection = task === "running_advice" ? ["profile", "goals", "progression", "running"] :
-      ["profile", "goals", "progression", "strength", "running", "steps", "currentPlan"];
+    const selection = selectContextDomains(task, message);
     const jobs = {
       profile: () => query("authenticated_profile", () => client.profile.findUnique({ where: { userId }, select: { goal: true, level: true } }),
         (p) => domain("authenticated_profile", p ? { fitnessGoal: text(p.goal), trainingExperience: text(p.level) } : null, !p)),
@@ -106,4 +120,4 @@ function createFitnessContextEngine({ client = prisma, now = () => new Date() } 
   }
   return { build };
 }
-module.exports = { createFitnessContextEngine, VERSION, BUDGET };
+module.exports = { createFitnessContextEngine, selectContextDomains, VERSION, BUDGET };

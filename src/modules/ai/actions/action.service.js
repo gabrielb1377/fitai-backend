@@ -3,17 +3,22 @@ const prisma = require("../../../config/prisma");
 const AppError = require("../../../shared/errors/app-error");
 const { ACTION_VERSION, proposalSchema } = require("./action.schema");
 const { planSnapshot, loadSnapshot, projectResult, digest, include } = require("./plan.snapshot");
-const { validateWorkoutCatalog, projection } = require("../gateway/catalog");
+const { validateWorkoutCatalog, projection, replacementCompatibility } = require("../gateway/catalog");
 const { parseWorkoutResponse } = require("../response.parser");
 const { AI_OPERATIONS } = require("../ai-usage.service");
 const { withDeadline } = require("../gateway/gateway");
 
 const expiryMs = 30 * 60 * 1000;
-function createActionService({ client = prisma, now = () => new Date() } = {}) {
+const TRANSACTION_ATTEMPTS = 5;
+function createActionService({ client = prisma, now = () => new Date(),
+  wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms)) } = {}) {
   async function transaction(fn) {
-    for (let attempt = 0; attempt < 3; attempt++) {
+    for (let attempt = 0; attempt < TRANSACTION_ATTEMPTS; attempt++) {
       try { return await client.$transaction(fn, { isolationLevel: "Serializable" }); }
-      catch (e) { if (e.code !== "P2034" || attempt === 2) throw e; }
+      catch (e) {
+        if (e.code !== "P2034" || attempt === TRANSACTION_ATTEMPTS - 1) throw e;
+        await wait(50 * 2 ** attempt);
+      }
     }
   }
   function dto(row) {
@@ -53,6 +58,9 @@ function createActionService({ client = prisma, now = () => new Date() } = {}) {
     const active = await db.workoutSyncSession.findFirst({ where: { userId, planId: p.planId, status: { in: ["active", "paused", "running", "in_progress"] } } });
     if (active) throw new AppError("Conclua a sessao ativa antes de alterar a ficha.", 409, "ai_action_active_session");
     const after = projectResult(before, p);
+    if (p.type === "REPLACE_EXERCISE" && replacementCompatibility(p.previousExerciseId, p.canonicalExerciseId) === "INCOMPATIBLE") {
+      throw new AppError("A substituicao nao corresponde ao movimento ou grupo muscular registrado.", 409, "ai_action_incompatible_replacement");
+    }
     const from = p.type === "REPLACE_EXERCISE" ? p.previousExerciseId : before.nome;
     return { payload: p, before, after,
       preview: { before: from, after: p.canonicalExerciseId, details: [before.nome, "Altera somente a ficha futura; historico e series permanecem intactos."] } };

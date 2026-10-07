@@ -8,6 +8,7 @@ const policies = Object.freeze({
   ai_provider_rejected: [502, false, "O servico de IA nao pode atender esta solicitacao."],
   ai_invalid_response: [502, false, "A IA nao retornou um treino valido."],
   ai_domain_validation_error: [502, false, "O treino gerado nao passou na validacao."],
+  ai_semantic_validation_error: [502, false, "Nao foi possivel apoiar esta resposta nos dados disponiveis. Tente reformular a pergunta."],
   ai_not_configured: [503, false, "A geracao de IA nao esta configurada neste ambiente."],
   ai_unsupported_task: [400, false, "Esta tarefa de IA ainda nao esta disponivel."]
 });

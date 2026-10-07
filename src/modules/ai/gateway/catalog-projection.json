@@ -1,7 +1,7 @@
 {
   "contract": "ExerciseCatalogBindingContract/v1",
   "source": "app/lib/data/exercicios + ExerciseCatalogBinder.bindAi",
-  "sourceRevision": "77639761ede9cf737413d6e942e6c1744f87a3cd",
+  "sourceRevision": "08cdee669463c87aec928e98cc30b3b837369399",
   "canonicalIds": [
     "abdomen_001",
     "abdomen_002",
@@ -1076,5 +1076,3071 @@
     "wrist roller": "antebr_006",
     "zottman": "antebr_016",
     "zumba": "cardio_015"
+  },
+  "exerciseMetadata": {
+    "peito_001": {
+      "category": "Peito",
+      "primaryMuscles": [
+        "Peitoral Maior"
+      ],
+      "movementPattern": "horizontalPush"
+    },
+    "peito_002": {
+      "category": "Peito",
+      "primaryMuscles": [
+        "Peitoral Superior"
+      ],
+      "movementPattern": "horizontalPush"
+    },
+    "peito_003": {
+      "category": "Peito",
+      "primaryMuscles": [
+        "Peitoral Inferior"
+      ],
+      "movementPattern": "horizontalPush"
+    },
+    "peito_004": {
+      "category": "Peito",
+      "primaryMuscles": [
+        "Peitoral Maior"
+      ],
+      "movementPattern": "horizontalPush"
+    },
+    "peito_005": {
+      "category": "Peito",
+      "primaryMuscles": [
+        "Peitoral Superior"
+      ],
+      "movementPattern": "horizontalPush"
+    },
+    "peito_006": {
+      "category": "Peito",
+      "primaryMuscles": [
+        "Peitoral Maior"
+      ],
+      "movementPattern": "unknown"
+    },
+    "peito_007": {
+      "category": "Peito",
+      "primaryMuscles": [
+        "Peitoral Superior"
+      ],
+      "movementPattern": "unknown"
+    },
+    "peito_008": {
+      "category": "Peito",
+      "primaryMuscles": [
+        "Peitoral Maior"
+      ],
+      "movementPattern": "unknown"
+    },
+    "peito_009": {
+      "category": "Peito",
+      "primaryMuscles": [
+        "Peitoral Superior"
+      ],
+      "movementPattern": "unknown"
+    },
+    "peito_010": {
+      "category": "Peito",
+      "primaryMuscles": [
+        "Peitoral Maior"
+      ],
+      "movementPattern": "horizontalPush"
+    },
+    "peito_011": {
+      "category": "Peito",
+      "primaryMuscles": [
+        "Peitoral Inferior"
+      ],
+      "movementPattern": "horizontalPush"
+    },
+    "peito_012": {
+      "category": "Peito",
+      "primaryMuscles": [
+        "Peitoral Superior"
+      ],
+      "movementPattern": "horizontalPush"
+    },
+    "peito_013": {
+      "category": "Peito",
+      "primaryMuscles": [
+        "Peitoral Medial",
+        "Tríceps"
+      ],
+      "movementPattern": "horizontalPush"
+    },
+    "peito_014": {
+      "category": "Peito",
+      "primaryMuscles": [
+        "Peitoral Medial",
+        "Tríceps"
+      ],
+      "movementPattern": "horizontalPush"
+    },
+    "peito_015": {
+      "category": "Peito",
+      "primaryMuscles": [
+        "Peitoral Maior"
+      ],
+      "movementPattern": "unknown"
+    },
+    "peito_016": {
+      "category": "Peito",
+      "primaryMuscles": [
+        "Peitoral Maior"
+      ],
+      "movementPattern": "horizontalPush"
+    },
+    "peito_017": {
+      "category": "Peito",
+      "primaryMuscles": [
+        "Peitoral Maior",
+        "Grande Dorsal"
+      ],
+      "movementPattern": "unknown"
+    },
+    "peito_018": {
+      "category": "Peito",
+      "primaryMuscles": [
+        "Peitoral Inferior",
+        "Tríceps"
+      ],
+      "movementPattern": "isolation"
+    },
+    "peito_019": {
+      "category": "Peito",
+      "primaryMuscles": [
+        "Peitoral Maior"
+      ],
+      "movementPattern": "horizontalPush"
+    },
+    "peito_020": {
+      "category": "Peito",
+      "primaryMuscles": [
+        "Peitoral Maior"
+      ],
+      "movementPattern": "horizontalPush"
+    },
+    "peito_021": {
+      "category": "Peito",
+      "primaryMuscles": [
+        "Peitoral Maior"
+      ],
+      "movementPattern": "horizontalPush"
+    },
+    "peito_022": {
+      "category": "Peito",
+      "primaryMuscles": [
+        "Peitoral Maior"
+      ],
+      "movementPattern": "horizontalPush"
+    },
+    "peito_023": {
+      "category": "Peito",
+      "primaryMuscles": [
+        "Peitoral Maior"
+      ],
+      "movementPattern": "horizontalPush"
+    },
+    "peito_024": {
+      "category": "Peito",
+      "primaryMuscles": [
+        "Peitoral Maior"
+      ],
+      "movementPattern": "unknown"
+    },
+    "peito_025": {
+      "category": "Peito",
+      "primaryMuscles": [
+        "Peitoral Maior"
+      ],
+      "movementPattern": "horizontalPush"
+    },
+    "peito_026": {
+      "category": "Peito",
+      "primaryMuscles": [
+        "Peitoral Maior"
+      ],
+      "movementPattern": "horizontalPush"
+    },
+    "peito_027": {
+      "category": "Peito",
+      "primaryMuscles": [
+        "Peitoral Maior"
+      ],
+      "movementPattern": "horizontalPush"
+    },
+    "peito_028": {
+      "category": "Peito",
+      "primaryMuscles": [
+        "Peitoral Maior",
+        "Oblíquos"
+      ],
+      "movementPattern": "horizontalPush"
+    },
+    "peito_029": {
+      "category": "Peito",
+      "primaryMuscles": [
+        "Peitoral Maior"
+      ],
+      "movementPattern": "horizontalPush"
+    },
+    "peito_030": {
+      "category": "Peito",
+      "primaryMuscles": [
+        "Peitoral Maior",
+        "Deltóide"
+      ],
+      "movementPattern": "horizontalPush"
+    },
+    "costas_001": {
+      "category": "Costas",
+      "primaryMuscles": [
+        "Latíssimo do Dorso"
+      ],
+      "movementPattern": "verticalPull"
+    },
+    "costas_002": {
+      "category": "Costas",
+      "primaryMuscles": [
+        "Latíssimo do Dorso",
+        "Romboides",
+        "Trapézio Médio"
+      ],
+      "movementPattern": "horizontalPull"
+    },
+    "costas_003": {
+      "category": "Costas",
+      "primaryMuscles": [
+        "Latíssimo do Dorso"
+      ],
+      "movementPattern": "verticalPull"
+    },
+    "costas_004": {
+      "category": "Costas",
+      "primaryMuscles": [
+        "Latíssimo do Dorso",
+        "Romboides"
+      ],
+      "movementPattern": "horizontalPull"
+    },
+    "costas_005": {
+      "category": "Costas",
+      "primaryMuscles": [
+        "Eretores da Espinha",
+        "Glúteos",
+        "Isquiotibiais"
+      ],
+      "movementPattern": "hinge"
+    },
+    "costas_006": {
+      "category": "Costas",
+      "primaryMuscles": [
+        "Latíssimo do Dorso",
+        "Romboides",
+        "Trapézio Médio"
+      ],
+      "movementPattern": "horizontalPull"
+    },
+    "costas_007": {
+      "category": "Costas",
+      "primaryMuscles": [
+        "Latíssimo do Dorso"
+      ],
+      "movementPattern": "verticalPull"
+    },
+    "costas_008": {
+      "category": "Costas",
+      "primaryMuscles": [
+        "Trapézio",
+        "Deltóide Lateral e Posterior"
+      ],
+      "movementPattern": "horizontalPull"
+    },
+    "costas_009": {
+      "category": "Costas",
+      "primaryMuscles": [
+        "Eretores da Espinha",
+        "Glúteos"
+      ],
+      "movementPattern": "unknown"
+    },
+    "costas_010": {
+      "category": "Costas",
+      "primaryMuscles": [
+        "Latíssimo do Dorso"
+      ],
+      "movementPattern": "verticalPull"
+    },
+    "costas_011": {
+      "category": "Costas",
+      "primaryMuscles": [
+        "Latíssimo do Dorso"
+      ],
+      "movementPattern": "horizontalPull"
+    },
+    "costas_012": {
+      "category": "Costas",
+      "primaryMuscles": [
+        "Romboides",
+        "Trapézio Médio",
+        "Latíssimo do Dorso"
+      ],
+      "movementPattern": "horizontalPull"
+    },
+    "costas_013": {
+      "category": "Costas",
+      "primaryMuscles": [
+        "Romboides",
+        "Trapézio Médio",
+        "Latíssimo do Dorso"
+      ],
+      "movementPattern": "horizontalPull"
+    },
+    "costas_014": {
+      "category": "Costas",
+      "primaryMuscles": [
+        "Latíssimo do Dorso"
+      ],
+      "movementPattern": "verticalPull"
+    },
+    "costas_015": {
+      "category": "Costas",
+      "primaryMuscles": [
+        "Eretores da Espinha",
+        "Isquiotibiais",
+        "Glúteos"
+      ],
+      "movementPattern": "hinge"
+    },
+    "costas_016": {
+      "category": "Costas",
+      "primaryMuscles": [
+        "Latíssimo do Dorso",
+        "Romboides",
+        "Trapézio Médio"
+      ],
+      "movementPattern": "horizontalPull"
+    },
+    "costas_017": {
+      "category": "Costas",
+      "primaryMuscles": [
+        "Deltóide Posterior",
+        "Romboides"
+      ],
+      "movementPattern": "unknown"
+    },
+    "costas_018": {
+      "category": "Costas",
+      "primaryMuscles": [
+        "Deltóide Posterior",
+        "Trapézio Médio e Inferior"
+      ],
+      "movementPattern": "unknown"
+    },
+    "costas_019": {
+      "category": "Costas",
+      "primaryMuscles": [
+        "Isquiotibiais",
+        "Eretores da Espinha",
+        "Glúteos"
+      ],
+      "movementPattern": "hinge"
+    },
+    "costas_020": {
+      "category": "Costas",
+      "primaryMuscles": [
+        "Latíssimo do Dorso",
+        "Romboides"
+      ],
+      "movementPattern": "horizontalPull"
+    },
+    "costas_021": {
+      "category": "Costas",
+      "primaryMuscles": [
+        "Latíssimo do Dorso",
+        "Peitoral Maior"
+      ],
+      "movementPattern": "unknown"
+    },
+    "costas_022": {
+      "category": "Costas",
+      "primaryMuscles": [
+        "Latíssimo do Dorso",
+        "Romboides"
+      ],
+      "movementPattern": "horizontalPull"
+    },
+    "costas_023": {
+      "category": "Costas",
+      "primaryMuscles": [
+        "Eretores da Espinha",
+        "Glúteos"
+      ],
+      "movementPattern": "unknown"
+    },
+    "costas_024": {
+      "category": "Costas",
+      "primaryMuscles": [
+        "Latíssimo do Dorso"
+      ],
+      "movementPattern": "horizontalPull"
+    },
+    "costas_025": {
+      "category": "Costas",
+      "primaryMuscles": [
+        "Romboides",
+        "Trapézio Médio"
+      ],
+      "movementPattern": "unknown"
+    },
+    "costas_026": {
+      "category": "Costas",
+      "primaryMuscles": [
+        "Glúteos",
+        "Adutores",
+        "Isquiotibiais",
+        "Eretores da Espinha"
+      ],
+      "movementPattern": "hinge"
+    },
+    "costas_027": {
+      "category": "Costas",
+      "primaryMuscles": [
+        "Latíssimo do Dorso"
+      ],
+      "movementPattern": "verticalPull"
+    },
+    "costas_028": {
+      "category": "Costas",
+      "primaryMuscles": [
+        "Latíssimo do Dorso",
+        "Romboides"
+      ],
+      "movementPattern": "horizontalPull"
+    },
+    "costas_029": {
+      "category": "Costas",
+      "primaryMuscles": [
+        "Latíssimo do Dorso",
+        "Romboides",
+        "Trapézio"
+      ],
+      "movementPattern": "horizontalPull"
+    },
+    "costas_030": {
+      "category": "Costas",
+      "primaryMuscles": [
+        "Latíssimo do Dorso",
+        "Romboides"
+      ],
+      "movementPattern": "horizontalPull"
+    },
+    "costas_031": {
+      "category": "Costas",
+      "primaryMuscles": [
+        "Latíssimo do Dorso",
+        "Romboides"
+      ],
+      "movementPattern": "horizontalPull"
+    },
+    "costas_032": {
+      "category": "Costas",
+      "primaryMuscles": [
+        "Latíssimo do Dorso"
+      ],
+      "movementPattern": "verticalPull"
+    },
+    "biceps_001": {
+      "category": "Bíceps",
+      "primaryMuscles": [
+        "Bíceps Braquial"
+      ],
+      "movementPattern": "isolation"
+    },
+    "biceps_002": {
+      "category": "Bíceps",
+      "primaryMuscles": [
+        "Bíceps Braquial"
+      ],
+      "movementPattern": "isolation"
+    },
+    "biceps_003": {
+      "category": "Bíceps",
+      "primaryMuscles": [
+        "Bíceps Braquial"
+      ],
+      "movementPattern": "isolation"
+    },
+    "biceps_004": {
+      "category": "Bíceps",
+      "primaryMuscles": [
+        "Bíceps Braquial"
+      ],
+      "movementPattern": "isolation"
+    },
+    "biceps_005": {
+      "category": "Bíceps",
+      "primaryMuscles": [
+        "Braquial",
+        "Braquiorradial"
+      ],
+      "movementPattern": "isolation"
+    },
+    "biceps_006": {
+      "category": "Bíceps",
+      "primaryMuscles": [
+        "Bíceps Braquial"
+      ],
+      "movementPattern": "isolation"
+    },
+    "biceps_007": {
+      "category": "Bíceps",
+      "primaryMuscles": [
+        "Bíceps Braquial"
+      ],
+      "movementPattern": "isolation"
+    },
+    "biceps_008": {
+      "category": "Bíceps",
+      "primaryMuscles": [
+        "Braquiorradial"
+      ],
+      "movementPattern": "isolation"
+    },
+    "biceps_009": {
+      "category": "Bíceps",
+      "primaryMuscles": [
+        "Bíceps Braquial"
+      ],
+      "movementPattern": "isolation"
+    },
+    "biceps_010": {
+      "category": "Bíceps",
+      "primaryMuscles": [
+        "Bíceps Braquial",
+        "Latíssimo do Dorso"
+      ],
+      "movementPattern": "verticalPull"
+    },
+    "biceps_011": {
+      "category": "Bíceps",
+      "primaryMuscles": [
+        "Bíceps Braquial"
+      ],
+      "movementPattern": "isolation"
+    },
+    "biceps_012": {
+      "category": "Bíceps",
+      "primaryMuscles": [
+        "Bíceps Braquial",
+        "Braquiorradial"
+      ],
+      "movementPattern": "isolation"
+    },
+    "biceps_013": {
+      "category": "Bíceps",
+      "primaryMuscles": [
+        "Bíceps Braquial"
+      ],
+      "movementPattern": "isolation"
+    },
+    "biceps_014": {
+      "category": "Bíceps",
+      "primaryMuscles": [
+        "Bíceps Braquial"
+      ],
+      "movementPattern": "isolation"
+    },
+    "biceps_015": {
+      "category": "Bíceps",
+      "primaryMuscles": [
+        "Bíceps Braquial"
+      ],
+      "movementPattern": "isolation"
+    },
+    "biceps_016": {
+      "category": "Bíceps",
+      "primaryMuscles": [
+        "Bíceps Braquial"
+      ],
+      "movementPattern": "isolation"
+    },
+    "biceps_017": {
+      "category": "Bíceps",
+      "primaryMuscles": [
+        "Bíceps Braquial"
+      ],
+      "movementPattern": "isolation"
+    },
+    "biceps_018": {
+      "category": "Bíceps",
+      "primaryMuscles": [
+        "Bíceps Braquial"
+      ],
+      "movementPattern": "isolation"
+    },
+    "biceps_019": {
+      "category": "Bíceps",
+      "primaryMuscles": [
+        "Braquial"
+      ],
+      "movementPattern": "isolation"
+    },
+    "biceps_020": {
+      "category": "Bíceps",
+      "primaryMuscles": [
+        "Bíceps Braquial"
+      ],
+      "movementPattern": "horizontalPush"
+    },
+    "biceps_021": {
+      "category": "Bíceps",
+      "primaryMuscles": [
+        "Bíceps Braquial"
+      ],
+      "movementPattern": "isolation"
+    },
+    "biceps_022": {
+      "category": "Bíceps",
+      "primaryMuscles": [
+        "Bíceps Braquial"
+      ],
+      "movementPattern": "isolation"
+    },
+    "biceps_023": {
+      "category": "Bíceps",
+      "primaryMuscles": [
+        "Bíceps Braquial"
+      ],
+      "movementPattern": "isolation"
+    },
+    "biceps_024": {
+      "category": "Bíceps",
+      "primaryMuscles": [
+        "Bíceps Braquial"
+      ],
+      "movementPattern": "isolation"
+    },
+    "biceps_025": {
+      "category": "Bíceps",
+      "primaryMuscles": [
+        "Bíceps Braquial"
+      ],
+      "movementPattern": "isolation"
+    },
+    "biceps_026": {
+      "category": "Bíceps",
+      "primaryMuscles": [
+        "Bíceps Braquial"
+      ],
+      "movementPattern": "horizontalPush"
+    },
+    "biceps_027": {
+      "category": "Bíceps",
+      "primaryMuscles": [
+        "Bíceps Braquial"
+      ],
+      "movementPattern": "isolation"
+    },
+    "biceps_028": {
+      "category": "Bíceps",
+      "primaryMuscles": [
+        "Bíceps Braquial"
+      ],
+      "movementPattern": "isolation"
+    },
+    "biceps_029": {
+      "category": "Bíceps",
+      "primaryMuscles": [
+        "Bíceps Braquial",
+        "Latíssimo do Dorso"
+      ],
+      "movementPattern": "verticalPull"
+    },
+    "biceps_030": {
+      "category": "Bíceps",
+      "primaryMuscles": [
+        "Bíceps Braquial"
+      ],
+      "movementPattern": "isolation"
+    },
+    "triceps_001": {
+      "category": "Tríceps",
+      "primaryMuscles": [
+        "Tríceps braquial",
+        "Ancôneo"
+      ],
+      "movementPattern": "verticalPull"
+    },
+    "triceps_002": {
+      "category": "Tríceps",
+      "primaryMuscles": [
+        "Tríceps braquial",
+        "Cabeça longa do tríceps",
+        "Cabeça lateral do tríceps"
+      ],
+      "movementPattern": "isolation"
+    },
+    "triceps_003": {
+      "category": "Tríceps",
+      "primaryMuscles": [
+        "Cabeça longa do tríceps",
+        "Tríceps braquial"
+      ],
+      "movementPattern": "isolation"
+    },
+    "triceps_004": {
+      "category": "Tríceps",
+      "primaryMuscles": [
+        "Tríceps braquial",
+        "Deltóide anterior",
+        "Peitoral"
+      ],
+      "movementPattern": "isolation"
+    },
+    "triceps_005": {
+      "category": "Tríceps",
+      "primaryMuscles": [
+        "Tríceps braquial",
+        "Cabeça lateral do tríceps"
+      ],
+      "movementPattern": "isolation"
+    },
+    "triceps_006": {
+      "category": "Tríceps",
+      "primaryMuscles": [
+        "Tríceps braquial",
+        "Deltóide anterior",
+        "Peitoral esternal"
+      ],
+      "movementPattern": "horizontalPush"
+    },
+    "triceps_007": {
+      "category": "Tríceps",
+      "primaryMuscles": [
+        "Cabeça lateral do tríceps",
+        "Tríceps braquial"
+      ],
+      "movementPattern": "isolation"
+    },
+    "triceps_008": {
+      "category": "Tríceps",
+      "primaryMuscles": [
+        "Cabeça longa do tríceps",
+        "Cabeça medial do tríceps",
+        "Tríceps braquial"
+      ],
+      "movementPattern": "isolation"
+    },
+    "triceps_009": {
+      "category": "Tríceps",
+      "primaryMuscles": [
+        "Tríceps braquial",
+        "Deltóide anterior"
+      ],
+      "movementPattern": "isolation"
+    },
+    "triceps_010": {
+      "category": "Tríceps",
+      "primaryMuscles": [
+        "Cabeça longa do tríceps",
+        "Tríceps braquial"
+      ],
+      "movementPattern": "isolation"
+    },
+    "triceps_011": {
+      "category": "Tríceps",
+      "primaryMuscles": [
+        "Tríceps braquial",
+        "Deltóide anterior",
+        "Peitoral"
+      ],
+      "movementPattern": "horizontalPush"
+    },
+    "triceps_012": {
+      "category": "Tríceps",
+      "primaryMuscles": [
+        "Tríceps braquial",
+        "Cabeça longa do tríceps"
+      ],
+      "movementPattern": "isolation"
+    },
+    "triceps_013": {
+      "category": "Tríceps",
+      "primaryMuscles": [
+        "Tríceps braquial"
+      ],
+      "movementPattern": "isolation"
+    },
+    "triceps_014": {
+      "category": "Tríceps",
+      "primaryMuscles": [
+        "Tríceps braquial",
+        "Deltóide anterior",
+        "Peitoral"
+      ],
+      "movementPattern": "isolation"
+    },
+    "triceps_015": {
+      "category": "Tríceps",
+      "primaryMuscles": [
+        "Tríceps braquial",
+        "Peitoral esternal",
+        "Deltóide anterior"
+      ],
+      "movementPattern": "horizontalPush"
+    },
+    "triceps_016": {
+      "category": "Tríceps",
+      "primaryMuscles": [
+        "Tríceps braquial"
+      ],
+      "movementPattern": "isolation"
+    },
+    "triceps_017": {
+      "category": "Tríceps",
+      "primaryMuscles": [
+        "Cabeça longa do tríceps",
+        "Tríceps braquial"
+      ],
+      "movementPattern": "isolation"
+    },
+    "triceps_018": {
+      "category": "Tríceps",
+      "primaryMuscles": [
+        "Tríceps braquial",
+        "Cabeça lateral do tríceps"
+      ],
+      "movementPattern": "isolation"
+    },
+    "triceps_019": {
+      "category": "Tríceps",
+      "primaryMuscles": [
+        "Cabeça medial do tríceps",
+        "Tríceps braquial"
+      ],
+      "movementPattern": "isolation"
+    },
+    "triceps_020": {
+      "category": "Tríceps",
+      "primaryMuscles": [
+        "Tríceps braquial",
+        "Cabeça medial do tríceps",
+        "Peitoral inferior"
+      ],
+      "movementPattern": "horizontalPush"
+    },
+    "triceps_021": {
+      "category": "Tríceps",
+      "primaryMuscles": [
+        "Cabeça lateral do tríceps",
+        "Tríceps braquial"
+      ],
+      "movementPattern": "isolation"
+    },
+    "triceps_022": {
+      "category": "Tríceps",
+      "primaryMuscles": [
+        "Tríceps braquial",
+        "Deltóide anterior",
+        "Core",
+        "Peitoral"
+      ],
+      "movementPattern": "isolation"
+    },
+    "triceps_023": {
+      "category": "Tríceps",
+      "primaryMuscles": [
+        "Cabeça medial do tríceps",
+        "Tríceps braquial"
+      ],
+      "movementPattern": "isolation"
+    },
+    "triceps_024": {
+      "category": "Tríceps",
+      "primaryMuscles": [
+        "Tríceps braquial",
+        "Cabeça lateral do tríceps"
+      ],
+      "movementPattern": "isolation"
+    },
+    "triceps_025": {
+      "category": "Tríceps",
+      "primaryMuscles": [
+        "Cabeça longa do tríceps",
+        "Tríceps braquial"
+      ],
+      "movementPattern": "isolation"
+    },
+    "triceps_026": {
+      "category": "Tríceps",
+      "primaryMuscles": [
+        "Tríceps braquial",
+        "Ancôneo"
+      ],
+      "movementPattern": "isolation"
+    },
+    "triceps_027": {
+      "category": "Tríceps",
+      "primaryMuscles": [
+        "Tríceps braquial",
+        "Deltóide anterior"
+      ],
+      "movementPattern": "isolation"
+    },
+    "triceps_028": {
+      "category": "Tríceps",
+      "primaryMuscles": [
+        "Tríceps braquial",
+        "Cabeça longa do tríceps"
+      ],
+      "movementPattern": "isolation"
+    },
+    "triceps_029": {
+      "category": "Tríceps",
+      "primaryMuscles": [
+        "Tríceps braquial",
+        "Deltóide anterior",
+        "Peitoral"
+      ],
+      "movementPattern": "horizontalPush"
+    },
+    "triceps_030": {
+      "category": "Tríceps",
+      "primaryMuscles": [
+        "Tríceps braquial",
+        "Cabeça medial do tríceps",
+        "Peitoral"
+      ],
+      "movementPattern": "isolation"
+    },
+    "ombros_001": {
+      "category": "Ombros",
+      "primaryMuscles": [
+        "Deltóide anterior",
+        "Deltóide medial",
+        "Tríceps",
+        "Trapézio",
+        "Core"
+      ],
+      "movementPattern": "verticalPush"
+    },
+    "ombros_002": {
+      "category": "Ombros",
+      "primaryMuscles": [
+        "Deltóide anterior",
+        "Deltóide medial",
+        "Tríceps",
+        "Trapézio"
+      ],
+      "movementPattern": "verticalPush"
+    },
+    "ombros_003": {
+      "category": "Ombros",
+      "primaryMuscles": [
+        "Deltóide medial",
+        "Trapézio superior",
+        "Supra-espinal"
+      ],
+      "movementPattern": "isolation"
+    },
+    "ombros_004": {
+      "category": "Ombros",
+      "primaryMuscles": [
+        "Deltóide anterior",
+        "Clavicular do peitoral"
+      ],
+      "movementPattern": "isolation"
+    },
+    "ombros_005": {
+      "category": "Ombros",
+      "primaryMuscles": [
+        "Deltóide medial",
+        "Trapézio",
+        "Bíceps"
+      ],
+      "movementPattern": "horizontalPull"
+    },
+    "ombros_006": {
+      "category": "Ombros",
+      "primaryMuscles": [
+        "Deltóide anterior",
+        "Deltóide medial",
+        "Deltóide posterior",
+        "Tríceps"
+      ],
+      "movementPattern": "unknown"
+    },
+    "ombros_007": {
+      "category": "Ombros",
+      "primaryMuscles": [
+        "Deltóide posterior",
+        "Romboides",
+        "Trapézio médio"
+      ],
+      "movementPattern": "unknown"
+    },
+    "ombros_008": {
+      "category": "Ombros",
+      "primaryMuscles": [
+        "Deltóide posterior",
+        "Manguito rotador",
+        "Romboides",
+        "Trapézio"
+      ],
+      "movementPattern": "unknown"
+    },
+    "ombros_009": {
+      "category": "Ombros",
+      "primaryMuscles": [
+        "Deltóide anterior",
+        "Deltóide medial",
+        "Tríceps",
+        "Core"
+      ],
+      "movementPattern": "verticalPush"
+    },
+    "ombros_010": {
+      "category": "Ombros",
+      "primaryMuscles": [
+        "Deltóide medial",
+        "Trapézio superior"
+      ],
+      "movementPattern": "isolation"
+    },
+    "ombros_011": {
+      "category": "Ombros",
+      "primaryMuscles": [
+        "Deltóide anterior",
+        "Deltóide medial",
+        "Tríceps"
+      ],
+      "movementPattern": "verticalPush"
+    },
+    "ombros_012": {
+      "category": "Ombros",
+      "primaryMuscles": [
+        "Trapézio superior",
+        "Levantador da escápula"
+      ],
+      "movementPattern": "unknown"
+    },
+    "ombros_013": {
+      "category": "Ombros",
+      "primaryMuscles": [
+        "Deltóide anterior",
+        "Deltóide medial",
+        "Tríceps",
+        "Quadríceps",
+        "Core"
+      ],
+      "movementPattern": "unknown"
+    },
+    "ombros_014": {
+      "category": "Ombros",
+      "primaryMuscles": [
+        "Deltóide medial",
+        "Trapézio superior"
+      ],
+      "movementPattern": "isolation"
+    },
+    "ombros_015": {
+      "category": "Ombros",
+      "primaryMuscles": [
+        "Deltóide anterior",
+        "Deltóide medial",
+        "Tríceps"
+      ],
+      "movementPattern": "verticalPush"
+    },
+    "ombros_016": {
+      "category": "Ombros",
+      "primaryMuscles": [
+        "Infraespinal",
+        "Redondo menor",
+        "Manguito rotador"
+      ],
+      "movementPattern": "unknown"
+    },
+    "ombros_017": {
+      "category": "Ombros",
+      "primaryMuscles": [
+        "Deltóide anterior",
+        "Deltóide medial",
+        "Tríceps",
+        "Core"
+      ],
+      "movementPattern": "unknown"
+    },
+    "ombros_018": {
+      "category": "Ombros",
+      "primaryMuscles": [
+        "Deltóide posterior",
+        "Romboides",
+        "Trapézio médio"
+      ],
+      "movementPattern": "unknown"
+    },
+    "ombros_019": {
+      "category": "Ombros",
+      "primaryMuscles": [
+        "Deltóide",
+        "Trapézio",
+        "Manguito rotador",
+        "Core"
+      ],
+      "movementPattern": "horizontalPush"
+    },
+    "ombros_020": {
+      "category": "Ombros",
+      "primaryMuscles": [
+        "Deltóide anterior",
+        "Deltóide medial",
+        "Tríceps"
+      ],
+      "movementPattern": "verticalPush"
+    },
+    "ombros_021": {
+      "category": "Ombros",
+      "primaryMuscles": [
+        "Deltóide anterior"
+      ],
+      "movementPattern": "isolation"
+    },
+    "ombros_022": {
+      "category": "Ombros",
+      "primaryMuscles": [
+        "Deltóide medial",
+        "Deltóide posterior",
+        "Tríceps",
+        "Trapézio"
+      ],
+      "movementPattern": "verticalPush"
+    },
+    "ombros_023": {
+      "category": "Ombros",
+      "primaryMuscles": [
+        "Deltóide posterior",
+        "Romboides",
+        "Trapézio médio"
+      ],
+      "movementPattern": "unknown"
+    },
+    "ombros_024": {
+      "category": "Ombros",
+      "primaryMuscles": [
+        "Tríceps",
+        "Deltóide anterior",
+        "Peitoral"
+      ],
+      "movementPattern": "horizontalPush"
+    },
+    "ombros_025": {
+      "category": "Ombros",
+      "primaryMuscles": [
+        "Subescapular",
+        "Manguito rotador"
+      ],
+      "movementPattern": "unknown"
+    },
+    "ombros_026": {
+      "category": "Ombros",
+      "primaryMuscles": [
+        "Deltóide anterior",
+        "Deltóide medial",
+        "Tríceps",
+        "Core",
+        "Trapézio"
+      ],
+      "movementPattern": "unknown"
+    },
+    "ombros_027": {
+      "category": "Ombros",
+      "primaryMuscles": [
+        "Deltóide medial",
+        "Trapézio superior"
+      ],
+      "movementPattern": "isolation"
+    },
+    "ombros_028": {
+      "category": "Ombros",
+      "primaryMuscles": [
+        "Deltóide anterior",
+        "Deltóide medial",
+        "Tríceps",
+        "Core",
+        "Manguito rotador"
+      ],
+      "movementPattern": "verticalPush"
+    },
+    "ombros_029": {
+      "category": "Ombros",
+      "primaryMuscles": [
+        "Deltóide medial",
+        "Trapézio superior"
+      ],
+      "movementPattern": "isolation"
+    },
+    "ombros_030": {
+      "category": "Ombros",
+      "primaryMuscles": [
+        "Deltóide medial",
+        "Trapézio",
+        "Bíceps"
+      ],
+      "movementPattern": "horizontalPull"
+    },
+    "antebr_001": {
+      "category": "Antebraço",
+      "primaryMuscles": [
+        "Flexores do Punho",
+        "Flexor Radial do Carpo",
+        "Flexor Ulnar do Carpo"
+      ],
+      "movementPattern": "horizontalPush"
+    },
+    "antebr_002": {
+      "category": "Antebraço",
+      "primaryMuscles": [
+        "Extensores do Punho",
+        "Extensor Radial Longo do Carpo",
+        "Extensor Ulnar do Carpo"
+      ],
+      "movementPattern": "isolation"
+    },
+    "antebr_003": {
+      "category": "Antebraço",
+      "primaryMuscles": [
+        "Flexores do Antebraço",
+        "Intrínsecos da Mão"
+      ],
+      "movementPattern": "unknown"
+    },
+    "antebr_004": {
+      "category": "Antebraço",
+      "primaryMuscles": [
+        "Flexores do Antebraço",
+        "Intrínsecos da Mão"
+      ],
+      "movementPattern": "unknown"
+    },
+    "antebr_005": {
+      "category": "Antebraço",
+      "primaryMuscles": [
+        "Braquiorradial",
+        "Braquial"
+      ],
+      "movementPattern": "isolation"
+    },
+    "antebr_006": {
+      "category": "Antebraço",
+      "primaryMuscles": [
+        "Flexores do Punho",
+        "Extensores do Punho"
+      ],
+      "movementPattern": "unknown"
+    },
+    "antebr_007": {
+      "category": "Antebraço",
+      "primaryMuscles": [
+        "Pronador Redondo",
+        "Pronador Quadrado",
+        "Supinador"
+      ],
+      "movementPattern": "unknown"
+    },
+    "antebr_008": {
+      "category": "Antebraço",
+      "primaryMuscles": [
+        "Flexores dos Dedos",
+        "Músculos Intrínsecos da Mão"
+      ],
+      "movementPattern": "unknown"
+    },
+    "antebr_009": {
+      "category": "Antebraço",
+      "primaryMuscles": [
+        "Extensores do Punho"
+      ],
+      "movementPattern": "unknown"
+    },
+    "antebr_010": {
+      "category": "Antebraço",
+      "primaryMuscles": [
+        "Flexores do Punho",
+        "Flexores dos Dedos"
+      ],
+      "movementPattern": "horizontalPush"
+    },
+    "antebr_011": {
+      "category": "Antebraço",
+      "primaryMuscles": [
+        "Flexores dos Dedos",
+        "Músculos Intrínsecos da Mão"
+      ],
+      "movementPattern": "unknown"
+    },
+    "antebr_012": {
+      "category": "Antebraço",
+      "primaryMuscles": [
+        "Braquiorradial",
+        "Extensores do Punho"
+      ],
+      "movementPattern": "isolation"
+    },
+    "antebr_013": {
+      "category": "Antebraço",
+      "primaryMuscles": [
+        "Flexores dos Dedos",
+        "Intrínsecos da Mão"
+      ],
+      "movementPattern": "unknown"
+    },
+    "antebr_014": {
+      "category": "Antebraço",
+      "primaryMuscles": [
+        "Flexores do Punho"
+      ],
+      "movementPattern": "horizontalPush"
+    },
+    "antebr_015": {
+      "category": "Antebraço",
+      "primaryMuscles": [
+        "Flexores do Antebraço",
+        "Flexores dos Dedos"
+      ],
+      "movementPattern": "unknown"
+    },
+    "antebr_016": {
+      "category": "Antebraço",
+      "primaryMuscles": [
+        "Bíceps Braquial",
+        "Braquiorradial",
+        "Extensores do Punho"
+      ],
+      "movementPattern": "isolation"
+    },
+    "antebr_017": {
+      "category": "Antebraço",
+      "primaryMuscles": [
+        "Extensores dos Dedos",
+        "Músculos Intrínsecos da Mão"
+      ],
+      "movementPattern": "unknown"
+    },
+    "antebr_018": {
+      "category": "Antebraço",
+      "primaryMuscles": [
+        "Flexores do Antebraço",
+        "Intrínsecos da Mão"
+      ],
+      "movementPattern": "unknown"
+    },
+    "antebr_019": {
+      "category": "Antebraço",
+      "primaryMuscles": [
+        "Extensor Radial do Carpo",
+        "Flexor Ulnar do Carpo",
+        "Flexor Radial do Carpo"
+      ],
+      "movementPattern": "isolation"
+    },
+    "antebr_020": {
+      "category": "Antebraço",
+      "primaryMuscles": [
+        "Flexores dos Dedos",
+        "Lumbricais",
+        "Intrínsecos da Mão"
+      ],
+      "movementPattern": "unknown"
+    },
+    "antebr_021": {
+      "category": "Antebraço",
+      "primaryMuscles": [
+        "Pronador Redondo",
+        "Supinador",
+        "Pronador Quadrado"
+      ],
+      "movementPattern": "unknown"
+    },
+    "antebr_022": {
+      "category": "Antebraço",
+      "primaryMuscles": [
+        "Flexores dos Dedos",
+        "Flexores do Punho"
+      ],
+      "movementPattern": "hinge"
+    },
+    "antebr_023": {
+      "category": "Antebraço",
+      "primaryMuscles": [
+        "Flexores dos Dedos",
+        "Flexores do Punho"
+      ],
+      "movementPattern": "horizontalPull"
+    },
+    "antebr_024": {
+      "category": "Antebraço",
+      "primaryMuscles": [
+        "Extensores dos Dedos",
+        "Músculos Intrínsecos da Mão"
+      ],
+      "movementPattern": "unknown"
+    },
+    "antebr_025": {
+      "category": "Antebraço",
+      "primaryMuscles": [
+        "Flexores dos Dedos",
+        "Thenar"
+      ],
+      "movementPattern": "unknown"
+    },
+    "antebr_026": {
+      "category": "Antebraço",
+      "primaryMuscles": [
+        "Braquiorradial",
+        "Bíceps Braquial"
+      ],
+      "movementPattern": "isolation"
+    },
+    "antebr_027": {
+      "category": "Antebraço",
+      "primaryMuscles": [
+        "Flexores do Punho",
+        "Flexores dos Dedos"
+      ],
+      "movementPattern": "horizontalPush"
+    },
+    "antebr_028": {
+      "category": "Antebraço",
+      "primaryMuscles": [
+        "Flexores dos Dedos",
+        "Pronadores"
+      ],
+      "movementPattern": "unknown"
+    },
+    "antebr_029": {
+      "category": "Antebraço",
+      "primaryMuscles": [
+        "Flexores dos Dedos",
+        "Intrínsecos da Mão"
+      ],
+      "movementPattern": "unknown"
+    },
+    "antebr_030": {
+      "category": "Antebraço",
+      "primaryMuscles": [
+        "Flexores dos Dedos",
+        "Intrínsecos da Mão",
+        "Flexores do Punho"
+      ],
+      "movementPattern": "verticalPull"
+    },
+    "abdomen_001": {
+      "category": "Abdômen",
+      "primaryMuscles": [
+        "Reto Abdominal"
+      ],
+      "movementPattern": "unknown"
+    },
+    "abdomen_002": {
+      "category": "Abdômen",
+      "primaryMuscles": [
+        "Transverso do Abdômen",
+        "Reto Abdominal"
+      ],
+      "movementPattern": "unknown"
+    },
+    "abdomen_003": {
+      "category": "Abdômen",
+      "primaryMuscles": [
+        "Reto Abdominal",
+        "Oblíquos"
+      ],
+      "movementPattern": "unknown"
+    },
+    "abdomen_004": {
+      "category": "Abdômen",
+      "primaryMuscles": [
+        "Reto Abdominal Inferior",
+        "Flexores do Quadril"
+      ],
+      "movementPattern": "isolation"
+    },
+    "abdomen_005": {
+      "category": "Abdômen",
+      "primaryMuscles": [
+        "Oblíquos",
+        "Reto Abdominal"
+      ],
+      "movementPattern": "unknown"
+    },
+    "abdomen_006": {
+      "category": "Abdômen",
+      "primaryMuscles": [
+        "Reto Abdominal"
+      ],
+      "movementPattern": "unknown"
+    },
+    "abdomen_007": {
+      "category": "Abdômen",
+      "primaryMuscles": [
+        "Transverso do Abdômen",
+        "Flexores do Quadril"
+      ],
+      "movementPattern": "unknown"
+    },
+    "abdomen_008": {
+      "category": "Abdômen",
+      "primaryMuscles": [
+        "Oblíquos"
+      ],
+      "movementPattern": "unknown"
+    },
+    "abdomen_009": {
+      "category": "Abdômen",
+      "primaryMuscles": [
+        "Oblíquos",
+        "Quadrado Lombar"
+      ],
+      "movementPattern": "unknown"
+    },
+    "abdomen_010": {
+      "category": "Abdômen",
+      "primaryMuscles": [
+        "Transverso do Abdômen"
+      ],
+      "movementPattern": "unknown"
+    },
+    "abdomen_011": {
+      "category": "Abdômen",
+      "primaryMuscles": [
+        "Reto Abdominal"
+      ],
+      "movementPattern": "unknown"
+    },
+    "abdomen_012": {
+      "category": "Abdômen",
+      "primaryMuscles": [
+        "Reto Abdominal"
+      ],
+      "movementPattern": "unknown"
+    },
+    "abdomen_013": {
+      "category": "Abdômen",
+      "primaryMuscles": [
+        "Transverso do Abdômen",
+        "Reto Abdominal"
+      ],
+      "movementPattern": "unknown"
+    },
+    "abdomen_014": {
+      "category": "Abdômen",
+      "primaryMuscles": [
+        "Reto Abdominal",
+        "Transverso do Abdômen"
+      ],
+      "movementPattern": "unknown"
+    },
+    "abdomen_015": {
+      "category": "Abdômen",
+      "primaryMuscles": [
+        "Reto Abdominal Inferior"
+      ],
+      "movementPattern": "isolation"
+    },
+    "abdomen_016": {
+      "category": "Abdômen",
+      "primaryMuscles": [
+        "Transverso do Abdômen",
+        "Oblíquos"
+      ],
+      "movementPattern": "unknown"
+    },
+    "abdomen_017": {
+      "category": "Abdômen",
+      "primaryMuscles": [
+        "Reto Abdominal Inferior"
+      ],
+      "movementPattern": "unknown"
+    },
+    "abdomen_018": {
+      "category": "Abdômen",
+      "primaryMuscles": [
+        "Oblíquos",
+        "Reto Abdominal"
+      ],
+      "movementPattern": "unknown"
+    },
+    "abdomen_019": {
+      "category": "Abdômen",
+      "primaryMuscles": [
+        "Reto Abdominal Inferior",
+        "Flexores do Quadril"
+      ],
+      "movementPattern": "verticalPull"
+    },
+    "abdomen_020": {
+      "category": "Abdômen",
+      "primaryMuscles": [
+        "Reto Abdominal Inferior",
+        "Flexores do Quadril"
+      ],
+      "movementPattern": "unknown"
+    },
+    "abdomen_021": {
+      "category": "Abdômen",
+      "primaryMuscles": [
+        "Transverso do Abdômen",
+        "Glúteo Máximo"
+      ],
+      "movementPattern": "isolation"
+    },
+    "abdomen_022": {
+      "category": "Abdômen",
+      "primaryMuscles": [
+        "Reto Abdominal"
+      ],
+      "movementPattern": "unknown"
+    },
+    "abdomen_023": {
+      "category": "Abdômen",
+      "primaryMuscles": [
+        "Transverso do Abdômen"
+      ],
+      "movementPattern": "unknown"
+    },
+    "abdomen_024": {
+      "category": "Abdômen",
+      "primaryMuscles": [
+        "Reto Abdominal"
+      ],
+      "movementPattern": "unknown"
+    },
+    "abdomen_025": {
+      "category": "Abdômen",
+      "primaryMuscles": [
+        "Reto Abdominal Inferior",
+        "Flexores do Quadril"
+      ],
+      "movementPattern": "unknown"
+    },
+    "abdomen_026": {
+      "category": "Abdômen",
+      "primaryMuscles": [
+        "Reto Abdominal",
+        "Flexores do Quadril",
+        "Transverso do Abdômen"
+      ],
+      "movementPattern": "unknown"
+    },
+    "abdomen_027": {
+      "category": "Abdômen",
+      "primaryMuscles": [
+        "Oblíquos",
+        "Reto Abdominal"
+      ],
+      "movementPattern": "unknown"
+    },
+    "abdomen_028": {
+      "category": "Abdômen",
+      "primaryMuscles": [
+        "Transverso do Abdômen",
+        "Reto Abdominal",
+        "Glúteos"
+      ],
+      "movementPattern": "unknown"
+    },
+    "abdomen_029": {
+      "category": "Abdômen",
+      "primaryMuscles": [
+        "Reto Abdominal",
+        "Oblíquos"
+      ],
+      "movementPattern": "unknown"
+    },
+    "abdomen_030": {
+      "category": "Abdômen",
+      "primaryMuscles": [
+        "Reto Abdominal",
+        "Transverso do Abdômen"
+      ],
+      "movementPattern": "unknown"
+    },
+    "pernas_001": {
+      "category": "Pernas",
+      "primaryMuscles": [
+        "Quadríceps",
+        "Glúteo máximo",
+        "Isquiotibiais",
+        "Adutores",
+        "Core"
+      ],
+      "movementPattern": "squat"
+    },
+    "pernas_002": {
+      "category": "Pernas",
+      "primaryMuscles": [
+        "Quadríceps",
+        "Glúteo máximo",
+        "Isquiotibiais"
+      ],
+      "movementPattern": "squat"
+    },
+    "pernas_003": {
+      "category": "Pernas",
+      "primaryMuscles": [
+        "Quadríceps",
+        "Reto femoral",
+        "Vasto lateral",
+        "Vasto medial"
+      ],
+      "movementPattern": "isolation"
+    },
+    "pernas_004": {
+      "category": "Pernas",
+      "primaryMuscles": [
+        "Isquiotibiais",
+        "Bíceps femoral",
+        "Semitendíneo",
+        "Semimembranáceo"
+      ],
+      "movementPattern": "horizontalPush"
+    },
+    "pernas_005": {
+      "category": "Pernas",
+      "primaryMuscles": [
+        "Quadríceps",
+        "Glúteo máximo",
+        "Isquiotibiais",
+        "Glúteo médio"
+      ],
+      "movementPattern": "lunge"
+    },
+    "pernas_006": {
+      "category": "Pernas",
+      "primaryMuscles": [
+        "Quadríceps",
+        "Glúteo máximo",
+        "Isquiotibiais",
+        "Glúteo médio"
+      ],
+      "movementPattern": "squat"
+    },
+    "pernas_007": {
+      "category": "Pernas",
+      "primaryMuscles": [
+        "Isquiotibiais",
+        "Glúteo máximo",
+        "Eretores da coluna"
+      ],
+      "movementPattern": "hinge"
+    },
+    "pernas_008": {
+      "category": "Pernas",
+      "primaryMuscles": [
+        "Quadríceps",
+        "Glúteo máximo",
+        "Isquiotibiais",
+        "Panturrilha"
+      ],
+      "movementPattern": "squat"
+    },
+    "pernas_009": {
+      "category": "Pernas",
+      "primaryMuscles": [
+        "Gastrocnêmio",
+        "Sóleo"
+      ],
+      "movementPattern": "unknown"
+    },
+    "pernas_010": {
+      "category": "Pernas",
+      "primaryMuscles": [
+        "Sóleo",
+        "Gastrocnêmio"
+      ],
+      "movementPattern": "unknown"
+    },
+    "pernas_011": {
+      "category": "Pernas",
+      "primaryMuscles": [
+        "Adutores",
+        "Glúteo máximo",
+        "Quadríceps",
+        "Glúteo médio"
+      ],
+      "movementPattern": "squat"
+    },
+    "pernas_012": {
+      "category": "Pernas",
+      "primaryMuscles": [
+        "Quadríceps",
+        "Glúteo máximo",
+        "Isquiotibiais"
+      ],
+      "movementPattern": "unknown"
+    },
+    "pernas_013": {
+      "category": "Pernas",
+      "primaryMuscles": [
+        "Isquiotibiais",
+        "Bíceps femoral"
+      ],
+      "movementPattern": "horizontalPush"
+    },
+    "pernas_014": {
+      "category": "Pernas",
+      "primaryMuscles": [
+        "Quadríceps",
+        "Core",
+        "Glúteo máximo",
+        "Trapézio"
+      ],
+      "movementPattern": "squat"
+    },
+    "pernas_015": {
+      "category": "Pernas",
+      "primaryMuscles": [
+        "Gastrocnêmio",
+        "Sóleo"
+      ],
+      "movementPattern": "unknown"
+    },
+    "pernas_016": {
+      "category": "Pernas",
+      "primaryMuscles": [
+        "Quadríceps",
+        "Glúteo máximo",
+        "Core",
+        "Glúteo médio"
+      ],
+      "movementPattern": "unknown"
+    },
+    "pernas_017": {
+      "category": "Pernas",
+      "primaryMuscles": [
+        "Quadríceps",
+        "Glúteo máximo",
+        "Isquiotibiais"
+      ],
+      "movementPattern": "squat"
+    },
+    "pernas_018": {
+      "category": "Pernas",
+      "primaryMuscles": [
+        "Glúteo médio",
+        "Glúteo mínimo",
+        "TFL",
+        "Abdutores"
+      ],
+      "movementPattern": "unknown"
+    },
+    "pernas_019": {
+      "category": "Pernas",
+      "primaryMuscles": [
+        "Quadríceps",
+        "Glúteo máximo",
+        "Adutores",
+        "Core"
+      ],
+      "movementPattern": "squat"
+    },
+    "pernas_020": {
+      "category": "Pernas",
+      "primaryMuscles": [
+        "Adutores",
+        "Pectíneo",
+        "Grácil"
+      ],
+      "movementPattern": "unknown"
+    },
+    "pernas_021": {
+      "category": "Pernas",
+      "primaryMuscles": [
+        "Quadríceps",
+        "Glúteo máximo",
+        "Core",
+        "Isquiotibiais"
+      ],
+      "movementPattern": "squat"
+    },
+    "pernas_022": {
+      "category": "Pernas",
+      "primaryMuscles": [
+        "Isquiotibiais",
+        "Glúteo máximo",
+        "Eretores da coluna"
+      ],
+      "movementPattern": "hinge"
+    },
+    "pernas_023": {
+      "category": "Pernas",
+      "primaryMuscles": [
+        "Quadríceps",
+        "Glúteo máximo",
+        "Isquiotibiais"
+      ],
+      "movementPattern": "squat"
+    },
+    "pernas_024": {
+      "category": "Pernas",
+      "primaryMuscles": [
+        "Quadríceps",
+        "Glúteo máximo",
+        "Isquiotibiais",
+        "Panturrilha"
+      ],
+      "movementPattern": "squat"
+    },
+    "pernas_025": {
+      "category": "Pernas",
+      "primaryMuscles": [
+        "Adutores",
+        "Glúteo máximo",
+        "Quadríceps",
+        "Glúteo médio"
+      ],
+      "movementPattern": "squat"
+    },
+    "pernas_026": {
+      "category": "Pernas",
+      "primaryMuscles": [
+        "Quadríceps",
+        "Reto femoral"
+      ],
+      "movementPattern": "isolation"
+    },
+    "pernas_027": {
+      "category": "Pernas",
+      "primaryMuscles": [
+        "Adutores",
+        "Glúteo máximo",
+        "Quadríceps",
+        "Glúteo médio"
+      ],
+      "movementPattern": "lunge"
+    },
+    "pernas_028": {
+      "category": "Pernas",
+      "primaryMuscles": [
+        "Quadríceps",
+        "Glúteo máximo",
+        "Isquiotibiais"
+      ],
+      "movementPattern": "squat"
+    },
+    "pernas_029": {
+      "category": "Pernas",
+      "primaryMuscles": [
+        "Glúteo máximo",
+        "Isquiotibiais",
+        "Core",
+        "Quadríceps"
+      ],
+      "movementPattern": "unknown"
+    },
+    "pernas_030": {
+      "category": "Pernas",
+      "primaryMuscles": [
+        "Isquiotibiais",
+        "Glúteo máximo",
+        "Eretores da coluna",
+        "Quadríceps",
+        "Trapézio",
+        "Core"
+      ],
+      "movementPattern": "hinge"
+    },
+    "gluteos_001": {
+      "category": "Glúteos",
+      "primaryMuscles": [
+        "Glúteo máximo",
+        "Quadríceps",
+        "Isquiotibiais",
+        "Adutores",
+        "Core"
+      ],
+      "movementPattern": "squat"
+    },
+    "gluteos_002": {
+      "category": "Glúteos",
+      "primaryMuscles": [
+        "Glúteo máximo",
+        "Glúteo médio",
+        "Adutores",
+        "Quadríceps"
+      ],
+      "movementPattern": "squat"
+    },
+    "gluteos_003": {
+      "category": "Glúteos",
+      "primaryMuscles": [
+        "Glúteo máximo",
+        "Isquiotibiais",
+        "Core"
+      ],
+      "movementPattern": "unknown"
+    },
+    "gluteos_004": {
+      "category": "Glúteos",
+      "primaryMuscles": [
+        "Glúteo máximo",
+        "Isquiotibiais",
+        "Core"
+      ],
+      "movementPattern": "isolation"
+    },
+    "gluteos_005": {
+      "category": "Glúteos",
+      "primaryMuscles": [
+        "Glúteo máximo",
+        "Quadríceps",
+        "Isquiotibiais",
+        "Glúteo médio"
+      ],
+      "movementPattern": "lunge"
+    },
+    "gluteos_006": {
+      "category": "Glúteos",
+      "primaryMuscles": [
+        "Glúteo máximo",
+        "Quadríceps",
+        "Isquiotibiais"
+      ],
+      "movementPattern": "lunge"
+    },
+    "gluteos_007": {
+      "category": "Glúteos",
+      "primaryMuscles": [
+        "Isquiotibiais",
+        "Glúteo máximo",
+        "Eretores da coluna"
+      ],
+      "movementPattern": "hinge"
+    },
+    "gluteos_008": {
+      "category": "Glúteos",
+      "primaryMuscles": [
+        "Glúteo máximo",
+        "Quadríceps",
+        "Isquiotibiais",
+        "Glúteo médio"
+      ],
+      "movementPattern": "squat"
+    },
+    "gluteos_009": {
+      "category": "Glúteos",
+      "primaryMuscles": [
+        "Glúteo médio",
+        "Glúteo mínimo",
+        "TFL"
+      ],
+      "movementPattern": "unknown"
+    },
+    "gluteos_010": {
+      "category": "Glúteos",
+      "primaryMuscles": [
+        "Glúteo máximo",
+        "Isquiotibiais"
+      ],
+      "movementPattern": "unknown"
+    },
+    "gluteos_011": {
+      "category": "Glúteos",
+      "primaryMuscles": [
+        "Glúteo médio",
+        "Glúteo mínimo",
+        "Piriforme"
+      ],
+      "movementPattern": "unknown"
+    },
+    "gluteos_012": {
+      "category": "Glúteos",
+      "primaryMuscles": [
+        "Glúteo máximo",
+        "Isquiotibiais",
+        "Eretores da coluna",
+        "Quadríceps",
+        "Core"
+      ],
+      "movementPattern": "hinge"
+    },
+    "gluteos_013": {
+      "category": "Glúteos",
+      "primaryMuscles": [
+        "Glúteo máximo",
+        "Quadríceps",
+        "Isquiotibiais",
+        "Glúteo médio"
+      ],
+      "movementPattern": "unknown"
+    },
+    "gluteos_014": {
+      "category": "Glúteos",
+      "primaryMuscles": [
+        "Glúteo máximo",
+        "Isquiotibiais",
+        "Core"
+      ],
+      "movementPattern": "unknown"
+    },
+    "gluteos_015": {
+      "category": "Glúteos",
+      "primaryMuscles": [
+        "Glúteo máximo",
+        "Quadríceps",
+        "Isquiotibiais",
+        "Panturrilha"
+      ],
+      "movementPattern": "squat"
+    },
+    "gluteos_016": {
+      "category": "Glúteos",
+      "primaryMuscles": [
+        "Glúteo máximo",
+        "Isquiotibiais"
+      ],
+      "movementPattern": "unknown"
+    },
+    "gluteos_017": {
+      "category": "Glúteos",
+      "primaryMuscles": [
+        "Glúteo máximo",
+        "Glúteo médio",
+        "Adutores",
+        "Quadríceps"
+      ],
+      "movementPattern": "lunge"
+    },
+    "gluteos_018": {
+      "category": "Glúteos",
+      "primaryMuscles": [
+        "Glúteo máximo",
+        "Quadríceps",
+        "Core",
+        "Adutores"
+      ],
+      "movementPattern": "squat"
+    },
+    "gluteos_019": {
+      "category": "Glúteos",
+      "primaryMuscles": [
+        "Isquiotibiais",
+        "Glúteo máximo",
+        "Eretores da coluna"
+      ],
+      "movementPattern": "unknown"
+    },
+    "gluteos_020": {
+      "category": "Glúteos",
+      "primaryMuscles": [
+        "Glúteo máximo",
+        "Quadríceps",
+        "Isquiotibiais"
+      ],
+      "movementPattern": "squat"
+    },
+    "gluteos_021": {
+      "category": "Glúteos",
+      "primaryMuscles": [
+        "Glúteo máximo"
+      ],
+      "movementPattern": "unknown"
+    },
+    "gluteos_022": {
+      "category": "Glúteos",
+      "primaryMuscles": [
+        "Glúteo médio",
+        "Glúteo mínimo",
+        "TFL"
+      ],
+      "movementPattern": "unknown"
+    },
+    "gluteos_023": {
+      "category": "Glúteos",
+      "primaryMuscles": [
+        "Quadríceps",
+        "Glúteo máximo",
+        "Isquiotibiais"
+      ],
+      "movementPattern": "squat"
+    },
+    "gluteos_024": {
+      "category": "Glúteos",
+      "primaryMuscles": [
+        "Glúteo máximo",
+        "Quadríceps",
+        "Isquiotibiais",
+        "Glúteo médio"
+      ],
+      "movementPattern": "lunge"
+    },
+    "gluteos_025": {
+      "category": "Glúteos",
+      "primaryMuscles": [
+        "Glúteo máximo",
+        "Quadríceps",
+        "Core",
+        "Isquiotibiais"
+      ],
+      "movementPattern": "squat"
+    },
+    "gluteos_026": {
+      "category": "Glúteos",
+      "primaryMuscles": [
+        "Glúteo máximo",
+        "Isquiotibiais",
+        "Core",
+        "Eretores da coluna"
+      ],
+      "movementPattern": "unknown"
+    },
+    "gluteos_027": {
+      "category": "Glúteos",
+      "primaryMuscles": [
+        "Glúteo máximo",
+        "Isquiotibiais"
+      ],
+      "movementPattern": "unknown"
+    },
+    "gluteos_028": {
+      "category": "Glúteos",
+      "primaryMuscles": [
+        "Quadríceps",
+        "Glúteo máximo",
+        "Isquiotibiais"
+      ],
+      "movementPattern": "squat"
+    },
+    "gluteos_029": {
+      "category": "Glúteos",
+      "primaryMuscles": [
+        "Glúteo máximo",
+        "Isquiotibiais"
+      ],
+      "movementPattern": "unknown"
+    },
+    "gluteos_030": {
+      "category": "Glúteos",
+      "primaryMuscles": [
+        "Glúteo máximo",
+        "Glúteo médio",
+        "Quadríceps",
+        "Isquiotibiais"
+      ],
+      "movementPattern": "squat"
+    },
+    "cardio_001": {
+      "category": "Cardio",
+      "primaryMuscles": [
+        "Quadríceps",
+        "Isquiotibiais",
+        "Glúteos",
+        "Panturrilha"
+      ],
+      "movementPattern": "unknown"
+    },
+    "cardio_002": {
+      "category": "Cardio",
+      "primaryMuscles": [
+        "Quadríceps",
+        "Isquiotibiais",
+        "Glúteos",
+        "Panturrilha"
+      ],
+      "movementPattern": "unknown"
+    },
+    "cardio_003": {
+      "category": "Cardio",
+      "primaryMuscles": [
+        "Panturrilha",
+        "Quadríceps",
+        "Glúteos"
+      ],
+      "movementPattern": "unknown"
+    },
+    "cardio_004": {
+      "category": "Cardio",
+      "primaryMuscles": [
+        "Quadríceps",
+        "Glúteos",
+        "Panturrilha"
+      ],
+      "movementPattern": "unknown"
+    },
+    "cardio_005": {
+      "category": "Cardio",
+      "primaryMuscles": [
+        "Quadríceps",
+        "Glúteos",
+        "Isquiotibiais",
+        "Panturrilha"
+      ],
+      "movementPattern": "unknown"
+    },
+    "cardio_006": {
+      "category": "Cardio",
+      "primaryMuscles": [
+        "Quadríceps",
+        "Glúteos",
+        "Peitoral",
+        "Tríceps",
+        "Deltóide"
+      ],
+      "movementPattern": "unknown"
+    },
+    "cardio_007": {
+      "category": "Cardio",
+      "primaryMuscles": [
+        "Core",
+        "Hip Flexores",
+        "Quadríceps"
+      ],
+      "movementPattern": "unknown"
+    },
+    "cardio_008": {
+      "category": "Cardio",
+      "primaryMuscles": [
+        "Deltóide",
+        "Glúteos",
+        "Panturrilha",
+        "Quadríceps"
+      ],
+      "movementPattern": "unknown"
+    },
+    "cardio_009": {
+      "category": "Cardio",
+      "primaryMuscles": [
+        "Latíssimo do Dorso",
+        "Peitoral",
+        "Deltóide",
+        "Quadríceps",
+        "Core"
+      ],
+      "movementPattern": "unknown"
+    },
+    "cardio_010": {
+      "category": "Cardio",
+      "primaryMuscles": [
+        "Latíssimo do Dorso",
+        "Quadríceps",
+        "Glúteos",
+        "Romboides"
+      ],
+      "movementPattern": "unknown"
+    },
+    "cardio_011": {
+      "category": "Cardio",
+      "primaryMuscles": [
+        "Quadríceps",
+        "Glúteos",
+        "Panturrilha",
+        "Isquiotibiais"
+      ],
+      "movementPattern": "unknown"
+    },
+    "cardio_012": {
+      "category": "Cardio",
+      "primaryMuscles": [
+        "Quadríceps",
+        "Glúteos",
+        "Panturrilha",
+        "Isquiotibiais"
+      ],
+      "movementPattern": "unknown"
+    },
+    "cardio_013": {
+      "category": "Cardio",
+      "primaryMuscles": [
+        "Quadríceps",
+        "Glúteos",
+        "Panturrilha"
+      ],
+      "movementPattern": "unknown"
+    },
+    "cardio_014": {
+      "category": "Cardio",
+      "primaryMuscles": [
+        "Glúteos",
+        "Quadríceps",
+        "Deltóide",
+        "Panturrilha"
+      ],
+      "movementPattern": "unknown"
+    },
+    "cardio_015": {
+      "category": "Cardio",
+      "primaryMuscles": [
+        "Quadríceps",
+        "Glúteos",
+        "Panturrilha",
+        "Deltóide"
+      ],
+      "movementPattern": "unknown"
+    },
+    "cardio_016": {
+      "category": "Cardio",
+      "primaryMuscles": [
+        "Quadríceps",
+        "Hip Flexores",
+        "Panturrilha"
+      ],
+      "movementPattern": "unknown"
+    },
+    "cardio_017": {
+      "category": "Cardio",
+      "primaryMuscles": [
+        "Quadríceps",
+        "Glúteos",
+        "Peitoral",
+        "Deltóide",
+        "Core"
+      ],
+      "movementPattern": "unknown"
+    },
+    "cardio_018": {
+      "category": "Cardio",
+      "primaryMuscles": [
+        "Panturrilha",
+        "Quadríceps",
+        "Glúteos"
+      ],
+      "movementPattern": "unknown"
+    },
+    "cardio_019": {
+      "category": "Cardio",
+      "primaryMuscles": [
+        "Glúteos",
+        "Isquiotibiais",
+        "Panturrilha",
+        "Quadríceps"
+      ],
+      "movementPattern": "unknown"
+    },
+    "cardio_020": {
+      "category": "Cardio",
+      "primaryMuscles": [
+        "Quadríceps",
+        "Glúteos",
+        "Panturrilha"
+      ],
+      "movementPattern": "squat"
+    },
+    "cardio_021": {
+      "category": "Cardio",
+      "primaryMuscles": [
+        "Bíceps Braquial",
+        "Latíssimo do Dorso",
+        "Braquial"
+      ],
+      "movementPattern": "unknown"
+    },
+    "cardio_022": {
+      "category": "Cardio",
+      "primaryMuscles": [
+        "Deltóide",
+        "Peitoral",
+        "Tríceps",
+        "Core"
+      ],
+      "movementPattern": "unknown"
+    },
+    "cardio_023": {
+      "category": "Cardio",
+      "primaryMuscles": [
+        "Deltóide",
+        "Trapézio",
+        "Core",
+        "Antebraços"
+      ],
+      "movementPattern": "unknown"
+    },
+    "cardio_024": {
+      "category": "Cardio",
+      "primaryMuscles": [
+        "Core",
+        "Deltóide",
+        "Peitoral",
+        "Tríceps"
+      ],
+      "movementPattern": "unknown"
+    },
+    "cardio_025": {
+      "category": "Cardio",
+      "primaryMuscles": [
+        "Quadríceps",
+        "Glúteos",
+        "Panturrilha"
+      ],
+      "movementPattern": "unknown"
+    },
+    "cardio_026": {
+      "category": "Cardio",
+      "primaryMuscles": [
+        "Quadríceps",
+        "Glúteos",
+        "Panturrilha",
+        "Tríceps",
+        "Deltóide"
+      ],
+      "movementPattern": "unknown"
+    },
+    "cardio_027": {
+      "category": "Cardio",
+      "primaryMuscles": [
+        "Glúteos",
+        "Isquiotibiais",
+        "Core"
+      ],
+      "movementPattern": "unknown"
+    },
+    "cardio_028": {
+      "category": "Cardio",
+      "primaryMuscles": [
+        "Quadríceps",
+        "Glúteos",
+        "Isquiotibiais",
+        "Panturrilha"
+      ],
+      "movementPattern": "unknown"
+    },
+    "cardio_029": {
+      "category": "Cardio",
+      "primaryMuscles": [
+        "Quadríceps",
+        "Glúteos",
+        "Panturrilha",
+        "Isquiotibiais"
+      ],
+      "movementPattern": "unknown"
+    },
+    "cardio_030": {
+      "category": "Cardio",
+      "primaryMuscles": [
+        "Quadríceps",
+        "Glúteos",
+        "Panturrilha"
+      ],
+      "movementPattern": "unknown"
+    },
+    "funcional_001": {
+      "category": "Funcional",
+      "primaryMuscles": [
+        "Quadríceps",
+        "Glúteos",
+        "Isquiotibiais"
+      ],
+      "movementPattern": "squat"
+    },
+    "funcional_002": {
+      "category": "Funcional",
+      "primaryMuscles": [
+        "Peitoral Maior",
+        "Tríceps",
+        "Deltóide Anterior"
+      ],
+      "movementPattern": "horizontalPush"
+    },
+    "funcional_003": {
+      "category": "Funcional",
+      "primaryMuscles": [
+        "Quadríceps",
+        "Glúteos"
+      ],
+      "movementPattern": "lunge"
+    },
+    "funcional_004": {
+      "category": "Funcional",
+      "primaryMuscles": [
+        "Core",
+        "Reto Abdominal",
+        "Oblíquos"
+      ],
+      "movementPattern": "unknown"
+    },
+    "funcional_005": {
+      "category": "Funcional",
+      "primaryMuscles": [
+        "Quadríceps",
+        "Glúteos",
+        "Adutores"
+      ],
+      "movementPattern": "squat"
+    },
+    "funcional_006": {
+      "category": "Funcional",
+      "primaryMuscles": [
+        "Core",
+        "Glúteos",
+        "Deltóide",
+        "Quadríceps"
+      ],
+      "movementPattern": "unknown"
+    },
+    "funcional_007": {
+      "category": "Funcional",
+      "primaryMuscles": [
+        "Core",
+        "Reto Abdominal",
+        "Transverso do Abdômen"
+      ],
+      "movementPattern": "unknown"
+    },
+    "funcional_008": {
+      "category": "Funcional",
+      "primaryMuscles": [
+        "Trapézio",
+        "Antebraços",
+        "Core",
+        "Glúteos"
+      ],
+      "movementPattern": "unknown"
+    },
+    "funcional_009": {
+      "category": "Funcional",
+      "primaryMuscles": [
+        "Quadríceps",
+        "Glúteos"
+      ],
+      "movementPattern": "squat"
+    },
+    "funcional_010": {
+      "category": "Funcional",
+      "primaryMuscles": [
+        "Glúteos",
+        "Isquiotibiais",
+        "Core"
+      ],
+      "movementPattern": "unknown"
+    },
+    "funcional_011": {
+      "category": "Funcional",
+      "primaryMuscles": [
+        "Core",
+        "Deltóide",
+        "Quadríceps",
+        "Glúteos"
+      ],
+      "movementPattern": "unknown"
+    },
+    "funcional_012": {
+      "category": "Funcional",
+      "primaryMuscles": [
+        "Peitoral Maior",
+        "Tríceps",
+        "Deltóide Anterior"
+      ],
+      "movementPattern": "horizontalPush"
+    },
+    "funcional_013": {
+      "category": "Funcional",
+      "primaryMuscles": [
+        "Reto Abdominal",
+        "Transverso do Abdômen",
+        "Hip Flexores"
+      ],
+      "movementPattern": "unknown"
+    },
+    "funcional_014": {
+      "category": "Funcional",
+      "primaryMuscles": [
+        "Quadríceps",
+        "Glúteos",
+        "Panturrilha"
+      ],
+      "movementPattern": "unknown"
+    },
+    "funcional_015": {
+      "category": "Funcional",
+      "primaryMuscles": [
+        "Quadríceps",
+        "Glúteos",
+        "Deltóide",
+        "Peitoral"
+      ],
+      "movementPattern": "unknown"
+    },
+    "funcional_016": {
+      "category": "Funcional",
+      "primaryMuscles": [
+        "Deltóide",
+        "Latíssimo do Dorso",
+        "Core"
+      ],
+      "movementPattern": "unknown"
+    },
+    "funcional_017": {
+      "category": "Funcional",
+      "primaryMuscles": [
+        "Oblíquos",
+        "Quadrado Lombar",
+        "Glúteo Médio"
+      ],
+      "movementPattern": "unknown"
+    },
+    "funcional_018": {
+      "category": "Funcional",
+      "primaryMuscles": [
+        "Glúteo Médio",
+        "Glúteos",
+        "Quadríceps",
+        "Panturrilha"
+      ],
+      "movementPattern": "unknown"
+    },
+    "funcional_019": {
+      "category": "Funcional",
+      "primaryMuscles": [
+        "Oblíquos",
+        "Reto Abdominal",
+        "Transverso do Abdômen"
+      ],
+      "movementPattern": "unknown"
+    },
+    "funcional_020": {
+      "category": "Funcional",
+      "primaryMuscles": [
+        "Deltóide",
+        "Tríceps",
+        "Glúteos",
+        "Quadríceps"
+      ],
+      "movementPattern": "verticalPush"
+    },
+    "funcional_021": {
+      "category": "Funcional",
+      "primaryMuscles": [
+        "Quadríceps",
+        "Glúteos",
+        "Oblíquos"
+      ],
+      "movementPattern": "lunge"
+    },
+    "funcional_022": {
+      "category": "Funcional",
+      "primaryMuscles": [
+        "Quadríceps",
+        "Glúteos",
+        "Panturrilha"
+      ],
+      "movementPattern": "unknown"
+    },
+    "funcional_023": {
+      "category": "Funcional",
+      "primaryMuscles": [
+        "Core",
+        "Glúteos",
+        "Deltóide"
+      ],
+      "movementPattern": "isolation"
+    },
+    "funcional_024": {
+      "category": "Funcional",
+      "primaryMuscles": [
+        "Peitoral",
+        "Tríceps",
+        "Deltóide",
+        "Core"
+      ],
+      "movementPattern": "unknown"
+    },
+    "funcional_025": {
+      "category": "Funcional",
+      "primaryMuscles": [
+        "Latíssimo do Dorso",
+        "Romboides"
+      ],
+      "movementPattern": "horizontalPull"
+    },
+    "funcional_026": {
+      "category": "Funcional",
+      "primaryMuscles": [
+        "Quadríceps",
+        "Glúteos",
+        "Panturrilha"
+      ],
+      "movementPattern": "squat"
+    },
+    "funcional_027": {
+      "category": "Funcional",
+      "primaryMuscles": [
+        "Latíssimo do Dorso",
+        "Romboides"
+      ],
+      "movementPattern": "horizontalPull"
+    },
+    "funcional_028": {
+      "category": "Funcional",
+      "primaryMuscles": [
+        "Quadríceps",
+        "Glúteos"
+      ],
+      "movementPattern": "unknown"
+    },
+    "funcional_029": {
+      "category": "Funcional",
+      "primaryMuscles": [
+        "Deltóide",
+        "Trapézio",
+        "Core",
+        "Manguito Rotador"
+      ],
+      "movementPattern": "unknown"
+    },
+    "funcional_030": {
+      "category": "Funcional",
+      "primaryMuscles": [
+        "Quadríceps",
+        "Glúteos",
+        "Panturrilha"
+      ],
+      "movementPattern": "squat"
+    },
+    "along_001": {
+      "category": "Alongamento",
+      "primaryMuscles": [
+        "Isquiotibiais"
+      ],
+      "movementPattern": "unknown"
+    },
+    "along_002": {
+      "category": "Alongamento",
+      "primaryMuscles": [
+        "Quadríceps",
+        "Flexor do Quadril"
+      ],
+      "movementPattern": "unknown"
+    },
+    "along_003": {
+      "category": "Alongamento",
+      "primaryMuscles": [
+        "Gastrocnêmio",
+        "Sóleo"
+      ],
+      "movementPattern": "unknown"
+    },
+    "along_004": {
+      "category": "Alongamento",
+      "primaryMuscles": [
+        "Peitoral Maior",
+        "Deltóide Anterior"
+      ],
+      "movementPattern": "unknown"
+    },
+    "along_005": {
+      "category": "Alongamento",
+      "primaryMuscles": [
+        "Tríceps"
+      ],
+      "movementPattern": "isolation"
+    },
+    "along_006": {
+      "category": "Alongamento",
+      "primaryMuscles": [
+        "Deltóide Posterior"
+      ],
+      "movementPattern": "unknown"
+    },
+    "along_007": {
+      "category": "Alongamento",
+      "primaryMuscles": [
+        "Flexor do Quadril",
+        "Psoas",
+        "Reto Femoral"
+      ],
+      "movementPattern": "lunge"
+    },
+    "along_008": {
+      "category": "Alongamento",
+      "primaryMuscles": [
+        "Glúteo Médio",
+        "Piriforme",
+        "Rotadores Externos do Quadril"
+      ],
+      "movementPattern": "unknown"
+    },
+    "along_009": {
+      "category": "Alongamento",
+      "primaryMuscles": [
+        "Erétores da Coluna Torácica"
+      ],
+      "movementPattern": "unknown"
+    },
+    "along_010": {
+      "category": "Alongamento",
+      "primaryMuscles": [
+        "Erétores da Coluna",
+        "Multífideos"
+      ],
+      "movementPattern": "unknown"
+    },
+    "along_011": {
+      "category": "Alongamento",
+      "primaryMuscles": [
+        "Esternocleidomastoideo",
+        "Escalenos",
+        "Trapézio Superior"
+      ],
+      "movementPattern": "unknown"
+    },
+    "along_012": {
+      "category": "Alongamento",
+      "primaryMuscles": [
+        "Adutores da Coxa",
+        "Grácil"
+      ],
+      "movementPattern": "unknown"
+    },
+    "along_013": {
+      "category": "Alongamento",
+      "primaryMuscles": [
+        "Erétores da Coluna Lombar",
+        "Quadrado Lombar"
+      ],
+      "movementPattern": "unknown"
+    },
+    "along_014": {
+      "category": "Alongamento",
+      "primaryMuscles": [
+        "Bíceps Braquial"
+      ],
+      "movementPattern": "unknown"
+    },
+    "along_015": {
+      "category": "Alongamento",
+      "primaryMuscles": [
+        "Latíssimo do Dorso",
+        "Erétores da Coluna",
+        "Glúteos"
+      ],
+      "movementPattern": "unknown"
+    },
+    "along_016": {
+      "category": "Alongamento",
+      "primaryMuscles": [
+        "Glúteo Médio",
+        "Piriforme"
+      ],
+      "movementPattern": "unknown"
+    },
+    "along_017": {
+      "category": "Alongamento",
+      "primaryMuscles": [
+        "Isquiotibiais"
+      ],
+      "movementPattern": "unknown"
+    },
+    "along_018": {
+      "category": "Alongamento",
+      "primaryMuscles": [
+        "Oblíquos",
+        "Quadrado Lombar"
+      ],
+      "movementPattern": "unknown"
+    },
+    "along_019": {
+      "category": "Alongamento",
+      "primaryMuscles": [
+        "Quadrado Lombar",
+        "Oblíquos",
+        "Intercostais"
+      ],
+      "movementPattern": "unknown"
+    },
+    "along_020": {
+      "category": "Alongamento",
+      "primaryMuscles": [
+        "Latíssimo do Dorso",
+        "Romboide"
+      ],
+      "movementPattern": "verticalPull"
+    },
+    "along_021": {
+      "category": "Alongamento",
+      "primaryMuscles": [
+        "Flexores do Punho",
+        "Extensores do Punho"
+      ],
+      "movementPattern": "unknown"
+    },
+    "along_022": {
+      "category": "Alongamento",
+      "primaryMuscles": [
+        "Flexores do Quadril",
+        "Glúteos",
+        "Adutores"
+      ],
+      "movementPattern": "unknown"
+    },
+    "along_023": {
+      "category": "Alongamento",
+      "primaryMuscles": [
+        "Isquiotibiais",
+        "Panturrilha",
+        "Ombros"
+      ],
+      "movementPattern": "unknown"
+    },
+    "along_024": {
+      "category": "Alongamento",
+      "primaryMuscles": [
+        "Glúteo Médio",
+        "Piriforme"
+      ],
+      "movementPattern": "unknown"
+    },
+    "along_025": {
+      "category": "Alongamento",
+      "primaryMuscles": [
+        "Oblíquos",
+        "Erétores da Coluna"
+      ],
+      "movementPattern": "unknown"
+    },
+    "along_026": {
+      "category": "Alongamento",
+      "primaryMuscles": [
+        "Flexores do Quadril",
+        "Oblíquos",
+        "Peitoral"
+      ],
+      "movementPattern": "lunge"
+    },
+    "along_027": {
+      "category": "Alongamento",
+      "primaryMuscles": [
+        "Trapézio Superior",
+        "Esternocleidomastoideo"
+      ],
+      "movementPattern": "unknown"
+    },
+    "along_028": {
+      "category": "Alongamento",
+      "primaryMuscles": [
+        "Romboides",
+        "Trapézio Médio",
+        "Rotadores da Coluna"
+      ],
+      "movementPattern": "unknown"
+    },
+    "along_029": {
+      "category": "Alongamento",
+      "primaryMuscles": [
+        "Peitoral Maior",
+        "Deltóide Anterior"
+      ],
+      "movementPattern": "unknown"
+    },
+    "along_030": {
+      "category": "Alongamento",
+      "primaryMuscles": [
+        "Reto Abdominal",
+        "Flexores do Quadril"
+      ],
+      "movementPattern": "unknown"
+    }
   }
 }
