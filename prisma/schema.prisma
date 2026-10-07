@@ -23,6 +23,7 @@ model User {
   authRefreshSessions AuthRefreshSession[]
   aiUsages            AiUsage[]
   aiConversations     AiConversation[]
+  aiActionProposals   AiActionProposal[]
   workoutSyncEvents   WorkoutSyncEvent[]
   workoutSyncSessions WorkoutSyncSession[]
   workoutSyncSets     WorkoutSyncSet[]
@@ -64,6 +65,7 @@ model AiConversation {
   pendingUsageId String?
   pendingUntil   DateTime?
   messages       AiChatMessage[]
+  actions        AiActionProposal[]
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
@@ -81,11 +83,45 @@ model AiChatMessage {
   taskType       String
   sequence       Int
   createdAt      DateTime       @default(now())
+  actions        AiActionProposal[]
 
   @@unique([usageId, role])
   @@unique([conversationId, sequence])
   @@index([conversationId, createdAt])
   @@map("ai_chat_messages")
+}
+
+model AiActionProposal {
+  id                String         @id @default(uuid())
+  userId            String
+  user              User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  conversationId    String
+  conversation      AiConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  sourceMessageId   String
+  sourceMessage     AiChatMessage  @relation(fields: [sourceMessageId], references: [id], onDelete: Cascade)
+  ordinal           Int
+  actionType        String
+  status            String
+  title             String
+  explanation       String
+  payload           Json
+  preview           Json
+  expectedBefore    Json?
+  expectedAfter     Json?
+  validationCode    String
+  executionDeviceId String?
+  resultReference   String?
+  expiresAt         DateTime
+  confirmedAt       DateTime?
+  cancelledAt       DateTime?
+  executedAt        DateTime?
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+
+  @@unique([sourceMessageId, ordinal])
+  @@index([userId, status, createdAt])
+  @@index([conversationId])
+  @@map("ai_action_proposals")
 }
 
 model AuthRefreshSession {
