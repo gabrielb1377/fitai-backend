@@ -5,10 +5,11 @@ const { parseWorkoutResponse } = require("../response.parser");
 const { validateWorkoutCatalog, projection } = require("./catalog");
 const { gatewayError, classifyProviderError, policies } = require("./errors");
 const { createOpenAIAdapter, createOpenRouterAdapter } = require("./providers");
+const { buildChatPrompt, parseChatResponse } = require("../chat/chat.prompt");
 
 const TASKS = Object.freeze({
   generate_workout: "implemented",
-  chat: "reserved", analyze_progress: "reserved", replace_exercise: "reserved", running_advice: "reserved"
+  chat: "implemented", analyze_progress: "implemented", replace_exercise: "reserved", running_advice: "implemented"
 });
 
 function createAiGateway({ config, adapters, logger = (event) => console.info(JSON.stringify(event)), now = () => performance.now() }) {
@@ -27,7 +28,7 @@ function createAiGateway({ config, adapters, logger = (event) => console.info(JS
       let servedModel = null;
       function emit(status, code = null) {
         const event = Object.freeze({ event: "ai_gateway", requestId: correlation, taskType: Object.hasOwn(TASKS, task) ? task : "unsupported",
-          provider: config.provider, policy: "workout-v1", servedModel,
+          provider: config.provider, policy: task === "generate_workout" ? "workout-v1" : "chat-v1", servedModel,
           fallbackUsed: attempts > 1, attemptCount: attempts, latencyMs: Math.max(0, Math.round(now() - started)),
           inputTokens, outputTokens, estimatedCost: "unavailable", status, errorCategory: code });
         // Logging is best-effort; it must never replay a paid generation.
@@ -39,12 +40,13 @@ function createAiGateway({ config, adapters, logger = (event) => console.info(JS
         if (!config.apiKey || !config.primaryModel || !providerAdapters[config.provider]) {
           throw gatewayError("ai_not_configured", correlation);
         }
-        const prompt = buildWorkoutPrompt(input);
+        const isWorkout = task === "generate_workout";
+        const prompt = isWorkout ? buildWorkoutPrompt(input) : buildChatPrompt(input);
         const allowedNames = Object.keys(projection.nameBindings);
-        const messages = [
+        const messages = isWorkout ? [
           { role: "system", content: prompt.instructions },
           { role: "user", content: `${prompt.input}\nNomes permitidos pelo catalogo canonico (use literalmente):\n${JSON.stringify(allowedNames)}` }
-        ];
+        ] : prompt.messages;
         const routes = [config.primaryModel, ...config.fallbackModels].slice(0, config.maxAttempts);
         let lastError;
         for (const [index, model] of routes.entries()) {
@@ -74,11 +76,11 @@ function createAiGateway({ config, adapters, logger = (event) => console.info(JS
             if (![null, undefined, "stop", "completed"].includes(response.finishReason)) {
               throw gatewayError("ai_invalid_response", correlation);
             }
-            const workout = parseWorkoutResponse({ output_text: response.content }, input);
+            const workout = isWorkout ? parseWorkoutResponse({ output_text: response.content }, input) : parseChatResponse(response.content, correlation);
             if (JSON.stringify(workout).includes(config.apiKey)) {
               throw gatewayError("ai_invalid_response", correlation);
             }
-            validateWorkoutCatalog(workout, correlation);
+            if (isWorkout) validateWorkoutCatalog(workout, correlation);
             return { data: workout, metadata: emit("succeeded") };
           } catch (error) {
             if (error.code === "ai_domain_validation_error") throw error;

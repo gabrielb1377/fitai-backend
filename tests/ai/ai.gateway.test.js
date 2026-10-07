@@ -44,7 +44,7 @@ test("AI-GATEWAY-01/02: semantic task routes exclusively through injected adapte
 });
 test("AI-GATEWAY-03: reserved/unknown tasks call zero providers", async () => {
   const h = harness([]);
-  for (const task of [...Object.keys(TASKS).filter((t) => t !== "generate_workout"), "unknown"]) {
+  for (const task of [...Object.keys(TASKS).filter((t) => TASKS[t] === "reserved"), "unknown"]) {
     await assert.rejects(h.run({ task }), { code: "ai_unsupported_task" });
   }
   assert.equal(h.calls.length, 0);

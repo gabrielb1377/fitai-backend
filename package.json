@@ -21,6 +21,8 @@
     "test:r1-6:ai-boundary-e2e": "node scripts/run-r1-6-ai-boundary-e2e.js",
     "ai:config:check": "node scripts/check-ai-config.js",
     "test:ai:gateway": "node --test tests/ai/ai.gateway.test.js tests/ai/ai.gateway.http.test.js",
+    "test:ai:chat": "node --test tests/ai/ai.chat.test.js tests/ai/ai.context.test.js",
+    "test:ai:chat:integration": "node scripts/run-ai-chat-postgres-integration.js",
     "db:test": "node src/config/database.js",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",

@@ -5,7 +5,8 @@ const AppError = require("../../shared/errors/app-error");
 
 const AI_OPERATIONS = Object.freeze({
   workout: "workout_generation",
-  coach: "coach_insights"
+  coach: "coach_insights",
+  chat: "chat_message"
 });
 
 function readIdempotencyKey(req) {
@@ -55,12 +56,17 @@ async function claimWithinTransaction({ tx, userId, operation, idempotencyKey, r
       if (existing.status === "succeeded" && existing.response) {
         return { kind: "replay", usage: existing, response: existing.response };
       }
-      if (existing.status === "pending") {
+      const staleChat = operation === AI_OPERATIONS.chat && existing.status === "pending" &&
+        existing.updatedAt && Date.now() - existing.updatedAt.getTime() > 120000;
+      if (existing.status === "pending" && !staleChat) {
         throw new AppError(
           "Esta solicitacao de IA ainda esta sendo processada.",
           409,
           "ai_request_in_progress"
         );
+      }
+      if (staleChat) {
+        await tx.aiUsage.update({ where: { id: existing.id }, data: { status: "failed", errorCode: "ai_chat_lease_expired" } });
       }
     }
 
@@ -117,7 +123,7 @@ async function failAiUsage(usageId, error) {
 
 function quotaFor(operation) {
   if (operation === AI_OPERATIONS.workout) return env.aiWorkoutDailyQuota;
-  if (operation === AI_OPERATIONS.coach) return env.aiCoachDailyQuota;
+  if (operation === AI_OPERATIONS.coach || operation === AI_OPERATIONS.chat) return env.aiCoachDailyQuota;
   throw new Error(`Operacao de IA desconhecida: ${operation}`);
 }
 

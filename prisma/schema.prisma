@@ -22,9 +22,12 @@ model User {
   readyPlanFavorites  ReadyPlanFavorite[]
   authRefreshSessions AuthRefreshSession[]
   aiUsages            AiUsage[]
+  aiConversations     AiConversation[]
   workoutSyncEvents   WorkoutSyncEvent[]
   workoutSyncSessions WorkoutSyncSession[]
   workoutSyncSets     WorkoutSyncSet[]
+  progressionXpEvents ProgressionXpEvent[]
+  activitySyncMutations ActivitySyncMutation[]
   createdAt           DateTime             @default(now())
   updatedAt           DateTime             @updatedAt
 
@@ -32,33 +35,67 @@ model User {
 }
 
 model AiUsage {
-  id             String   @id @default(uuid())
+  id             String    @id @default(uuid())
   userId         String
-  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   operation      String
   idempotencyKey String
   requestHash    String
-  status         String   @default("pending")
+  status         String    @default("pending")
   response       Json?
   errorCode      String?
   periodStart    DateTime
-  createdAt      DateTime @default(now())
+  createdAt      DateTime  @default(now())
   completedAt    DateTime?
-  updatedAt      DateTime @updatedAt
+  updatedAt      DateTime  @updatedAt
 
   @@unique([userId, operation, idempotencyKey])
   @@index([userId, operation, periodStart, status])
   @@map("ai_usages")
 }
 
+model AiConversation {
+  id             String   @id @default(uuid())
+  userId         String
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  initialUsageId String   @unique
+  nextSequence   Int      @default(0)
+  lockVersion    Int      @default(0)
+  pendingUsageId String?
+  pendingUntil   DateTime?
+  messages       AiChatMessage[]
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([userId, updatedAt])
+  @@map("ai_conversations")
+}
+
+model AiChatMessage {
+  id             String         @id @default(uuid())
+  conversationId String
+  conversation   AiConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  usageId        String
+  role           String
+  content        String
+  taskType       String
+  sequence       Int
+  createdAt      DateTime       @default(now())
+
+  @@unique([usageId, role])
+  @@unique([conversationId, sequence])
+  @@index([conversationId, createdAt])
+  @@map("ai_chat_messages")
+}
+
 model AuthRefreshSession {
-  id        String   @id
+  id        String    @id
   userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   tokenHash String
   expiresAt DateTime
   revokedAt DateTime?
-  createdAt DateTime @default(now())
+  createdAt DateTime  @default(now())
 
   @@index([userId, revokedAt])
   @@index([expiresAt])
@@ -207,32 +244,70 @@ model ExerciseHistory {
 }
 
 model RunningHistory {
-  id              String   @id @default(uuid())
-  userId          String
-  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  distanceKm      Float
-  durationSeconds Int
-  averageSpeed    Float
-  performedAt     DateTime
+  id                 String    @id @default(uuid())
+  userId             String
+  user               User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  externalRunId      String
+  distanceKm         Float
+  durationSeconds    Int
+  averageSpeed       Float
+  paceMinutesPerKm   Float
+  route              Json
+  calories           Float?
+  steps              Int?
+  startedAt          DateTime
+  finishedAt         DateTime
+  performedAt        DateTime
+  deletedAt          DateTime?
+  revision           BigInt    @default(0)
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
 
   @@index([userId])
+  @@unique([userId, externalRunId])
+  @@index([userId, revision])
   @@map("running_histories")
 }
 
 model DailySteps {
-  id        String   @id @default(uuid())
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  date      DateTime
-  steps     Int
-  goal      Int
-  source    String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id         String   @id @default(uuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  date       DateTime
+  dayKey     String
+  steps      Int
+  goal       Int
+  source     String
+  deviceId   String
+  observedAt DateTime
+  revision   BigInt   @default(0)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
   @@unique([userId, date])
+  @@unique([userId, dayKey])
   @@index([userId])
+  @@index([userId, revision])
   @@map("daily_steps")
+}
+
+/// Ledger de transporte do ActivitySyncContract/v2. A revisao e global e
+/// monotona; ownership continua vindo exclusivamente do JWT.
+model ActivitySyncMutation {
+  id         String   @id @default(uuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  deviceId   String
+  mutationId String
+  entityType String
+  entityKey  String
+  operation  String
+  processedAt DateTime @default(now())
+  revision   BigInt   @unique @default(autoincrement())
+
+  @@unique([userId, mutationId])
+  @@index([userId, revision])
+  @@map("activity_sync_mutations")
 }
 
 model Goal {
