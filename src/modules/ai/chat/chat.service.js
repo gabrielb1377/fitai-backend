@@ -6,6 +6,7 @@ const { createAiGateway } = require("../gateway/gateway");
 const { createAiConfig } = require("../gateway/config");
 const { createFitnessContextEngine } = require("./fitness-context.engine");
 const { CHAT_VERSION, selectTask } = require("./chat.schema");
+const { createActionService } = require("../actions/action.service");
 
 const HISTORY_MESSAGES = 8;
 const HISTORY_CHARS = 6000;
@@ -14,7 +15,7 @@ const busy = () => new AppError("Esta conversa esta sendo processada. Tente nova
 
 function createChatService({ client = prisma, contextEngine = createFitnessContextEngine({ client }),
   gateway = createAiGateway({ config: createAiConfig() }), claim = usage.claimAiUsage,
-  fail = usage.failAiUsage, now = () => new Date() } = {}) {
+  fail = usage.failAiUsage, now = () => new Date(), actionService = createActionService({ client, now }) } = {}) {
   async function owned(userId, conversationId) {
     const conversation = await client.aiConversation.findFirst({ where: { id: conversationId, userId } });
     if (!conversation) throw new AppError("Conversa nao encontrada.", 404, "conversation_not_found");
@@ -57,8 +58,9 @@ function createChatService({ client = prisma, contextEngine = createFitnessConte
     try {
       lease = await prepare(userId, input, usageId);
       const context = await contextEngine.build({ userId, task: lease.task });
+      const actionContext = await actionService.context({ userId, task: lease.task });
       const answer = await gateway.generate({ task: lease.task, requestId: usageId,
-        input: { message: input.message, context, history: lease.history } });
+        input: { message: input.message, context, history: lease.history, actionContext } });
       const createdAt = now();
       const response = { contractVersion: CHAT_VERSION, conversationId: lease.conversationId,
         clientRequestId: input.clientRequestId, userMessageId: randomUUID(), messageId: randomUUID(),
@@ -76,6 +78,9 @@ function createChatService({ client = prisma, contextEngine = createFitnessConte
           { id: response.messageId, conversationId: lease.conversationId, usageId, role: "assistant", content: response.content,
             taskType: lease.task, sequence: lease.sequence + 1, createdAt }
         ] });
+        const proposals = await actionService.propose({ db: tx, userId, conversationId: lease.conversationId,
+          sourceMessageId: response.messageId, candidates: answer.data.actions || [] });
+        if (proposals.length) response.actions = proposals;
         await tx.aiUsage.update({ where: { id: usageId }, data: { status: "succeeded", response, completedAt: createdAt, errorCode: null } });
       });
       return { response, replay: false };
@@ -95,7 +100,9 @@ function createChatService({ client = prisma, contextEngine = createFitnessConte
     await owned(userId, conversationId);
     const messages = await client.aiChatMessage.findMany({ where: { conversationId }, orderBy: { sequence: "desc" }, take: 40,
       select: { id: true, role: true, content: true, taskType: true, createdAt: true } });
-    return { contractVersion: CHAT_VERSION, conversationId, messages: messages.reverse() };
+    const actions = await actionService.forMessages({ userId, messageIds: messages.map((m) => m.id) });
+    return { contractVersion: CHAT_VERSION, conversationId, messages: messages.reverse().map((m) => ({ ...m,
+      ...(actions.some((a) => a.sourceMessageId === m.id) ? { actions: actions.filter((a) => a.sourceMessageId === m.id) } : {}) })) };
   }
   return { send, history };
 }

@@ -16,9 +16,10 @@ async function main() {
     }
   } finally { await admin.end(); }
   const env = { ...process.env, DATABASE_URL: url.toString(), TEST_DATABASE_URL: url.toString(),
-    NODE_ENV: "test", RUN_AI_CHAT_POSTGRES_TESTS: "1", AI_PROVIDER: "", OPENAI_API_KEY: "", OPENROUTER_API_KEY: "" };
+    NODE_ENV: "test", RUN_AI_CHAT_POSTGRES_TESTS: "1", RUN_AI_ACTION_POSTGRES_TESTS: process.argv[2] === "actions" ? "1" : "0",
+    AI_PROVIDER: "", OPENAI_API_KEY: "", OPENROUTER_API_KEY: "" };
   for (const args of [[require.resolve("prisma/build/index.js"), "migrate", "deploy"],
-    ["--test", "tests/ai/ai.chat.postgres.integration.test.js"]]) {
+    ["--test", "tests/ai/ai.chat.postgres.integration.test.js", ...(process.argv[2] === "actions" ? ["tests/ai/ai.actions.postgres.integration.test.js"] : [])]]) {
     const result = spawnSync(process.execPath, args, { env, cwd: process.cwd(), stdio: "inherit" });
     if (result.error) throw result.error;
     if (result.status !== 0) throw new Error(`Gate PostgreSQL falhou (${result.status}).`);

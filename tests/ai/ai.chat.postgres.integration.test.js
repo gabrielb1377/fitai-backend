@@ -58,14 +58,15 @@ test("AI PostgreSQL: ownership, context, order, idempotency, restart, concurrenc
   await assert.rejects(make().send({ userId: a, input: { ...input, conversationId: first.conversationId,
     clientRequestId: randomUUID() } }), { code: "ai_request_in_progress" });
   release(); await pending;
-  const before = await prisma.aiChatMessage.count();
+  const ownMessages = { conversation: { userId: a } };
+  const before = await prisma.aiChatMessage.count({ where: ownMessages });
   const rollbackId = randomUUID();
   await assert.rejects(make({ gateway: { generate: async () => ({ data: { content: null } }) } }).send({ userId: a,
     input: { ...input, clientRequestId: rollbackId } }));
-  assert.equal(await prisma.aiChatMessage.count(), before);
+  assert.equal(await prisma.aiChatMessage.count({ where: ownMessages }), before);
   assert.equal((await prisma.aiUsage.findFirst({ where: { userId: a, idempotencyKey: rollbackId } })).status, "failed");
   await make().send({ userId: a, input: { ...input, clientRequestId: rollbackId } });
-  assert.equal(await prisma.aiChatMessage.count(), before + 2);
+  assert.equal(await prisma.aiChatMessage.count({ where: ownMessages }), before + 2);
   assert.equal(await prisma.workoutSyncSet.count({ where: { userId: a } }), 1);
   for (let attempt = 0; attempt < 5; attempt++) {
     const concurrentInput = { ...input, clientRequestId: randomUUID() };

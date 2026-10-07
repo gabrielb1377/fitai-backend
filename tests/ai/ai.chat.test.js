@@ -63,8 +63,9 @@ test("AI-CHAT-05 bounded ordered history and task continuity", async (t) => {
   const h = await harness(t), first = await h.post({ message: "Como foi minha corrida?" });
   const id = first.body.conversationId;
   for (let i = 0; i < 6; i++) assert.equal((await h.post({ conversationId: id, message: `E comparando com a anterior ${i}?` })).status, 200);
-  const last = h.calls.at(-1); assert.equal(last.task, "running_advice"); assert.equal(last.messages.length, 11);
-  assert.equal(last.messages[2].role, "user"); assert.equal(last.messages.at(-2).role, "assistant");
+  const last = h.calls.at(-1); assert.equal(last.task, "running_advice"); assert.equal(last.messages.length, 12);
+  assert.match(last.messages[2].content, /^ACTION_CONTEXT_DATA/);
+  assert.equal(last.messages[3].role, "user"); assert.equal(last.messages.at(-2).role, "assistant");
 });
 test("AI-CHAT-06 new conversation excludes old messages", async (t) => {
   const h = await harness(t), a = await h.post({ message: "old-private-history" }), b = await h.post({ message: "new-conversation" });
