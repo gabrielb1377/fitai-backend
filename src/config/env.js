@@ -1,4 +1,5 @@
 require("dotenv").config();
+const { createAiConfig } = require("../modules/ai/gateway/config");
 
 const minimumJwtSecretLength = 32;
 
@@ -14,6 +15,7 @@ function createEnv(values = process.env) {
     jwtSecret,
     jwtExpiresIn: optionalText(values.JWT_EXPIRES_IN, "7d"),
     jwtRefreshExpiresIn: optionalText(values.JWT_REFRESH_EXPIRES_IN, "30d"),
+    aiGateway: createAiConfig(values),
     openaiApiKey: optionalText(values.OPENAI_API_KEY),
     openaiModel: optionalText(values.OPENAI_MODEL, "gpt-4o-mini"),
     openaiTimeoutMs: optionalPositiveInteger(values.OPENAI_TIMEOUT_MS, 30000),

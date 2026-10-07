@@ -9,6 +9,12 @@ function errorHandlerMiddleware(err, req, res, next) {
     payload.details = err.details;
   }
 
+  if (typeof err.retryable === "boolean" && err.requestId) {
+    payload.code = payload.error;
+    payload.retryable = err.retryable;
+    payload.requestId = err.requestId;
+  }
+
   res.status(statusCode).json(payload);
 }
 

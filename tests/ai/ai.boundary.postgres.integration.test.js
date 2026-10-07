@@ -64,7 +64,7 @@ test("AI-07/10: quota nao e ultrapassada sob concorrencia", { skip: !enabled }, 
     request("/coach/insights", { method: "POST", headers: authHeaders(account.token, key("concurrent-b")), body: {} })
   ]);
   const statuses = responses.map((response) => response.status).sort();
-  assert.deepEqual(statuses, [200, 429]);
+  assert.deepEqual(statuses, [200, 429], JSON.stringify(responses.map((response) => response.body)));
   assert.equal(await prisma.aiUsage.count({ where: { userId: account.user.id, operation: "coach_insights", status: "succeeded" } }), 1);
 });
 

@@ -62,12 +62,6 @@ async function claimWithinTransaction({ tx, userId, operation, idempotencyKey, r
           "ai_request_in_progress"
         );
       }
-
-      const retried = await tx.aiUsage.update({
-        where: { id: existing.id },
-        data: { status: "pending", errorCode: null, completedAt: null }
-      });
-      return { kind: "claimed", usage: retried };
     }
 
     const quota = quotaFor(operation);
@@ -86,6 +80,15 @@ async function claimWithinTransaction({ tx, userId, operation, idempotencyKey, r
         "ai_quota_exceeded",
         { operation, retryAfter: nextPeriodStart(periodStart).toISOString() }
       );
+    }
+
+    // A failed operation can be reclaimed, but never bypass today's quota.
+    if (existing) {
+      const retried = await tx.aiUsage.update({
+        where: { id: existing.id },
+        data: { status: "pending", errorCode: null, completedAt: null, periodStart }
+      });
+      return { kind: "claimed", usage: retried };
     }
 
     const usage = await tx.aiUsage.create({
@@ -151,5 +154,6 @@ module.exports = {
   failAiUsage,
   quotaFor,
   currentPeriodStart,
-  hashPayload
+  hashPayload,
+  claimWithinTransaction
 };

@@ -6,22 +6,13 @@ async function generateWorkout(input, context, dependencies = {}) {
     ...input,
     contextoUsuario: context || null
   };
-  console.info(`[ai] operation=workout_generation minExerciciosPorDia=${input.minExerciciosPorDia}`);
-
   if (!isOpenAIEnabled() && !dependencies.generateWithProvider) {
-    console.info("[ai] modo=MOCK reason=OPENAI_API_KEY ausente");
+    console.info("[ai] operation=workout_generation mode=mock external_generation=false");
     return generateMockWorkout(generationInput);
   }
 
-  console.info("[ai] modo=OPENAI");
-
-  try {
-    const generateWithProvider = dependencies.generateWithProvider || generateWorkoutWithOpenAI;
-    return await generateWithProvider(generationInput);
-  } catch (err) {
-    console.error(`[ai] provider_failure code=${err.code || "openai_error"}`);
-    throw err;
-  }
+  const generateWithProvider = dependencies.generateWithProvider || generateWorkoutWithOpenAI;
+  return generateWithProvider(generationInput, { requestId: dependencies.requestId });
 }
 
 function generateMockWorkout(input) {
