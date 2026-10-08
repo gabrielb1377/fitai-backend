@@ -21,6 +21,8 @@ test("legacy steps sync cannot overwrite a day already owned by ActivitySync/v2"
   };
   let writes = 0;
   const db = {
+    $transaction: async callback => callback(db),
+    $executeRaw: async () => 0,
     user: { findUnique: async () => user },
     dailySteps: {
       findUnique: async () => canonical,
@@ -47,6 +49,8 @@ test("legacy steps sync remains writable before a v2 identity exists", async () 
   const user = { id: "user-a", name: "A", email: "a@test.dev" };
   let writes = 0;
   const db = {
+    $transaction: async callback => callback(db),
+    $executeRaw: async () => 0,
     user: { findUnique: async () => user },
     dailySteps: {
       findUnique: async () => null,

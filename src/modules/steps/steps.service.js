@@ -1,5 +1,6 @@
 const prisma = require("../../config/prisma");
 const AppError = require("../../shared/errors/app-error");
+const { lockUser } = require("../activity_sync/activity_sync.service");
 
 async function syncSteps(req, payload, items, db = prisma) {
   const user = await resolveAuthenticatedUser(req, db);
@@ -10,10 +11,12 @@ async function syncSteps(req, payload, items, db = prisma) {
     if (!dateKey) continue;
 
     const date = dateFromKey(dateKey);
-    const existing = await db.dailySteps.findUnique({
+    const record = await db.$transaction(async (tx) => {
+    await lockUser(tx, user.id);
+    const existing = await tx.dailySteps.findUnique({
       where: { userId_date: { userId: user.id, date } }
     });
-    const activityMutation = await db.activitySyncMutation.findFirst({
+    const activityMutation = await tx.activitySyncMutation.findFirst({
       where: {
         userId: user.id,
         entityType: "steps",
@@ -23,13 +26,12 @@ async function syncSteps(req, payload, items, db = prisma) {
     if (activityMutation) {
       // Older clients may retry a queued absolute snapshot after v2 has
       // accepted a later correction. Preserve the v2-authoritative row.
-      if (existing) synced.push(existing);
-      continue;
+      return existing;
     }
     const incoming = normalizeStepItem(item, date);
     const merged = reconcileStepRecord(existing, incoming);
 
-    synced.push(await db.dailySteps.upsert({
+    return tx.dailySteps.upsert({
       where: { userId_date: { userId: user.id, date } },
       update: {
         steps: merged.steps,
@@ -49,7 +51,9 @@ async function syncSteps(req, payload, items, db = prisma) {
         deviceId: text(payload.clientId, "legacy"),
         observedAt: incoming.updatedAt
       }
-    }));
+    });
+    });
+    if (record) synced.push(record);
   }
 
   logSteps(`sync count=${synced.length} user=${user.id}`);

@@ -140,7 +140,8 @@ async function syncWorkouts(req, payload, items) {
   const workouts = [];
 
   for (const item of items) {
-    workouts.push(await upsertWorkoutWithDays(user.id, item));
+    const workout = await upsertWorkoutWithDays(user.id, item);
+    workouts.push({ ...workout, deletionRevision: workout.deletionRevision?.toString() ?? null });
   }
 
   logSync("workouts", user, workouts.length);
@@ -182,9 +183,13 @@ async function deleteWorkoutById(userId, workoutId, db = prisma) {
     throw new AppError("Identificador do plano obrigatorio.", 400, "workout_id_required");
   }
 
-  const result = await db.workout.updateMany({
-    where: { id, userId, deletedAt: null },
-    data: { deletedAt: new Date() }
+  const result = await db.$transaction(async (tx) => {
+    await require("../activity_sync/activity_sync.service").lockUser(tx, userId);
+    const revision = (await tx.$queryRaw`SELECT nextval('plan_deletion_revision_seq') AS revision`)[0].revision;
+    return tx.workout.updateMany({
+      where: { id, userId, deletedAt: null },
+      data: { deletedAt: new Date(), deletionRevision: revision }
+    });
   });
 
   return {
@@ -259,7 +264,9 @@ async function syncRunning(req, payload, items, db = prisma) {
       performedAt
     };
 
-    const activityMutation = await db.activitySyncMutation.findFirst({
+    const stored = await db.$transaction(async (tx) => {
+    await require("../activity_sync/activity_sync.service").lockUser(tx, user.id);
+    const activityMutation = await tx.activitySyncMutation.findFirst({
       where: {
         userId: user.id,
         entityType: "run",
@@ -267,17 +274,16 @@ async function syncRunning(req, payload, items, db = prisma) {
       }
     });
     if (activityMutation) {
-      const canonical = await db.runningHistory.findUnique({
+      const canonical = await tx.runningHistory.findUnique({
         where: {
           userId_externalRunId: { userId: user.id, externalRunId: id }
         }
       });
-      if (canonical) runs.push(canonical);
-      continue;
+      return canonical;
     }
 
-    await ensureOwnedOrAvailable(db, "runningHistory", id, user.id);
-    runs.push(await db.runningHistory.upsert({
+    await ensureOwnedOrAvailable(tx, "runningHistory", id, user.id);
+    return tx.runningHistory.upsert({
       where: { id },
       update: data,
       create: {
@@ -285,7 +291,9 @@ async function syncRunning(req, payload, items, db = prisma) {
         userId: user.id,
         ...data
       }
-    }));
+    });
+    });
+    if (stored) runs.push(stored);
   }
 
   logSync("running", user, runs.length);
@@ -308,6 +316,7 @@ async function upsertWorkoutWithDays(userId, item) {
   const readyPlanId = text(item.readyPlanId, "") || null;
 
   return prisma.$transaction(async (tx) => {
+    await require("../activity_sync/activity_sync.service").lockUser(tx, userId);
     await ensureOwnedOrAvailable(tx, "workout", workoutId, userId);
     const existing = await tx.workout.findUnique({
       where: { id: workoutId },

@@ -33,6 +33,10 @@ router.get("/records", asyncHandler(getRecordsController));
 
 router.post("/workouts", asyncHandler(postWorkoutsController));
 router.get("/workouts", asyncHandler(getWorkoutsController));
+router.get("/workouts/deletions", asyncHandler(async (req, res) => {
+  const result = await require("./sync.read.service").pullPlanDeletions(req.auth.userId, req.query);
+  res.json(result);
+}));
 router.post("/workouts/delete", asyncHandler(postWorkoutDeleteController));
 
 router.post("/workout-history", asyncHandler(postWorkoutHistoryController));

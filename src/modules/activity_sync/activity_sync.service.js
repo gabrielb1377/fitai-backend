@@ -76,6 +76,13 @@ function createActivitySyncService({ prismaClient = prisma, now = () => new Date
             where: { id: current.id },
             data: { deletedAt: run.deletedAt, revision: mutation.revision }
           });
+        } else if (BigInt(current.revision ?? 0) === 0n) {
+          // A matching legacy row becomes visible to incremental pull only
+          // when its canonical mutation and revision commit together.
+          await tx.runningHistory.update({
+            where: { id: current.id },
+            data: { revision: mutation.revision }
+          });
         }
         return {
           mutation,
@@ -339,4 +346,4 @@ function nullableDate(value) { return value ? new Date(value).toISOString() : nu
 function isUniqueConstraintError(error) { return error?.code === "P2002"; }
 
 const service = createActivitySyncService();
-module.exports = { ...service, createActivitySyncService };
+module.exports = { ...service, createActivitySyncService, lockUser };

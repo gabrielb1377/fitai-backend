@@ -278,6 +278,7 @@ function memoryDatabase() {
       });
     },
     async $transaction(callback) { return callback(db); },
+    async $executeRaw() { return 0; },
     progressionXpEvent: {
       async findUnique({ where }) {
         if (where.userId_eventId) {
@@ -307,10 +308,20 @@ function memoryDatabase() {
         state.events.push(record);
         return record;
       },
-      async findMany({ where }) {
+      async findMany({ where, take }) {
         return state.events
-          .filter((item) => item.userId === where.userId)
-          .sort((left, right) => Number(left.revision - right.revision));
+          .filter((item) => item.userId === where.userId &&
+            (where.revision?.gt == null || item.revision > where.revision.gt))
+          .sort((left, right) => Number(left.revision - right.revision))
+          .slice(0, take);
+      },
+      async aggregate({ where }) {
+        return { _sum: { xpAwarded: state.events.filter(e => e.userId === where.userId)
+          .reduce((sum, e) => sum + e.xpAwarded, 0) } };
+      },
+      async findFirst({ where }) {
+        return state.events.filter(e => e.userId === where.userId)
+          .sort((a, b) => Number(b.revision - a.revision))[0] || null;
       }
     },
     workoutSyncSession: {

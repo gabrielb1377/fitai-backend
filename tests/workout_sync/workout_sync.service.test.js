@@ -215,6 +215,8 @@ function createMemoryPrisma() {
   let nextId = 1;
   const id = () => `local-${nextId++}`;
   const client = {
+    $executeRaw: async () => 0,
+    $queryRaw: async () => [{ revision: BigInt(nextId++) }],
     workoutSyncEvent: {
       findFirst: async ({ where }) => state.events.find((item) =>
         item.userId === where.userId && where.OR.some((candidate) =>

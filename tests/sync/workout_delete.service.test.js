@@ -8,6 +8,9 @@ test("deleteWorkoutById aplica tombstone apenas ao plano do usuario e e idempote
   const calls = [];
   let present = true;
   const db = {
+    $transaction: async callback => callback(db),
+    $executeRaw: async () => 0,
+    $queryRaw: async () => [{ revision: 1n }],
     workout: {
       updateMany: async (args) => {
         calls.push(args);

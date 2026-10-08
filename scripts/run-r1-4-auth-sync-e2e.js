@@ -129,8 +129,14 @@ async function verifyDatabase(prisma, runId) {
   ]);
 
   assert.equal(sessionsA, 2, "USER_A deve possuir duas sessoes aceitas no recorte E2E.");
-  assert.equal(setsA, 2, "Retry e idempotencia devem resultar em duas series logicas de USER_A.");
-  assert.equal(eventsA, 5, "ACK duplicado nao deve inserir evento adicional para USER_A.");
+  assert.equal(setsA, 52, "Retry nao duplica; 52 series atravessam a fronteira de pagina FITAI-20.");
+  assert.equal(eventsA, 56, "ACK duplicado nao insere evento; FITAI-20 inclui 50 series adicionais e finalizacao.");
+  assert.equal(await prisma.progressionXpEvent.count({ where: { userId: userA.id } }), 0,
+    "Importacao de historico nao deve recriar XP.");
+  const plan = await prisma.workout.findUnique({ where: { id: `r1-4-plan-${runId}` } });
+  assert.ok(plan?.deletedAt, "Tombstone de plano deve permanecer persistido.");
+  assert.equal(await prisma.workoutSyncSet.count({ where: { userId: userA.id } }), 52,
+    "Excluir definicao de plano preserva as series canonicas.");
   assert.equal(sessionsB, 0, "USER_B nao pode criar sessao usando a sessao de USER_A.");
   assert.equal(setsB, 0, "USER_B nao pode gravar serie na sessao de USER_A.");
   assert.deepEqual(

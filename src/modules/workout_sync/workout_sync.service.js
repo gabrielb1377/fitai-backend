@@ -1,6 +1,7 @@
 const { createHash } = require("crypto");
 const prisma = require("../../config/prisma");
 const AppError = require("../../shared/errors/app-error");
+const { lockUser } = require("../activity_sync/activity_sync.service");
 const {
   parseWorkoutSyncEvent,
   formatZodIssues
@@ -56,6 +57,7 @@ function createWorkoutSyncService({ prismaClient = prisma, now = () => new Date(
   async function processEvent({ userId, deviceId, event }) {
     try {
       return await prismaClient.$transaction(async (tx) => {
+        await lockUser(tx, userId);
         const existing = await tx.workoutSyncEvent.findFirst({
           where: {
             userId,
@@ -241,10 +243,14 @@ function createWorkoutSyncService({ prismaClient = prisma, now = () => new Date(
       return conflict(event, "session_closed", "Sessao ja foi encerrada.", session.version);
     }
 
+    const revision = targetStatus === "completed"
+      ? (await tx.$queryRaw`SELECT nextval('workout_history_revision_seq') AS revision`)[0].revision
+      : null;
     const updated = await tx.workoutSyncSession.update({
       where: { id: session.id },
       data: {
         status: targetStatus,
+        ...(revision === null ? {} : { historyRevision: revision }),
         finishedAt: targetStatus === "completed" ? sessionData.finishedAt || event.occurredAt : null,
         currentExerciseIndex: sessionData.currentExerciseIndex,
         currentSetIndex: sessionData.currentSetIndex,

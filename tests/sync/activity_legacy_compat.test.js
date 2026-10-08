@@ -12,6 +12,8 @@ test("legacy running sync cannot resurrect a v2 tombstone", async () => {
   };
   let writes = 0;
   const db = {
+    $transaction: async callback => callback(db),
+    $executeRaw: async () => 0,
     user: { findUnique: async () => user },
     activitySyncMutation: { findFirst: async () => ({ operation: "tombstone" }) },
     runningHistory: {
@@ -39,6 +41,8 @@ test("legacy running sync remains compatible before a v2 marker exists", async (
   const user = { id: "user-a", name: "A", email: "a@test.dev" };
   let writes = 0;
   const db = {
+    $transaction: async callback => callback(db),
+    $executeRaw: async () => 0,
     user: { findUnique: async () => user },
     activitySyncMutation: { findFirst: async () => null },
     runningHistory: {

@@ -170,12 +170,14 @@ model Workout {
   days             WorkoutDay[]
   histories        WorkoutHistory[]
   deletedAt        DateTime?
+  deletionRevision BigInt? @unique
   createdAt        DateTime         @default(now())
   updatedAt        DateTime         @updatedAt
 
   @@unique([userId, readyPlanId])
   @@index([userId])
   @@index([userId, deletedAt])
+  @@index([userId, deletionRevision])
   @@index([readyPlanId])
   @@map("workouts")
 }
@@ -490,6 +492,7 @@ model WorkoutSyncSession {
   status               String
   startedAt            DateTime
   finishedAt           DateTime?
+  historyRevision      BigInt? @unique
   currentExerciseIndex Int              @default(0)
   currentSetIndex      Int              @default(0)
   restEndsAt           DateTime?
@@ -500,6 +503,7 @@ model WorkoutSyncSession {
 
   @@unique([userId, externalSessionId])
   @@index([userId, status])
+  @@index([userId, historyRevision])
   @@map("workout_sync_sessions")
 }
 

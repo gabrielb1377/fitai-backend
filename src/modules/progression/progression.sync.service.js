@@ -1,4 +1,5 @@
 const prisma = require("../../config/prisma");
+const { lockUser } = require("../activity_sync/activity_sync.service");
 const {
   parseProgressionSyncEvent,
   formatZodIssues
@@ -69,6 +70,9 @@ function createProgressionSyncService({ prismaClient = prisma, now = () => new D
 
     try {
       const created = await prismaClient.$transaction(async (tx) => {
+        await lockUser(tx, userId);
+        const raced = await findExisting(tx, userId, event);
+        if (raced) return { valid: true, duplicate: raced };
         const source = await validateSource(tx, userId, event);
         if (!source.valid) return source;
 
@@ -96,6 +100,7 @@ function createProgressionSyncService({ prismaClient = prisma, now = () => new D
         };
       }
 
+      if (created.duplicate) return duplicateOutcome(created.duplicate, event);
       return { bucket: "accepted", data: acknowledgement(created.record) };
     } catch (error) {
       if (!isUniqueConstraintError(error)) throw error;
@@ -107,20 +112,29 @@ function createProgressionSyncService({ prismaClient = prisma, now = () => new D
 
   async function pullState({ userId, afterRevision = "0" }) {
     const cursor = parseRevision(afterRevision);
-    const records = await prismaClient.progressionXpEvent.findMany({
-      where: { userId },
-      orderBy: { revision: "asc" }
+    return prismaClient.$transaction(async (tx) => {
+      // Revisions are allocated under the writer lock, so the reader cannot
+      // skip an earlier uncommitted event when advancing its watermark.
+      await lockUser(tx, userId);
+      const records = await tx.progressionXpEvent.findMany({
+        where: { userId, revision: { gt: cursor } },
+        orderBy: { revision: "asc" }, take: 51
+      });
+      const totals = await tx.progressionXpEvent.aggregate({
+        where: { userId }, _sum: { xpAwarded: true }
+      });
+      const latest = await tx.progressionXpEvent.findFirst({
+        where: { userId }, orderBy: { revision: "desc" }
+      });
+      const hasMore = records.length > 50;
+      const page = records.slice(0, 50);
+      const watermark = hasMore ? BigInt(page.at(-1).revision) : BigInt(latest?.revision || 0);
+      return {
+        revision: (watermark > cursor ? watermark : cursor).toString(),
+        balance: balanceForTotalXp(totals._sum.xpAwarded || 0),
+        events: page.map(toRemoteEvent), hasMore
+      };
     });
-    const latest = records.length > 0 ? BigInt(records[records.length - 1].revision) : 0n;
-    const totalXp = records.reduce((total, event) => total + event.xpAwarded, 0);
-
-    return {
-      revision: latest.toString(),
-      balance: balanceForTotalXp(totalXp),
-      events: records
-        .filter((event) => BigInt(event.revision) > cursor)
-        .map(toRemoteEvent)
-    };
   }
 
   return { processBatch, processEvent, pullState };
