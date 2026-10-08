@@ -172,6 +172,79 @@ test("FITAI-12: canonical progress survives PostgreSQL, ACK, retry and device B 
   }
 });
 
+test("FITAI-19: concurrent daily observations are atomic and device v1 identities differ", { skip: !enabled }, async () => {
+  const user = await createUser(`sync19-concurrent-${randomUUID()}@fitia.test`);
+  const token = accessToken(user);
+  const server = createApp().listen(0, "127.0.0.1");
+  await new Promise((resolve) => server.once("listening", resolve));
+  const base = `http://127.0.0.1:${server.address().port}`;
+  try {
+    const results = await Promise.all(Array.from({ length: 8 }, (_, index) => {
+      const device = `device-${index}`;
+      const observation = steps("2026-10-05", 5000 + index, 1);
+      observation.mutationId = `${device}:${observation.mutationId}`;
+      return post(base, token, body({ steps: [observation] }, device));
+    }));
+    assert.ok(results.every((result) => result.status === 200),
+      JSON.stringify(results.map((result) => ({ status: result.status, ack: result.body?.ack }))));
+    assert.equal(await prisma.dailySteps.count({ where: { userId: user.id } }), 1);
+    const row = await stepRow(user.id);
+    const latest = await prisma.activitySyncMutation.findFirst({
+      where: { userId: user.id }, orderBy: { revision: "desc" }
+    });
+    assert.equal(row.revision, latest.revision);
+    const lastIndex = Number(latest.deviceId.split("-")[1]);
+    assert.equal(row.steps, 5000 + lastIndex);
+    const replay = steps("2026-10-05", 5000 + lastIndex, 1);
+    replay.mutationId = `${latest.deviceId}:${replay.mutationId}`;
+    const lostAck = await post(base, token, body({ steps: [replay] }, latest.deviceId));
+    assert.equal(lostAck.body.ack.alreadyApplied.length, 1);
+    assert.equal((await stepRow(user.id)).steps, row.steps);
+  } finally {
+    await new Promise((resolve) => server.close(resolve));
+    await prisma.user.delete({ where: { id: user.id } });
+  }
+});
+
+test("FITAI-19: new-device pulls are bounded, replayable and preserve partial ACKs", { skip: !enabled }, async () => {
+  const user = await createUser(`sync19-paging-${randomUUID()}@fitia.test`);
+  const token = accessToken(user);
+  const server = createApp().listen(0, "127.0.0.1");
+  await new Promise((resolve) => server.once("listening", resolve));
+  const base = `http://127.0.0.1:${server.address().port}`;
+  try {
+    const observations = Array.from({ length: 75 }, (_, index) => {
+      const day = new Date(Date.UTC(2026, 0, 1 + index)).toISOString().slice(0, 10);
+      return steps(day, 4000 + index, 1);
+    });
+    for (const batch of [observations.slice(0, 50), observations.slice(50)]) {
+      const result = await post(base, token, body({ steps: batch }));
+      assert.equal(result.status, 200);
+    }
+    const first = await get(base, token, "0");
+    assert.equal(first.body.state.steps.length, 50);
+    assert.equal(first.body.state.hasMore, true);
+    const replay = await get(base, token, "0");
+    assert.deepEqual(replay.body.state, first.body.state);
+    const next = await get(base, token, first.body.state.revision);
+    assert.equal(next.body.state.steps.length, 25);
+    assert.equal(next.body.state.hasMore, false);
+    assert.equal(new Set([...first.body.state.steps, ...next.body.state.steps]
+      .map((item) => item.dayKey)).size, 75);
+    const empty = await get(base, token, next.body.state.revision);
+    assert.equal(empty.body.state.steps.length, 0);
+    assert.equal(empty.body.state.revision, next.body.state.revision);
+    const partial = await post(base, token, body({ runs: [
+      run(`valid-${user.id}`), { mutationId: "invalid" }
+    ] }));
+    assert.equal(partial.body.ack.accepted.length, 1);
+    assert.equal(partial.body.ack.rejected.length, 1);
+  } finally {
+    await new Promise((resolve) => server.close(resolve));
+    await prisma.user.delete({ where: { id: user.id } });
+  }
+});
+
 async function createUser(email) {
   return prisma.user.create({ data: { name: "Activity Integration", email, passwordHash: "unused" } });
 }

@@ -46,6 +46,7 @@ function createActivitySyncService({ prismaClient = prisma, now = () => new Date
 
     try {
       const result = await prismaClient.$transaction(async (tx) => {
+        await lockUser(tx, userId);
         const raced = await findMutation(tx, userId, run.mutationId);
         if (raced) return { duplicate: raced };
         const current = await tx.runningHistory.findUnique({
@@ -116,6 +117,7 @@ function createActivitySyncService({ prismaClient = prisma, now = () => new Date
     if (duplicate) return duplicateAck(duplicate);
     try {
       const result = await prismaClient.$transaction(async (tx) => {
+        await lockUser(tx, userId);
         const raced = await findMutation(tx, userId, steps.mutationId);
         if (raced) return { duplicate: raced };
         const existing = await tx.dailySteps.findUnique({
@@ -169,26 +171,47 @@ function createActivitySyncService({ prismaClient = prisma, now = () => new Date
 
   async function pullState({ userId, afterRevision = "0" }) {
     const cursor = BigInt(afterRevision);
-    const [runs, steps, latest] = await Promise.all([
-      prismaClient.runningHistory.findMany({
-        where: { userId, revision: { gt: cursor } },
-        orderBy: { revision: "asc" }
-      }),
-      prismaClient.dailySteps.findMany({
-        where: { userId, revision: { gt: cursor } },
-        orderBy: { revision: "asc" }
-      }),
-      prismaClient.activitySyncMutation.findFirst({
-        where: { userId },
-        orderBy: { revision: "desc" }
-      })
-    ]);
-    return {
-      afterRevision: cursor.toString(),
-      revision: latest ? BigInt(latest.revision).toString() : cursor.toString(),
-      runs: runs.map(toRunDto),
-      steps: steps.map(toStepsDto)
-    };
+    return prismaClient.$transaction(async (tx) => {
+      // The same account lock used by writes prevents a cursor from advancing
+      // past an uncommitted lower revision or a concurrently changed entity.
+      await lockUser(tx, userId);
+      const [runs, steps, latest] = await Promise.all([
+        tx.runningHistory.findMany({
+          where: { userId, revision: { gt: cursor } },
+          orderBy: { revision: "asc" },
+          take: 51
+        }),
+        tx.dailySteps.findMany({
+          where: { userId, revision: { gt: cursor } },
+          orderBy: { revision: "asc" },
+          take: 51
+        }),
+        tx.activitySyncMutation.findFirst({
+          where: { userId },
+          orderBy: { revision: "desc" }
+        })
+      ]);
+      const candidates = [
+        ...runs.map((record) => ({ type: "run", record })),
+        ...steps.map((record) => ({ type: "steps", record }))
+      ].sort((left, right) => {
+        const a = BigInt(left.record.revision);
+        const b = BigInt(right.record.revision);
+        return a < b ? -1 : a > b ? 1 : 0;
+      });
+      const page = candidates.slice(0, 50);
+      const hasMore = candidates.length > page.length;
+      const watermark = hasMore
+        ? BigInt(page[page.length - 1].record.revision)
+        : latest ? BigInt(latest.revision) : cursor;
+      return {
+        afterRevision: cursor.toString(),
+        revision: (watermark > cursor ? watermark : cursor).toString(),
+        hasMore,
+        runs: page.filter((item) => item.type === "run").map((item) => toRunDto(item.record)),
+        steps: page.filter((item) => item.type === "steps").map((item) => toStepsDto(item.record))
+      };
+    });
   }
 
   return { processBatch, processRun, processSteps, pullState };
@@ -266,6 +289,12 @@ async function findMutation(client, userId, mutationId) {
   return client.activitySyncMutation.findUnique({
     where: { userId_mutationId: { userId, mutationId } }
   });
+}
+
+async function lockUser(tx, userId) {
+  // Namespace 19 is reserved for canonical ActivitySync/v2 transactions.
+  // IDs are parameters, never SQL text. Hash collisions only serialize users.
+  await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${userId}, 19))`;
 }
 
 function duplicateAck(record) {
