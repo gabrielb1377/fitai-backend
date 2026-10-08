@@ -524,3 +524,26 @@ model WorkoutSyncSet {
   @@index([userId, sessionId])
   @@map("workout_sync_sets")
 }
+
+/// Ledger remoto server-authoritative de XP. O saldo e sempre derivado destes
+/// eventos; o cliente nunca grava um total arbitrario.
+model ProgressionXpEvent {
+  id             String   @id @default(uuid())
+  userId         String
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  deviceId       String
+  eventId        String
+  idempotencyKey String
+  sourceType     String
+  sourceId       String
+  rulesVersion   Int
+  xpAwarded      Int
+  occurredAt     DateTime
+  processedAt    DateTime @default(now())
+  revision       BigInt   @unique @default(autoincrement())
+
+  @@unique([userId, sourceType, sourceId])
+  @@unique([userId, eventId])
+  @@index([userId, revision])
+  @@map("progression_xp_events")
+}

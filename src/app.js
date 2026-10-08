@@ -1,6 +1,7 @@
 const express = require("express");
 const env = require("./config/env");
 const aiRoutes = require("./modules/ai/routes/ai.routes");
+const activitySyncRoutes = require("./modules/activity_sync/activity_sync.routes");
 const authRoutes = require("./modules/auth/auth.routes");
 const coachRoutes = require("./modules/coach/coach.routes");
 const progressionRoutes = require("./modules/progression/progression.routes");
@@ -31,6 +32,7 @@ function createApp() {
   app.use("/auth", authRoutes);
   app.use(usersRoutes);
   app.use("/ai", aiRoutes);
+  app.use("/activities", activitySyncRoutes);
   app.use("/coach", coachRoutes);
   app.use("/progression", progressionRoutes);
   app.use("/ready-plans", readyPlansRoutes);

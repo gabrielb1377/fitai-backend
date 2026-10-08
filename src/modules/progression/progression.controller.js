@@ -1,5 +1,12 @@
 const { validateProgressionRequest } = require("./progression.schemas");
 const { generateExerciseProgression } = require("./progression.service");
+const AppError = require("../../shared/errors/app-error");
+const {
+  parseProgressionSyncBatch,
+  parseProgressionPullQuery,
+  formatZodIssues
+} = require("./progression.sync.schemas");
+const progressionSyncService = require("./progression.sync.service");
 
 async function generateExerciseProgressionController(req, res) {
   const validation = validateProgressionRequest(req.body);
@@ -18,4 +25,48 @@ async function generateExerciseProgressionController(req, res) {
   return res.status(200).json(progression);
 }
 
-module.exports = { generateExerciseProgressionController };
+async function pushProgressionEventsController(req, res) {
+  const parsed = parseProgressionSyncBatch(req.body);
+  if (!parsed.success) {
+    throw new AppError(
+      "Lote de progressao invalido.",
+      400,
+      "invalid_progression_sync_batch",
+      formatZodIssues(parsed.error)
+    );
+  }
+
+  const result = await progressionSyncService.processBatch({
+    userId: req.auth.userId,
+    ...parsed.data
+  });
+  return res.status(200).json(result);
+}
+
+async function pullProgressionController(req, res) {
+  const parsed = parseProgressionPullQuery(req.query);
+  if (!parsed.success) {
+    throw new AppError(
+      "Consulta de progressao invalida.",
+      400,
+      "invalid_progression_pull",
+      formatZodIssues(parsed.error)
+    );
+  }
+
+  const state = await progressionSyncService.pullState({
+    userId: req.auth.userId,
+    afterRevision: parsed.data.afterRevision
+  });
+  return res.status(200).json({
+    contractVersion: parsed.data.contractVersion,
+    rulesVersion: progressionSyncService.RULES_VERSION,
+    state
+  });
+}
+
+module.exports = {
+  generateExerciseProgressionController,
+  pushProgressionEventsController,
+  pullProgressionController
+};
