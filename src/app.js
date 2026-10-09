@@ -14,7 +14,7 @@ const { corsMiddleware } = require("./shared/middleware/cors.middleware");
 const errorHandlerMiddleware = require("./shared/middleware/error-handler.middleware");
 const notFoundMiddleware = require("./shared/middleware/not-found.middleware");
 
-function createApp() {
+function createApp({ aiRoutes: aiRoutesOverride } = {}) {
   const app = express();
 
   app.options(/.*/, corsMiddleware);
@@ -31,7 +31,7 @@ function createApp() {
 
   app.use("/auth", authRoutes);
   app.use(usersRoutes);
-  app.use("/ai", aiRoutes);
+  app.use("/ai", aiRoutesOverride || aiRoutes);
   app.use("/activities", activitySyncRoutes);
   app.use("/coach", coachRoutes);
   app.use("/progression", progressionRoutes);

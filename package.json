@@ -19,6 +19,7 @@
     "test:r1-4:auth-sync-e2e": "node scripts/run-r1-4-auth-sync-e2e.js",
     "test:r1-5:auth-lifecycle-e2e": "node scripts/run-r1-5-auth-lifecycle-e2e.js",
     "test:r1-6:ai-boundary-e2e": "node scripts/run-r1-6-ai-boundary-e2e.js",
+    "test:fitai-22:e2e": "node scripts/run-fitai-22-e2e.js",
     "ai:config:check": "node scripts/check-ai-config.js",
     "test:ai:gateway": "node --test tests/ai/ai.gateway.test.js tests/ai/ai.gateway.http.test.js",
     "test:ai:chat": "node --test tests/ai/ai.chat.test.js tests/ai/ai.context.test.js",
