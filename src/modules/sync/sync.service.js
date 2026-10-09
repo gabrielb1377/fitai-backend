@@ -149,10 +149,15 @@ async function syncWorkouts(req, payload, items) {
   return { workouts };
 }
 
-async function getWorkouts(req, payload = {}) {
-  const user = await resolveAuthenticatedUser(req);
-  const workouts = await prisma.workout.findMany({
-    where: { userId: user.id, deletedAt: null },
+async function getWorkouts(req, payload = {}, db = prisma) {
+  const user = await resolveAuthenticatedUser(req, db);
+  const paged = payload.paged === "1";
+  const afterId = payload.afterId || "";
+  if (paged && (typeof afterId !== "string" || afterId.length > 240)) {
+    throw new AppError("Cursor de planos invalido.", 400, "invalid_sync_cursor");
+  }
+  const workouts = await db.workout.findMany({
+    where: { userId: user.id, deletedAt: null, ...(paged && afterId ? { id: { gt: afterId } } : {}) },
     include: {
       days: {
         orderBy: { order: "asc" },
@@ -164,9 +169,16 @@ async function getWorkouts(req, payload = {}) {
         }
       }
     },
-    orderBy: { updatedAt: "desc" }
+    orderBy: paged ? { id: "asc" } : { updatedAt: "desc" },
+    ...(paged ? { take: 51 } : {})
   });
 
+  // This is a bounded full scan, not an incremental updatedAt cursor. A new
+  // scan after completion also picks up edits to IDs already visited.
+  if (paged) {
+    const page = workouts.slice(0, 50);
+    return { workouts: page, afterId: workouts.length > 50 ? page.at(-1).id : "", hasMore: workouts.length > 50 };
+  }
   return { workouts };
 }
 

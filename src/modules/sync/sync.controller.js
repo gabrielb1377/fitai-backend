@@ -49,7 +49,7 @@ async function postWorkoutsController(req, res) {
 }
 
 async function getWorkoutsController(req, res) {
-  const result = await syncService.getWorkouts(req);
+  const result = await syncService.getWorkouts(req, req.query);
 
   return res.status(200).json(result);
 }
