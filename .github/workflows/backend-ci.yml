@@ -73,5 +73,8 @@ jobs:
       - name: Run PostgreSQL workout sync integration tests
         run: npm run test:workout-sync:integration
 
+      - name: Run Coach IA V1.3 weekly summary PostgreSQL integration test
+        run: npm run test:coach-weekly:integration
+
       - name: Audit production dependencies
         run: npm audit --omit=dev --audit-level=high

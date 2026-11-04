@@ -13,6 +13,14 @@ const names = new Map();
 for (const [name, id] of Object.entries(projection.nameBindings)) if (!names.has(id)) names.set(id, name);
 const unavailable = (source, reason = "remote_data_unavailable") => ({ status: "UNAVAILABLE", source, reason });
 const domain = (source, data, isEmpty = false) => ({ status: isEmpty ? "EMPTY" : "AVAILABLE", source, data });
+function getStartOfWeek(date) {
+  const d = new Date(date);
+  const day = d.getDay();
+  const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+  const start = new Date(d.setDate(diff));
+  start.setHours(0, 0, 0, 0);
+  return start;
+}
 const text = (value) => {
   const signal = String(value || "");
   if (/Bearer\s+|eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.|sk-[A-Za-z0-9_-]{12,}|(?:api[_ ]?key|refresh[_ ]?token)\s*[:=]/i.test(signal)) return null;
@@ -28,7 +36,7 @@ function selectContextDomains(task, message = "") {
   const crossDomain = /semana|hoje|evoluindo|evolucao geral|pernas|corrida|correr/.test(question);
   if (!crossDomain && strength && !steps) return ["profile", "goals", "progression", "strength", "currentPlan"];
   if (!crossDomain && steps && !strength) return ["profile", "goals", "progression", "steps"];
-  return ["profile", "goals", "progression", "strength", "running", "steps", "currentPlan"];
+  return ["profile", "goals", "progression", "strength", "running", "steps", "currentPlan", "weekly"];
 }
 
 function createFitnessContextEngine({ client = prisma, now = () => new Date() } = {}) {
@@ -104,7 +112,55 @@ function createFitnessContextEngine({ client = prisma, now = () => new Date() } 
         select: { goal: true, split: true, daysPerWeek: true, estimatedMinutes: true } }), (plans) => domain("workouts", {
           active: unavailable("local_plan_selection", "active_selection_not_synced"),
           recent: plans.map((p) => ({ goal: text(p.goal), split: text(p.split), daysPerWeek: p.daysPerWeek, estimatedMinutes: p.estimatedMinutes }))
-        }, !plans.length))
+        }, !plans.length)),
+      weekly: async () => {
+        const source = "WeeklySummaryContract/v1";
+        return query(source, async () => {
+          const startOfWeek = getStartOfWeek(generatedAt);
+          const endOfWeek = new Date(startOfWeek);
+          endOfWeek.setDate(startOfWeek.getDate() + 6);
+          endOfWeek.setHours(23, 59, 59, 999);
+          const [workouts, cancelledWorkouts, runs, weeklyXpSum, totalXpSum] = await Promise.all([
+            client.workoutSyncSession.findMany({
+              where: { userId, status: "completed", finishedAt: { gte: startOfWeek, lte: endOfWeek } },
+              select: { finishedAt: true }
+            }),
+            client.workoutSyncSession.findMany({
+              where: { userId, status: "discarded", finishedAt: { gte: startOfWeek, lte: endOfWeek } },
+              select: { id: true }
+            }),
+            client.runningHistory.findMany({
+              where: { userId, deletedAt: null, finishedAt: { gte: startOfWeek, lte: endOfWeek } },
+              select: { distanceKm: true, durationSeconds: true, finishedAt: true }
+            }),
+            client.progressionXpEvent.aggregate({
+              where: { userId, occurredAt: { gte: startOfWeek, lte: endOfWeek } },
+              _sum: { xpAwarded: true }, _count: true
+            }),
+            client.progressionXpEvent.aggregate({
+              where: { userId },
+              _sum: { xpAwarded: true }
+            })
+          ]);
+          const workoutDays = new Set(workouts.map((w) => iso(w.finishedAt).split("T")[0])).size;
+          const totalDistanceKm = runs.reduce((sum, r) => sum + (r.distanceKm || 0), 0);
+          const weeklyXp = weeklyXpSum._sum.xpAwarded || 0;
+          const totalXp = totalXpSum._sum.xpAwarded || 0;
+          const isEmpty = workouts.length === 0 && runs.length === 0 && weeklyXpSum._count === 0;
+
+          return domain(source, {
+            period: { start: iso(startOfWeek), end: iso(endOfWeek) },
+            workoutsCompleted: workouts.length,
+            workoutsCancelled: cancelledWorkouts.length,
+            workoutDays,
+            runsCompleted: runs.length,
+            totalDistanceKm,
+            weeklyXp,
+            totalXp,
+            nutrition: unavailable("nutrition_weekly", "nutrition_sync_not_integrated")
+          }, isEmpty);
+        }, (result) => result);
+      }
     };
     const values = await Promise.all(selection.map(async (key) => [key, await jobs[key]()]));
     const context = { contractVersion: VERSION, generatedAt: generatedAt.toISOString(), freshness: "synced_server_only",
