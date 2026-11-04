@@ -55,7 +55,13 @@
     "jsonwebtoken": "^9.0.3",
     "openai": "^6.45.0",
     "pg": "^8.22.0",
-    "zod": "^4.4.3"
+    "zod": "^4.6.6"
+  },
+  "overrides": {
+    "proxy-addr": "2.0.8",
+    "body-parser": "2.4.0",
+    "qs": "6.17.0",
+    "ip-address": "10.7.4"
   },
   "engines": {
     "node": ">=18"
